@@ -11,7 +11,7 @@ $ pip3 install -r requirements.txt
 - Mango requires scikit-learn and is develped for python 3.
 - Other packages installed are required to use Mango to optimize xgboost ML algorithms and fbprophet algorithm.
 
-# Mango Usage
+# Mango Usage to Find Optimal Value of a Function
 Mango is very easy to use. 
 The examples are available in the directory *examples*.
 General usage is as below:
@@ -49,12 +49,59 @@ print('best hyper parameters:',results['best_hyper_parameter'])
 print('best objective:',results['best_objective'])
 ```
 
-Output
+Output of Running Above Program. Note output may be different for your program.
 
 ```
 best hyper parameters: {'a': 999}
 best objective: 6.906754778648554
 ```
+
+# Mango Usage to Tune Hyperparameters of KNeighborsClassifier
+
+```
+from tuner import Tuner
+
+from scipy.stats import uniform
+
+# n_neighbors can vary between 1 and 50, with different choices of algorithm
+param_dict = {"n_neighbors": range(1, 50),
+              'algorithm' : ['auto', 'ball_tree', 'kd_tree', 'brute']
+             }
+             
+
+# User Objective function for KNN
+from sklearn import datasets
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import cross_val_score
+
+
+X, Y = datasets.load_breast_cancer(return_X_y=True)
+
+def objectiveKNN(args_list):
+    global X,Y
+    
+    results = []
+    for hyper_par in args_list:
+        clf = KNeighborsClassifier(**hyper_par)
+        result  = cross_val_score(clf, X, Y, scoring='accuracy').mean()
+        results.append(result)
+    return results
+
+tuner_user = Tuner(param_dict, objectiveKNN, conf_Dict)
+
+results = tuner_user.run()
+
+
+print('best hyper parameters:',results['best_hyper_parameter'])
+print('best Accuracy:',results['best_objective'])
+```
+Output of Running Above Program. Note output may be different for your program.
+
+```
+best hyper parameters: {'algorithm': 'auto', 'n_neighbors': 11}
+best Accuracy: 0.931486122714193
+```
+
 
 # More Details
 Details about specifying parameter/variable domain space, user objective function and internals of Mango will be added.
