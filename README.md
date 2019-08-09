@@ -89,7 +89,7 @@ def objectiveKNN(args_list):
         results.append(result)
     return results
 
-tuner_user = Tuner(param_dict, objectiveKNN, conf_Dict)
+tuner_user = Tuner(param_dict, objectiveKNN)
 
 results = tuner_user.run()
 
