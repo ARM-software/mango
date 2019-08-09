@@ -14,7 +14,9 @@ $ pip3 install -r requirements.txt
 # Mango Usage to Find Optimal Value of a Function
 Mango is very easy to use. 
 The examples are available in the directory *examples*.
-General usage is as below:
+In the example below our goal is to find optimal value of the function whose input is a single variable between 1 and 1000.
+The objective of the function is unknown to the Mango, but it can evaluate the function for fixed number of iterations.
+The selected function is log.
 
 ```
 # Import Tuner 
