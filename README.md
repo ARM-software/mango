@@ -51,7 +51,7 @@ print('best hyper parameters:',results['best_hyper_parameter'])
 print('best objective:',results['best_objective'])
 ```
 
-Output of Running Above Program. Note output may be different for your program.
+Sample output of Running Above Program. Note output may be different for your program.
 
 ```
 best hyper parameters: {'a': 999}
@@ -97,7 +97,7 @@ results = tuner_user.run()
 print('best hyper parameters:',results['best_hyper_parameter'])
 print('best Accuracy:',results['best_objective'])
 ```
-Output of Running Above Program. Note output may be different for your program.
+Sample output of Running Above Program. Note output may be different for your program.
 
 ```
 best hyper parameters: {'algorithm': 'auto', 'n_neighbors': 11}
@@ -107,4 +107,4 @@ best Accuracy: 0.931486122714193
 
 # More Details
 Details about specifying parameter/variable domain space, user objective function and internals of Mango will be added.
-Please stay tuner. For any questions feel free to reach out to Sandeep Singh Sandha (sandeepsingh.sandha@arm.com)
+Please stay tuned. For any questions feel free to reach out to Sandeep Singh Sandha (sandeepsingh.sandha@arm.com)
