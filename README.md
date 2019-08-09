@@ -12,51 +12,34 @@ $ pip3 install -r requirements.txt
 - Mango requires scikit-learn and is develped for python 3.
 - Other packages installed are required to use Mango to optimize xgboost ML algorithms and fbprophet algorithm.
 
-# Mango Usage to Find Optimal Value of a Function
+# Mango Usage
 Mango is very easy to use. 
 The examples are available in the directory *examples*.
 In the example below our goal is to find optimal value of the function whose input is a single variable between 1 and 1000.
-The objective of the function is unknown to the Mango, but it can evaluate the function for fixed number of iterations.
-The selected function is log.
+The objective of the function is unknown to the Mango, but it can evaluate the function value. The selected function is square.
 
 ```python
-# Import Tuner 
 from tuner import Tuner
 
-# Define the domain space of the objective function to optimize using param_dict
-# param_dict is a dictionary. Examples include complex space definitions.
-param_dict = {
-              "a": range(1,1000),
-             }
+param_dict = {"a": range(1,1000)} # Search space of variables
              
-# Define user Objective function
-# Here the function is log(a), and we want to find the Maximum value of this function
-import math
+def objectiveFunction(args_list): # User Objective Function
+    a = args_list[0]['a']
+    return [a*a]
 
-def objectiveFunction(args_list):
-    evaluations = []
-    for hyper_par in args_list:
-        a = hyper_par['a']
-        evaluations.append(math.log(a))
-    return evaluations
+tuner_user = Tuner(param_dict, objectiveFunction) # Initialize Tuner
 
+results = tuner_user.run() # Run Tuner
 
-# Create Tuner object and pass required parameters
-tuner_user = Tuner(param_dict, objectiveFunction)
-
-# Run the Tuner
-results = tuner_user.run()
-
-# results contains the details of the process followed by Mango
-print('best hyper parameters:',results['best_hyper_parameter'])
-print('best objective:',results['best_objective'])
+print('best value of a:',results['best_hyper_parameter'])
+print('best function objective:',results['best_objective'])
 ```
 
-Sample output of Running Above Program. Note output may be different for your program.
+Sample output of Running Above Program.
 
 ```
-best hyper parameters: {'a': 999}
-best objective: 6.906754778648554
+best value of a: {'a': 999}
+best function objective: 998001
 ```
 
 # Mango Usage to Tune Hyperparameters of KNeighborsClassifier
