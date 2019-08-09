@@ -15,7 +15,6 @@ include_sklearn_xgboost = True
 include_prophet = True
 
 
-
 app = Celery('AutoTuner',
              broker='amqp://',
              backend='rpc://')
@@ -127,41 +126,26 @@ if include_prophet:
 
     import numpy as np
     from prophet import Prophet
+    from xgboosttree import Xgboosttree
     from sklearn.model_selection import cross_val_score
+    from sklearn.metrics import mean_squared_error
 
 
-    model = Prophet()
 
-    X_train, y_train = model.load_train_dataset("data/PJME/train_data")
+    model = Xgboosttree()
+
+    #X_train, y_train = model.load_train_dataset("data/PJME/train_data")
+    X_train, y_train = model.load_train_dataset("../classifiers/data/PJME/train_data")
+    X_validate, y_validate = model.load_train_dataset("../classifiers/data/PJME/validate_data")
 
     @app.task
     def run_prophet(hyper_par):
-        global X_train, y_train
+        global X_train, y_train,X_validate,y_validate
         clf = Prophet(**hyper_par)
-        result = cross_val_score(clf, X_train, y_train, scoring='neg_mean_squared_error').mean()
-        result = result/10e5
-        return result
+        clf.fit(X_train, y_train.ravel())
+        y_pred = clf.predict(X_validate)
+        mse = mean_squared_error(y_validate, y_pred)
+        mse = mse/10e5
+        result =  (-1.0) * mse
 
-
-if include_xgboost:
-
-    """
-    Enabling the functionality of running xgboost on PJME
-    """
-
-    import numpy as np
-    from prophet import Prophet
-    from sklearn.model_selection import cross_val_score
-
-
-    model = Prophet()
-
-    X_train, y_train = model.load_train_dataset("data/PJME/train_data")
-
-    @app.task
-    def run_prophet(hyper_par):
-        global X_train, y_train
-        clf = Prophet(**hyper_par)
-        result = cross_val_score(clf, X_train, y_train, scoring='neg_mean_squared_error').mean()
-        result = result/10e5
         return result
