@@ -149,7 +149,7 @@ class Prophet(BaseEstimator, RegressorMixin):
             index_col=[0],
             parse_dates=[0]
         )
-        df = df.resample('D').sum()
+        df = df.resample('D').mean()
         X_train = df.index.values
         y_train = df.values
         return X_train, y_train
@@ -160,8 +160,9 @@ class Prophet(BaseEstimator, RegressorMixin):
         df = pd.read_csv(
             f,
             index_col=[0],
-            parse_dates=[0]
+            parse_dates=[0],
+            infer_datetime_format=True
         )
-        df = df.resample('D').sum()
+        #df = df.resample('D').mean()
         X = df.index.values
         return X

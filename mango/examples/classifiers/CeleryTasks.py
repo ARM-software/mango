@@ -4,9 +4,13 @@ They will run the classifier with the desired hyper parameters
 And return back the results.
 """
 
+# from __future__ import absolute_import, unicode_literals
+# from __future__ import absolute_import, unicode_literals
+# from celery import Celery
+
 from __future__ import absolute_import, unicode_literals
-from __future__ import absolute_import, unicode_literals
-from celery import Celery
+from .celery import app
+
 
 #whether sklearn_xgboost models should be enables on Celery
 include_sklearn_xgboost = True
@@ -15,15 +19,15 @@ include_sklearn_xgboost = True
 include_prophet = True
 
 
-app = Celery('AutoTuner',
-             broker='amqp://',
-             backend='rpc://')
-
-# Optional configuration
-app.conf.update(
-    result_expires=3600,
-    broker_heartbeat = 0
-)
+# app = Celery('Mango',
+#              broker='amqp://',
+#              backend='rpc://')
+#
+# # Optional configuration
+# app.conf.update(
+#     result_expires=3600,
+#     broker_heartbeat = 0
+# )
 
 
 
@@ -125,18 +129,20 @@ if include_prophet:
     """
 
     import numpy as np
-    from prophet import Prophet
-    from xgboosttree import Xgboosttree
+    from .prophet import Prophet
+    from .xgboosttree import Xgboosttree
     from sklearn.model_selection import cross_val_score
     from sklearn.metrics import mean_squared_error
+    import os
 
+    data_path = os.path.abspath('.')+'/classifiers/data/'
 
 
     model = Xgboosttree()
 
     #X_train, y_train = model.load_train_dataset("data/PJME/train_data")
-    X_train, y_train = model.load_train_dataset("../classifiers/data/PJME/train_data")
-    X_validate, y_validate = model.load_train_dataset("../classifiers/data/PJME/validate_data")
+    X_train, y_train = model.load_train_dataset(data_path+"PJME/train_data")
+    X_validate, y_validate = model.load_train_dataset(data_path+"PJME/validate_data")
 
     @app.task
     def run_prophet(hyper_par):

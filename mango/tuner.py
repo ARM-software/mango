@@ -3,8 +3,8 @@ Main Tuner Class which uses other abstractions.
 Genereal usage is to find the optimal hyper-parameters of the classifier
 """
 
-from domain.domain_space import domain_space
-from optimizer.bayesian_learning import BayesianLearning
+from mango.domain.domain_space import domain_space
+from mango.optimizer.bayesian_learning import BayesianLearning
 
 import numpy as np
 
