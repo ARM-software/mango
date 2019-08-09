@@ -18,7 +18,7 @@ In the example below our goal is to find optimal value of the function whose inp
 The objective of the function is unknown to the Mango, but it can evaluate the function for fixed number of iterations.
 The selected function is log.
 
-```
+```python
 # Import Tuner 
 from tuner import Tuner
 
@@ -60,7 +60,7 @@ best objective: 6.906754778648554
 
 # Mango Usage to Tune Hyperparameters of KNeighborsClassifier
 
-```
+```python
 from tuner import Tuner
 
 from scipy.stats import uniform
