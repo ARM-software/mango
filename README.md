@@ -13,11 +13,9 @@ $ python setup.py install
 - Mango requires scikit-learn and is develped for python 3.
 - Other packages installed are required to use Mango to optimize xgboost ML algorithms and fbprophet algorithm.
 
-# Mango Usage
-Mango is very easy to use. 
-The examples are available in the directory *examples*.
-In the example below our goal is to find optimal value of the function whose input is a single variable between 1 and 1000.
-The objective of the function is unknown to the Mango, but it can evaluate the function value. The selected function is identity.
+# Mango Simple Example
+Mango is very easy to use. The given example finds optimal value of the identity function whose input is a single variable between 1 and 1000.
+More examples are available in the directory *mango/examples*.
 
 ```python
 from mango.tuner import Tuner
@@ -31,18 +29,16 @@ def objectiveFunction(args_list): # Identity Objective Function
 tuner_identity = Tuner(param_dict, objectiveFunction) # Initialize Tuner
 
 results = tuner_identity.run() # Run Tuner
-print('best value of a:',results['best_hyper_parameter'])
-print('best function objective:',results['best_objective'])
+print('Optimal value of a:',results['best_hyper_parameter'],' and objective:',results['best_objective'])
 ```
 
 Sample output of Running Above Program.
 
 ```
-best value of a: {'a': 999}
-best function objective: 999
+Optimal value of a: {'a': 999}  and objective: 999
 ```
 
-# Mango Usage to Tune Hyperparameters of KNeighborsClassifier
+# Mango Example to Tune Hyperparameters of KNeighborsClassifier
 
 ```python
 from mango.tuner import Tuner
