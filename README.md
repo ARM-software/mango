@@ -16,20 +16,20 @@ $ pip3 install -r requirements.txt
 Mango is very easy to use. 
 The examples are available in the directory *examples*.
 In the example below our goal is to find optimal value of the function whose input is a single variable between 1 and 1000.
-The objective of the function is unknown to the Mango, but it can evaluate the function value. The selected function is square.
+The objective of the function is unknown to the Mango, but it can evaluate the function value. The selected function is identity.
 
 ```python
 from tuner import Tuner
 
 param_dict = {"a": range(1,1000)} # Search space of variables
              
-def objectiveFunction(args_list): # User Objective Function
+def objectiveFunction(args_list): # Identity Objective Function
     a = args_list[0]['a']
-    return [a*a]
+    return [a]
 
-tuner_user = Tuner(param_dict, objectiveFunction) # Initialize Tuner
+tuner_identity = Tuner(param_dict, objectiveFunction) # Initialize Tuner
 
-results = tuner_user.run() # Run Tuner
+results = tuner_identity.run() # Run Tuner
 
 print('best value of a:',results['best_hyper_parameter'])
 print('best function objective:',results['best_objective'])
@@ -39,7 +39,7 @@ Sample output of Running Above Program.
 
 ```
 best value of a: {'a': 999}
-best function objective: 998001
+best function objective: 999
 ```
 
 # Mango Usage to Tune Hyperparameters of KNeighborsClassifier
@@ -55,7 +55,7 @@ param_dict = {"n_neighbors": range(1, 50),
              }
              
 
-# User Objective function for KNN
+# Objective function for KNN
 from sklearn import datasets
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_val_score
@@ -73,9 +73,9 @@ def objectiveKNN(args_list):
         results.append(result)
     return results
 
-tuner_user = Tuner(param_dict, objectiveKNN)
+tuner_knn = Tuner(param_dict, objectiveKNN)
 
-results = tuner_user.run()
+results = tuner_knn.run()
 
 
 print('best hyper parameters:',results['best_hyper_parameter'])
