@@ -1,6 +1,6 @@
 # Mango: A parallel black-box optimization library
 
-**Mango** is a python library for parallel optimization over complex search spaces. Current usage of Mango is intended to find the optimal hyperparameters for machine learning algorithms.
+**Mango** is a python library for parallel optimization over complex search spaces. Currently Mango is intended to find the optimal hyperparameters for machine learning algorithms.
 Mango internally uses parallel implementation of multi-armed bandit bayesian optimizer based on gaussian process.
 
 ## Index
@@ -43,7 +43,7 @@ results = tuner_identity.run() # Run Tuner
 print('Optimal value of a:',results['best_hyper_parameter'],' and objective:',results['best_objective'])
 ```
 
-Sample output of Running Above Program.
+Sample output of above example.
 
 ```
 Optimal value of a: {'a': 999}  and objective: 999
@@ -85,7 +85,7 @@ results = tuner_knn.run()
 print('best hyper parameters:',results['best_hyper_parameter'])
 print('best Accuracy:',results['best_objective'])
 ```
-Sample output of Running Above Program. Note output may be different for your program.
+Sample output of above example. Note output may be different for your program.
 
 ```
 best hyper parameters: {'algorithm': 'auto', 'n_neighbors': 11}
