@@ -7,6 +7,7 @@ Mango internally uses parallel implementation of multi-armed bandit bayesian opt
 ```
 Clone the Mango repository, and from the Mango directory
 $ pip3 install -r requirements.txt
+$ python setup.py install
 ```
 
 - Mango requires scikit-learn and is develped for python 3.
@@ -19,7 +20,7 @@ In the example below our goal is to find optimal value of the function whose inp
 The objective of the function is unknown to the Mango, but it can evaluate the function value. The selected function is identity.
 
 ```python
-from tuner import Tuner
+from mango.tuner import Tuner
 
 param_dict = {"a": range(1,1000)} # Search space of variables
              
@@ -30,7 +31,6 @@ def objectiveFunction(args_list): # Identity Objective Function
 tuner_identity = Tuner(param_dict, objectiveFunction) # Initialize Tuner
 
 results = tuner_identity.run() # Run Tuner
-
 print('best value of a:',results['best_hyper_parameter'])
 print('best function objective:',results['best_objective'])
 ```
@@ -45,7 +45,7 @@ best function objective: 999
 # Mango Usage to Tune Hyperparameters of KNeighborsClassifier
 
 ```python
-from tuner import Tuner
+from mango.tuner import Tuner
 
 from scipy.stats import uniform
 
@@ -60,23 +60,19 @@ from sklearn import datasets
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_val_score
 
-
 X, Y = datasets.load_breast_cancer(return_X_y=True)
 
-def objectiveKNN(args_list):
-    global X,Y
-    
-    results = []
+def objectiveKNN(args_list): # arg_list is list of hyperpar values
+    global X,Y # Data is loaded only once
+    evaluations = []
     for hyper_par in args_list:
         clf = KNeighborsClassifier(**hyper_par)
-        result  = cross_val_score(clf, X, Y, scoring='accuracy').mean()
-        results.append(result)
-    return results
+        accuracy  = cross_val_score(clf, X, Y, scoring='accuracy').mean()
+        evaluations.append(accuracy)
+    return evaluations
 
 tuner_knn = Tuner(param_dict, objectiveKNN)
-
 results = tuner_knn.run()
-
 
 print('best hyper parameters:',results['best_hyper_parameter'])
 print('best Accuracy:',results['best_objective'])
