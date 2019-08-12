@@ -48,6 +48,7 @@ Sample output of above example.
 ```
 Optimal value of a: {'a': 999}  and objective: 999
 ```
+More details about this simple example are available [here.](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Getting_Started.ipynb)
 
 <a name="knnexample"></a>
 # Mango Example to Tune Hyperparameters of KNeighborsClassifier
