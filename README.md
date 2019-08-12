@@ -7,8 +7,8 @@ Mango internally uses parallel implementation of multi-armed bandit bayesian opt
 1. [ Mango Setup ](#setup)
 2. [ Mango Simple Example ](#simpleexample)
 3. [ Tune Hyperparameters of KNeighborsClassifier ](#knnexample)
-4. [ Tune Hyperparameters of Facebook Prophet ](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/19_Prophet_Objective.ipynb)
-5. [ Tune Hyperparameters of xgboost XGBRegressor ](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/19_xgboost_Objective.ipynb)
+4. [ Tune Hyperparameters of Facebook Prophet ](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Prophet_Classifier.ipynb)
+5. [ Tune Hyperparameters of xgboost XGBRegressor ](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Xgboost_Example.ipynb)
 6. [ More Examples](https://gitlab.com/arm-research/isr/mango/tree/master/mango/examples)
 7. [ Contact & Questions ](#contactDetails)
 
