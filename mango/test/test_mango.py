@@ -3,13 +3,13 @@ Testing the capabilities of Mango
 - Test the domain space transformations
 - Test the sampling capabilities
 - Test the bayesian learning optimizer iterations
-- Test the results for simple objective function
+- Test the results of tuner for simple objective function
 """
 
 from mango.domain.domain_space import domain_space
 from mango.optimizer.bayesian_learning import BayesianLearning
 from scipy.stats import uniform
-
+from mango.tuner import Tuner
 
 # Simple param_dict
 param_dict = {"a": uniform(0, 1), # uniform distribution
@@ -32,6 +32,7 @@ def objectiveFunction(args_list):
 
 domain_size = 10
 
+#test the functionality of domain space transformations
 def test_domain():
     ds = domain_space(param_dict,domain_size)
 
@@ -65,3 +66,10 @@ def test_domain():
 
         for key in l1.keys():
             assert key in param_dict.keys()
+
+#test the functionality of the tuner
+def test_tuner():
+    tuner_user = Tuner(param_dict, objectiveFunction)
+    results = tuner_user.run()
+    #max objective is 8, and minimum is 1
+    assert results['best_objective'] >1
