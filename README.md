@@ -1,7 +1,11 @@
 # Mango: A parallel black-box optimization library
 
 **Mango** is a python library for parallel optimization over complex search spaces. Currently Mango is intended to find the optimal hyperparameters for machine learning algorithms.
-Mango internally uses parallel implementation of multi-armed bandit bayesian optimizer based on gaussian process.
+Mango internally uses parallel implementation of multi-armed bandit bayesian optimizer based on gaussian process. Some of the salient features of Mango are:
+- Ability to easily define complex search spaces which are compatible with the scikit-learn random search and gridsearch functions.
+- Internally uses state of art optimizer which allows to sample a batch of values in parallel for evaluation.
+- Objective function can be arbitrary complex which can be scheduled on local, cluster  or cloud infrastructure.
+- The ease of usage was kept in mind with ability to plugin new distributions for search space and new optimizer algorithms.
 
 ## Index
 1. [ Mango Setup ](#setup)
@@ -9,8 +13,9 @@ Mango internally uses parallel implementation of multi-armed bandit bayesian opt
 3. [ Tune Hyperparameters of KNeighborsClassifier ](#knnexample)
 4. [ Tune Hyperparameters of Facebook Prophet ](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Prophet_Classifier.ipynb)
 5. [ Tune Hyperparameters of xgboost XGBRegressor ](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Xgboost_Example.ipynb)
-6. [ More Examples](https://gitlab.com/arm-research/isr/mango/tree/master/mango/examples)
-7. [ Contact & Questions ](#contactDetails)
+6. [ Parallel Scheduling using Celery](#Celery)
+7. [ More Examples](https://gitlab.com/arm-research/isr/mango/tree/master/mango/examples)
+8. [ Contact & Questions ](#contactDetails)
 
 <a name="setup"></a>
 # Mango Setup
@@ -92,6 +97,14 @@ Sample output of above example. Note output may be different for your program.
 best hyper parameters: {'algorithm': 'auto', 'n_neighbors': 11}
 best Accuracy: 0.931486122714193
 ```
+
+<a name="Celery"></a>
+# Mango Example to Schedule Objective Function on Celery
+User defined objective function can be scheduled on local, cluster  or cloud infrastructure. We have provided sample
+examples where celery workers are used to evaluate the objective function in parallel.
+
+- [KNN example using celery workers](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/KNN_Celery.ipynb)
+- [Prophet example using celery workers](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Prophet_Celery.ipynb)
 
 <a name="contactDetails"></a>
 # More Details
