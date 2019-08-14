@@ -108,11 +108,17 @@ best Accuracy: 0.931486122714193
 
 <a name="Celery"></a>
 # Mango Example to Schedule Objective Function on Celery
-User defined objective function can be scheduled on local, cluster  or cloud infrastructure. We have provided sample
-examples where celery workers are used to evaluate the objective function in parallel.
+User defined objective function can be scheduled on local, cluster  or cloud infrastructure. The objective function scheduler
+is completely independent of the Mango. This design was chosen to enable the scheduling of varied resource objective 
+function according to developer needs. We have included examples using [Celery](http://www.celeryproject.org/). In the sample
+examples celery workers are used to evaluate the objective function in parallel. These examples assumes celery is installed and workers
+are running. Default celery configurations can be modified in the [file](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/classifiers/celery.py).
 
 - [KNN example using celery workers](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/KNN_Celery.ipynb)
 - [Prophet example using celery workers](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Prophet_Celery.ipynb)
+
+More examples will be included to show scheduling of objective function using local threads/processes. By default examples schedule
+the objective function on the local machine itself.
 
 <a name="contactDetails"></a>
 # More Details
