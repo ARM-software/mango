@@ -14,8 +14,9 @@ Mango internally uses parallel implementation of multi-armed bandit bayesian opt
 4. [ Tune Hyperparameters of Facebook Prophet ](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Prophet_Classifier.ipynb)
 5. [ Tune Hyperparameters of xgboost XGBRegressor ](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Xgboost_Example.ipynb)
 6. [ Parallel Scheduling using Celery](#Celery)
-7. [ More Examples](https://gitlab.com/arm-research/isr/mango/tree/master/mango/examples)
-8. [ Contact & Questions ](#contactDetails)
+7. [ Domain Space of Variables](#DomainSpace)
+8. [ More Examples](https://gitlab.com/arm-research/isr/mango/tree/master/mango/examples)
+9. [ Contact & Questions ](#contactDetails)
 
 <a name="setup"></a>
 # Mango Setup
@@ -119,6 +120,53 @@ are running. Default celery configurations can be modified in the [file](https:/
 
 More examples will be included to show scheduling of objective function using local threads/processes. By default examples schedule
 the objective function on the local machine itself.
+
+<a name="DomainSpace"></a>
+# Domain Space of Variables
+The domain space defines the search space of variables from which optimal values are chosen. Mango allows definitions of domain space
+to define complex search spaces. Domain space definitions are compatible with the [RandomizedSearchCV](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.RandomizedSearchCV.html) of the
+scikit-learn. The parameter dictionary concept of scikit-learn is used. Dictionary with parameters names (string) as keys and distributions or 
+lists of parameters to try. Distributions must provide a rvs method for sampling (such as those from scipy.stats.distributions). 
+If a list is given, it is sampled uniformly. We have defined a new [loguniform](https://gitlab.com/arm-research/isr/mango/blob/master/mango/domain/distribution.py) distribution by extending the scipy.stats.distributions constructs.
+**loguniform** can be used in SVM classifiers where *C* parameter can have search space defined using loguniform distribution. In these definitions categorical/discrete variables are defined using list of strings. List of ints is considered
+as the variable having interger values. Some of the sample domain space definitions are shown.
+
+```python
+from scipy.stats import uniform
+param_dict = {"a": uniform(0, 1), # uniform distribution
+              "b": range(1,5), # Integer variable
+              "c":[1,2,3], # Integer variable
+              "d":["-1","1"] # Categorical variable
+             }
+```
+
+```python
+from scipy.stats import uniform
+param_dict = {"learning_rate": uniform(0.01, 0.5),
+              "gamma": uniform(0.5, 0.5),
+              "max_depth": range(1,14),
+              "n_estimators": range(500,2000),
+              "subsample": uniform(0.7, 0.3),
+              "colsample_bytree":uniform(0.3, 0.7),
+              "colsample_bylevel":uniform(0.3, 0.7),
+              "min_child_weight": range(1,10)}
+              
+```
+
+```python
+from mango.domain.distribution import loguniform
+param_dict = {"changepoint_prior_scale": loguniform(-3, 1),
+              'seasonality_prior_scale' : loguniform(1, 2)
+             }
+```
+
+```python
+from scipy.stats import uniform
+from distribution import loguniform
+param_dict = {"kernel": ['rbf'],
+              "gamma": uniform(0.1, 4),
+              "C": loguniform(-7, 8)}
+```
 
 <a name="contactDetails"></a>
 # More Details
