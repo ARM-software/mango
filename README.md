@@ -9,14 +9,16 @@ Mango internally uses parallel implementation of multi-armed bandit bayesian opt
 
 ## Index
 1. [ Mango Setup ](#setup)
-2. [ Mango Simple Example ](#simpleexample)
+2. [ Simple Example ](#simpleexample)
 3. [ Tune Hyperparameters of KNeighborsClassifier ](#knnexample)
-4. [ Parallel Scheduling using Celery](#Celery)
-5. [ Domain Space of Variables](#DomainSpace)
-6. [ Tune Hyperparameters of Facebook Prophet ](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Prophet_Classifier.ipynb)
-7. [ Tune Hyperparameters of xgboost XGBRegressor ](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Xgboost_Example.ipynb)
-8. [ More Examples](https://gitlab.com/arm-research/isr/mango/tree/master/mango/examples)
-9. [ Contact & Questions ](#contactDetails)
+4. [ Domain Space of Variables](#DomainSpace)
+5. [ More on Objective Function](#ObjectiveFunction)
+6. [ Controlling Mango Configurations](#MangoConfigurations)
+7. [ Schedule Objective Function on Celery](#Celery)
+8. [ Tune Hyperparameters of Facebook Prophet ](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Prophet_Classifier.ipynb)
+9. [ Tune Hyperparameters of xgboost XGBRegressor ](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Xgboost_Example.ipynb)
+10. [ More Examples](https://gitlab.com/arm-research/isr/mango/tree/master/mango/examples)
+11. [ Contact & Questions ](#contactDetails)
 
 <a name="setup"></a>
 # 1. Mango Setup
@@ -38,7 +40,7 @@ $ pytest
 
 
 <a name="simpleexample"></a>
-# 2. Mango Simple Example
+# 2. Simple Example
 Mango is very easy to use. The given example finds optimal value of the identity function whose input is a single variable between 1 and 1000.
 More examples are available in the directory *mango/examples*.
 
@@ -107,22 +109,8 @@ best hyper parameters: {'algorithm': 'auto', 'n_neighbors': 11}
 best Accuracy: 0.931486122714193
 ```
 
-<a name="Celery"></a>
-# 4. Mango Example to Schedule Objective Function on Celery
-User defined objective function can be scheduled on local, cluster  or cloud infrastructure. The objective function scheduler
-is completely independent of the Mango. This design was chosen to enable the scheduling of varied resource objective 
-function according to developer needs. We have included examples using [Celery](http://www.celeryproject.org/). In the sample
-examples celery workers are used to evaluate the objective function in parallel. These examples assumes celery is installed and workers
-are running. Default celery configurations can be modified in the [file](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/classifiers/celery.py).
-
-- [KNN example using celery workers](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/KNN_Celery.ipynb)
-- [Prophet example using celery workers](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Prophet_Celery.ipynb)
-
-More examples will be included to show scheduling of objective function using local threads/processes. By default examples schedule
-the objective function on the local machine itself.
-
 <a name="DomainSpace"></a>
-# 5. Domain Space of Variables
+# 4. Domain Space of Variables
 The domain space defines the search space of variables from which optimal values are chosen. Mango allows definitions of domain space
 to define complex search spaces. Domain space definitions are compatible with the [RandomizedSearchCV](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.RandomizedSearchCV.html) of the
 scikit-learn. The parameter dictionary concept of scikit-learn is used. Dictionary with parameters names (string) as keys and distributions or 
@@ -167,6 +155,73 @@ param_dict = {"kernel": ['rbf'],
               "gamma": uniform(0.1, 4),
               "C": loguniform(-7, 8)}
 ```
+
+
+<a name="ObjectiveFunction"></a>
+# 5. More on Objective Function
+The objective function has the structure as shown below.
+
+```python
+def objective_function(args_list):
+    evaluations = []
+    for hyper_par in args_list:
+        result =  evaluate_function_on_hyper_par
+        evaluations.append(result)
+    return evaluations
+```
+The objective function is called with the input list of hyper parameters. Each element of the list is the dictionary 
+which is a sample drawn from the domain space of variables. Mango expects the objective function to return the list of
+evaluations which has the same size as the args_list. Each value of evaluations list is the function evaluated at hyper parameters
+of args_list in the same order. A rich set of objective function is shown in the [examples](https://gitlab.com/arm-research/isr/mango/tree/master/mango/examples). The size of args_list is controlled by the batch_size configuration parameter of Mango. By default
+batch_size is 1. The configuration parameters of Mango are explained in the [Mango Configurations](#MangoConfigurations) section. 
+
+<a name="MangoConfigurations"></a>
+# 6. Controlling Mango Configurations
+
+The default configuration parameters used by the Mango as below:
+```python
+{'param_dict': ...,
+ 'userObjective': ...,
+ 'domain_size': 5000,
+ 'initial_random': 1,
+ 'num_iteration': 20,
+ 'objective': 'maximize',
+ 'batch_size': 1}
+```
+The configuration parameters are explained:
+- domain_size: The size which is explored in each iteration by the gaussian process. Generally, a larger size is prefered if higher dimensional functions are optimized. More on this will be added with details about the internals of bayesian optimization.
+- initial_random: The number of random samples tried.
+- num_iteration: The total number of iterations used by Mango to find the optimal value.
+- objective: Default objective of maximize is used. minimize objective is not supported yet. minimize objective can be acheived by evaluating the negative of the function.
+- batch_size: The size of args_list passed to the objective function for parallel evaluation. For larger batch sizes, Mango internally uses intelligent sampling to decide the optimal samples to evaluate.
+
+The default configuration parameters can be modified as shown below. Only the parameters whose values need to adjusted can be passed as the dictionary.
+```python
+conf_dict = dict()
+conf_dict['batch_size'] = 5
+conf_dict['num_iteration'] = 40
+conf_dict['domain_size'] = 10000
+conf_dict['initial_random'] = 3
+
+tuner_user = Tuner(param_dict, objective_Xgboost,conf_dict) 
+
+# Now tuner_user can be used as shown in other examples.
+```
+
+<a name="Celery"></a>
+# 7. Schedule Objective Function on Celery
+User defined objective function can be scheduled on local, cluster  or cloud infrastructure. The objective function scheduler
+is completely independent of the Mango. This design was chosen to enable the scheduling of varied resource objective 
+function according to developer needs. We have included examples using [Celery](http://www.celeryproject.org/). In the sample
+examples celery workers are used to evaluate the objective function in parallel. These examples assumes celery is installed and workers
+are running. Default celery configurations can be modified in the [file](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/classifiers/celery.py).
+
+- [KNN example using celery workers](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/KNN_Celery.ipynb)
+- [Prophet example using celery workers](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Prophet_Celery.ipynb)
+
+More examples will be included to show scheduling of objective function using local threads/processes. By default examples schedule
+the objective function on the local machine itself.
+
 
 <a name="contactDetails"></a>
 # More Details
