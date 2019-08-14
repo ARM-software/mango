@@ -11,15 +11,15 @@ Mango internally uses parallel implementation of multi-armed bandit bayesian opt
 1. [ Mango Setup ](#setup)
 2. [ Mango Simple Example ](#simpleexample)
 3. [ Tune Hyperparameters of KNeighborsClassifier ](#knnexample)
-4. [ Tune Hyperparameters of Facebook Prophet ](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Prophet_Classifier.ipynb)
-5. [ Tune Hyperparameters of xgboost XGBRegressor ](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Xgboost_Example.ipynb)
-6. [ Parallel Scheduling using Celery](#Celery)
-7. [ Domain Space of Variables](#DomainSpace)
+4. [ Parallel Scheduling using Celery](#Celery)
+5. [ Domain Space of Variables](#DomainSpace)
+6. [ Tune Hyperparameters of Facebook Prophet ](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Prophet_Classifier.ipynb)
+7. [ Tune Hyperparameters of xgboost XGBRegressor ](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Xgboost_Example.ipynb)
 8. [ More Examples](https://gitlab.com/arm-research/isr/mango/tree/master/mango/examples)
 9. [ Contact & Questions ](#contactDetails)
 
 <a name="setup"></a>
-# Mango Setup
+# 1. Mango Setup
 ```
 Clone the Mango repository, and from the Mango directory.
 $ pip3 install -r requirements.txt
@@ -38,7 +38,7 @@ $ pytest
 
 
 <a name="simpleexample"></a>
-# Mango Simple Example
+# 2. Mango Simple Example
 Mango is very easy to use. The given example finds optimal value of the identity function whose input is a single variable between 1 and 1000.
 More examples are available in the directory *mango/examples*.
 
@@ -65,7 +65,7 @@ Optimal value of a: {'a': 999}  and objective: 999
 More details about this simple example are available [here.](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Getting_Started.ipynb)
 
 <a name="knnexample"></a>
-# Mango Example to Tune Hyperparameters of KNeighborsClassifier
+# 3. Mango Example to Tune Hyperparameters of KNeighborsClassifier
 
 ```python
 from mango.tuner import Tuner
@@ -108,7 +108,7 @@ best Accuracy: 0.931486122714193
 ```
 
 <a name="Celery"></a>
-# Mango Example to Schedule Objective Function on Celery
+# 4. Mango Example to Schedule Objective Function on Celery
 User defined objective function can be scheduled on local, cluster  or cloud infrastructure. The objective function scheduler
 is completely independent of the Mango. This design was chosen to enable the scheduling of varied resource objective 
 function according to developer needs. We have included examples using [Celery](http://www.celeryproject.org/). In the sample
@@ -122,7 +122,7 @@ More examples will be included to show scheduling of objective function using lo
 the objective function on the local machine itself.
 
 <a name="DomainSpace"></a>
-# Domain Space of Variables
+# 5. Domain Space of Variables
 The domain space defines the search space of variables from which optimal values are chosen. Mango allows definitions of domain space
 to define complex search spaces. Domain space definitions are compatible with the [RandomizedSearchCV](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.RandomizedSearchCV.html) of the
 scikit-learn. The parameter dictionary concept of scikit-learn is used. Dictionary with parameters names (string) as keys and distributions or 
