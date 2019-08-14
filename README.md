@@ -20,13 +20,21 @@ Mango internally uses parallel implementation of multi-armed bandit bayesian opt
 <a name="setup"></a>
 # Mango Setup
 ```
-Clone the Mango repository, and from the Mango directory
+Clone the Mango repository, and from the Mango directory.
 $ pip3 install -r requirements.txt
 $ python setup.py install
 ```
 
-- Mango requires scikit-learn and is develped for python 3.
-- Other packages installed are required to use Mango to optimize xgboost ML algorithms and fbprophet algorithm.
+<!--
+- Mango requires scikit-learn and is develped for python 3, some other packages are installed which required to optimize xgboost classifiers and fbprophet.
+!-->
+
+Testing the installation.
+```
+$ cd PATH/mango/mango/test
+$ pytest
+```
+
 
 <a name="simpleexample"></a>
 # Mango Simple Example
