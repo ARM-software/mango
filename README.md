@@ -17,9 +17,10 @@ Mango internally uses parallel implementation of multi-armed bandit bayesian opt
 7. [ Schedule Objective Function on Celery](#Celery)
 8. [ Tune Hyperparameters of Facebook Prophet ](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Prophet_Classifier.ipynb)
 9. [ Tune Hyperparameters of xgboost XGBRegressor ](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Xgboost_Example.ipynb)
-10. [Tune Hyperparameters of SVM](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/SVM_Example.ipynb)
-11. [ More Examples](https://gitlab.com/arm-research/isr/mango/tree/master/mango/examples)
-12. [ Contact & Questions ](#contactDetails)
+10. [ Tune Hyperparameters of xgboost XGBClassifier ](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Xgboost_XGBClassifier.ipynb)
+11. [Tune Hyperparameters of SVM](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/SVM_Example.ipynb)
+12. [ More Examples](https://gitlab.com/arm-research/isr/mango/tree/master/mango/examples)
+13. [ Contact & Questions ](#contactDetails)
 
 <a name="setup"></a>
 # 1. Mango Setup
