@@ -5,6 +5,7 @@ Testing the capabilities of Mango
 - Test the bayesian learning optimizer iterations
 - Test the results of tuner for simple objective function
 """
+import math
 
 from mango.domain.domain_space import domain_space
 from mango.optimizer.bayesian_learning import BayesianLearning
@@ -73,3 +74,114 @@ def test_tuner():
     results = tuner_user.run()
     #max objective is 8, and minimum is 1
     assert results['best_objective'] >1
+
+# test on Rosenbrock's Valley
+# Rosenbrock's valley (a.k.k the banana function) has a global optimimum lying inside a long, narrow parabolic valley with a flat floor
+def test_rosenbrock():
+    param_dict = {
+        'x': range(-10, 10),
+        'y': range(-10, 10),
+    }
+    a = 1
+    b = 100
+    x_opt = a
+    y_opt = a**2
+    def objfunc(args_list):
+        results = []
+        for hyper_par in args_list:
+            x = hyper_par['x']
+            y = hyper_par['y']
+            result = -(b*((y - x**2)**2) + ((a - x)**2))
+            results.append(result)
+        return results
+
+    #  a grid search over integer values would give the results
+    #  the number of iterations should be smaller
+    grid_search_size = len(param_dict['x']) * len(param_dict['y'])
+    config = {
+        'domain_size': 5000,
+        'num_iteration': 2 * grid_search_size
+    }
+    tuner = Tuner(param_dict, objfunc)
+    results = tuner.run()
+
+    print('best hyper parameters:',results['best_hyper_parameter'])
+    print('best Accuracy:',results['best_objective'])
+
+    assert abs(results['best_hyper_parameter']['x'] - x_opt) <= 5
+    assert abs(results['best_hyper_parameter']['x'] - y_opt) <= 5
+
+def test_convex():
+    param_dict = {
+        'x': range(-100, 10),
+        'y': range(-10, 20),
+    }
+    
+    x_opt = 0
+    y_opt = 0
+    def objfunc(args_list):
+        results = []
+        for hyper_par in args_list:
+            x = hyper_par['x']
+            y = hyper_par['y']
+            result = -(x**2 + y**2)
+            results.append(result)
+        return results
+
+    #  a grid search over integer values would give the results
+    #  the number of iterations should be smaller
+    grid_search_size = len(param_dict['x']) * len(param_dict['y'])
+    config = {
+        'domain_size': 5000,
+        'num_iteration': 0.1 * grid_search_size
+    }
+    tuner = Tuner(param_dict, objfunc)
+    results = tuner.run()
+
+    print('best hyper parameters:',results['best_hyper_parameter'])
+    print('best Accuracy:',results['best_objective'])
+
+    assert abs(results['best_hyper_parameter']['x'] - x_opt) <= 1
+    assert abs(results['best_hyper_parameter']['x'] - y_opt) <= 1
+
+
+def test_six_hump():
+    def camel(x,y):
+        x2 = math.pow(x,2)
+        x4 = math.pow(x,4)
+        y2 = math.pow(y,2)
+        return (4.0 - 2.1 * x2 + (x4 / 3.0)) * x2 + x*y + (-4.0 + 4.0 * y2) * y2
+
+    param_dict = {
+        'x': uniform(-3, 3),
+        'y': uniform(-2, 2),
+    }
+
+    x_opt = 0.0898 # or -0;0898
+    y_opt = -0.7126  # or 0.7126
+    def objfunc(args_list):
+        results = []
+        for hyper_par in args_list:
+            x = hyper_par['x']
+            y = hyper_par['y']
+            result = - camel(x, y)
+            results.append(result)
+        return results
+
+    config = {
+        'domain_size': 5000,
+        'num_iteration': 100
+    }
+    tuner = Tuner(param_dict, objfunc)
+    results = tuner.run()
+
+    print('best hyper parameters:',results['best_hyper_parameter'])
+    print('best objective:',results['best_objective'])
+
+    assert abs(results['best_hyper_parameter']['x']) - abs(x_opt) <= 0.1
+    assert abs(results['best_hyper_parameter']['x']) - abs(y_opt) <= 0.1
+
+
+
+
+

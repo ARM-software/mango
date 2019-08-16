@@ -14,6 +14,11 @@ setuptools.setup(
     package_data={
         '': ['*.cfg'],
     },
+    install_requires=[
+        'numpy==1.17.0',
+        'scipy==1.3.1',
+        'scikit_learn==0.21.3',
+    ],
     zip_safe=False,
     classifiers=[
         'Programming Language :: Python :: 3',
