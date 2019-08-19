@@ -27,7 +27,7 @@ Mango internally uses parallel implementation of multi-armed bandit bayesian opt
 ```
 Clone the Mango repository, and from the Mango directory.
 $ pip3 install -r requirements.txt
-$ python setup.py install
+$ python3 setup.py install
 ```
 
 <!--
