@@ -5,6 +5,8 @@ Genereal usage is to find the optimal hyper-parameters of the classifier
 
 from mango.domain.domain_space import domain_space
 from mango.optimizer.bayesian_learning import BayesianLearning
+from scipy.stats._distn_infrastructure import rv_frozen
+
 
 import numpy as np
 
@@ -20,14 +22,13 @@ class Tuner():
         #stores the results of using the tuner
         self.results = dict()
 
-
         #param_dict is a required parameter
         self.conf_Dict['param_dict'] = param_dict
 
         #Objective funtion is a required parameter
         self.conf_Dict['userObjective']=objective
 
-        self.conf_Dict['domain_size'] = 5000
+        self.conf_Dict['domain_size'] = None
         self.conf_Dict['initial_random'] = 1
         self.conf_Dict['num_iteration'] = 20
         self.conf_Dict['objective'] = 'maximize'
@@ -53,7 +54,50 @@ class Tuner():
                 if conf_dict['batch_size']>0:
                     self.conf_Dict['batch_size'] = conf_dict['batch_size']
 
+        #Calculating the domain size based on the param_dict
+        if self.conf_Dict['domain_size'] == None:
+            self.calculateDomainSize()
 
+
+    """
+    Calculating the domain size to be explored for finding
+    optimum of bayesian optimizer
+    """
+    def calculateDomainSize(self):
+        # Minimum and maximum domain size
+        domain_min = 5000
+        domain_max = 50000
+
+
+        param_dict = self.conf_Dict['param_dict']
+        domain_size = 1
+
+        for par in param_dict:
+            if isinstance(param_dict[par], rv_frozen):
+                distrib = param_dict[par]
+                loc, scale = distrib.args
+                min_scale = 1
+                scale = int(scale)
+                if scale<min_scale:
+                    scale = min_scale
+
+                domain_size = domain_size*scale*50
+
+            elif isinstance(param_dict[par],range):
+                domain_size = domain_size*len(param_dict[par])
+
+            elif isinstance(param_dict[par],list):
+                domain_size = domain_size*len(param_dict[par])
+
+
+        #print('Calculated Domain Size:',domain_size)
+        if domain_size<domain_min:
+            domain_size = domain_min
+
+        if domain_size>domain_max:
+            domain_size = domain_max
+
+        self.conf_Dict['domain_size'] = domain_size
 
     def getConf(self):
         return self.conf_Dict
