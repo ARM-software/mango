@@ -66,6 +66,14 @@ class Tuner():
         self.results =  self.runBayesianOptimizer()
         return self.results
 
+    """
+    Main function used by tuner to run the classifier evaluation
+    """
+    def maximize(self):
+        #running the optimizer
+        self.results =  self.runBayesianOptimizer()
+        return self.results
+
 
     """
     - Called by runLocal.
@@ -93,8 +101,8 @@ class Tuner():
         Y_init,Y_list = self.runUserObjective(random_hyper_parameters)
 
         #setting the initial random hyper parameters tried
-        results['random_hyper_parameters'] = random_hyper_parameters
-        results['random_hyper_parameters_objective']= Y_list
+        results['random_params'] = random_hyper_parameters
+        results['random_params_objective']= Y_list
 
 
         Optimizer = BayesianLearning()
@@ -134,12 +142,12 @@ class Tuner():
             X_sample = np.vstack((X_sample, X_next_batch))
             Y_sample = np.vstack((Y_sample, Y_next_batch))
 
-        results['hyper_parameters_tried'] = hyper_parameters_tried
+        results['params_tried'] = hyper_parameters_tried
         results['objective_values'] = objective_function_values
 
 
         results['best_objective']=np.max(Y_sample)
-        results['best_hyper_parameter'] = hyper_parameters_tried[np.argmax(Y_sample)]
+        results['best_params'] = hyper_parameters_tried[np.argmax(Y_sample)]
 
         return results
 
