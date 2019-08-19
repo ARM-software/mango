@@ -57,8 +57,8 @@ def objectiveFunction(args_list): # Identity Objective Function
 
 tuner_identity = Tuner(param_dict, objectiveFunction) # Initialize Tuner
 
-results = tuner_identity.run() # Run Tuner
-print('Optimal value of a:',results['best_hyper_parameter'],' and objective:',results['best_objective'])
+results = tuner_identity.maximize() # Run Tuner
+print('Optimal value of a:',results['best_params'],' and objective:',results['best_objective'])
 ```
 
 Sample output of above example.
@@ -99,16 +99,16 @@ def objectiveKNN(args_list): # arg_list is list of hyperpar values
     return evaluations
 
 tuner_knn = Tuner(param_dict, objectiveKNN)
-results = tuner_knn.run()
+results = tuner_knn.maximize()
 
-print('best hyper parameters:',results['best_hyper_parameter'])
-print('best Accuracy:',results['best_objective'])
+print('best parameters:',results['best_params'])
+print('best accuracy:',results['best_objective'])
 ```
 Sample output of above example. Note output may be different for your program.
 
 ```
-best hyper parameters: {'algorithm': 'auto', 'n_neighbors': 11}
-best Accuracy: 0.931486122714193
+best parameters: {'algorithm': 'auto', 'n_neighbors': 11}
+best accuracy: 0.931486122714193
 ```
 
 <a name="DomainSpace"></a>
