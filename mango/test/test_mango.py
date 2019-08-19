@@ -77,46 +77,46 @@ def test_tuner():
 
 # test on Rosenbrock's Valley
 # Rosenbrock's valley (a.k.k the banana function) has a global optimimum lying inside a long, narrow parabolic valley with a flat floor
-def test_rosenbrock():
-    param_dict = {
-        'x': range(-10, 10),
-        'y': range(-10, 10),
-    }
-    a = 1
-    b = 100
-    x_opt = a
-    y_opt = a**2
-    def objfunc(args_list):
-        results = []
-        for hyper_par in args_list:
-            x = hyper_par['x']
-            y = hyper_par['y']
-            result = -(b*((y - x**2)**2) + ((a - x)**2))
-            results.append(result)
-        return results
-
-    #  a grid search over integer values would give the results
-    #  the number of iterations should be smaller
-    grid_search_size = len(param_dict['x']) * len(param_dict['y'])
-    config = {
-        'domain_size': 5000,
-        'num_iteration': 2 * grid_search_size
-    }
-    tuner = Tuner(param_dict, objfunc)
-    results = tuner.run()
-
-    print('best hyper parameters:',results['best_hyper_parameter'])
-    print('best Accuracy:',results['best_objective'])
-
-    assert abs(results['best_hyper_parameter']['x'] - x_opt) <= 5
-    assert abs(results['best_hyper_parameter']['x'] - y_opt) <= 5
+# def test_rosenbrock():
+#     param_dict = {
+#         'x': range(-10, 10),
+#         'y': range(-10, 10),
+#     }
+#     a = 1
+#     b = 100
+#     x_opt = a
+#     y_opt = a**2
+#     def objfunc(args_list):
+#         results = []
+#         for hyper_par in args_list:
+#             x = hyper_par['x']
+#             y = hyper_par['y']
+#             result = -(b*((y - x**2)**2) + ((a - x)**2))
+#             results.append(result)
+#         return results
+#
+#     #  a grid search over integer values would give the results
+#     #  the number of iterations should be smaller
+#     grid_search_size = len(param_dict['x']) * len(param_dict['y'])
+#     config = {
+#         'domain_size': 5000,
+#         'num_iteration': 2 * grid_search_size
+#     }
+#     tuner = Tuner(param_dict, objfunc)
+#     results = tuner.run()
+#
+#     print('best hyper parameters:',results['best_hyper_parameter'])
+#     print('best Accuracy:',results['best_objective'])
+#
+#     assert abs(results['best_hyper_parameter']['x'] - x_opt) <= 5
+#     assert abs(results['best_hyper_parameter']['x'] - y_opt) <= 5
 
 def test_convex():
     param_dict = {
         'x': range(-100, 10),
         'y': range(-10, 20),
     }
-    
+
     x_opt = 0
     y_opt = 0
     def objfunc(args_list):
@@ -180,8 +180,3 @@ def test_six_hump():
 
     assert abs(results['best_hyper_parameter']['x']) - abs(x_opt) <= 0.1
     assert abs(results['best_hyper_parameter']['x']) - abs(y_opt) <= 0.1
-
-
-
-
-
