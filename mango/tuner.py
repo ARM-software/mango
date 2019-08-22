@@ -193,6 +193,9 @@ class Tuner():
         results['best_objective']=np.max(Y_sample)
         results['best_params'] = hyper_parameters_tried[np.argmax(Y_sample)]
 
+        #saving the optimizer and ds in the tuner object which can save the surrogate function and ds details
+        self.Optimizer = Optimizer
+        self.ds = ds
         return results
 
 

@@ -33,7 +33,7 @@ class BayesianLearning(BasePredictor):
     """
     def Upper_Confidence_Bound(self,X):
         ''' Compute the upper confidence bound as per UCL paper
-        algorithm 2 GP-BUCB:'''
+        algorithm 2 GP-BUCB: C used here is C1 value which empirically works well'''
         mu, sigma = self.surrogate.predict(X, return_std=True)
         mu = mu.reshape(mu.shape[0],1)
 
@@ -61,6 +61,75 @@ class BayesianLearning(BasePredictor):
 
         return X[x_index],mu_value
 
+    """
+    Check if the returned index value is already present in X_Sample
+    """
+    def Upper_Confidence_Bound_Remove_Duplicates(self,X,X_Sample):
+        mu, sigma = self.surrogate.predict(X, return_std=True)
+        mu = mu.reshape(mu.shape[0],1)
+
+        sigma = sigma.reshape(sigma.shape[0],1)
+
+        tolerance = 1e-6
+
+        sigma_inv_sq = 1.0/(tolerance+(sigma*sigma))#tolerance is used to avoid the divide by zero error
+
+        C = 8/(np.log(1+sigma_inv_sq))
+
+        alpha_inter = self.domain_size*(self.iteration_count)*(self.iteration_count)*math.pi*math.pi/(6*0.1)
+
+        if alpha_inter ==0:
+            print('Error: alpha_inter is zero in Upper_Confidence_Bound')
+
+        alpha = 2*math.log(alpha_inter) # We have set delta = 0.1
+        alpha = math.sqrt(alpha)
+
+        beta = np.exp(2*C)*alpha
+        beta = np.sqrt(beta)
+        Value = mu + (beta)*sigma
+
+        return self.remove_duplicates(X,X_Sample,mu, Value)
+
+
+    def remove_duplicates(self,X,X_Sample,mu, Value):
+        #print('*'*200)
+        v_sorting_index = np.argsort(-Value,axis=0)
+        index = 0
+        #go through all the values in X_Sample and check if anyvalue is close
+        #to the optimal x value, if yes, don't consider this optimal x value
+
+        while index<v_sorting_index.shape[0]:
+            x_optimal = X[v_sorting_index[index]]
+
+            #check if x_optimal is in X_Sample
+            check_closeness = self.closeness(x_optimal,X_Sample)
+
+            if check_closeness==False: #No close element to x_optimal in X_Sample
+                break
+
+                #we will look for next optimal value to try
+            else:
+                index = index+1
+
+        #If entire domain is same to the already selected samples, we will just pick the best by value then
+        if(index == v_sorting_index.shape[0]):
+            index = 0
+
+        return X[v_sorting_index[index]], mu[v_sorting_index[index]]
+
+
+    def closeness(self,x_optimal,X_Sample):
+        #check if x_optimal is close to X_Sample
+        tolerance = 1e-3
+
+        for i in range(X_Sample.shape[0]):
+            diff = np.sum(np.absolute(X_Sample[i] - x_optimal))
+            if(diff<tolerance):
+                #print('Removed Duplicate')
+                return True
+
+        return False
+
 
     """
     This is the main function which returns the next batch to try along with the mean values for this batch
@@ -78,7 +147,7 @@ class BayesianLearning(BasePredictor):
             self.iteration_count = self.iteration_count + 1
             self.surrogate.fit(X_temp, Y_temp)
 
-            X_next,u_value = self.Upper_Confidence_Bound(X_tries)
+            X_next,u_value = self.Upper_Confidence_Bound_Remove_Duplicates(X_tries,X_temp)
 
             u_value = u_value.reshape(-1,1)
             Y_temp = np.vstack((Y_temp, u_value))
