@@ -139,13 +139,15 @@ class Tuner():
 
         #getting first few random values
         random_hyper_parameters = ds.get_random_sample(self.conf_Dict['initial_random'])
-        X_init = ds.convert_GP_space(random_hyper_parameters)
 
+        X_list,Y_list = self.runUserObjective(random_hyper_parameters)
 
-        Y_init,Y_list = self.runUserObjective(random_hyper_parameters)
+        #evaluated hyper parameters are used
+        X_init = ds.convert_GP_space(X_list)
+        Y_init = np.array(Y_list).reshape(len(Y_list),1)
 
         #setting the initial random hyper parameters tried
-        results['random_params'] = random_hyper_parameters
+        results['random_params'] = X_list
         results['random_params_objective']= Y_list
 
 
@@ -175,10 +177,14 @@ class Tuner():
 
 
             #Evaluate the Objective function
-            Y_next_batch, Y_next_list = self.runUserObjective(X_next_PS)
+            #Y_next_batch, Y_next_list = self.runUserObjective(X_next_PS)
+            X_next_list, Y_next_list = self.runUserObjective(X_next_PS)
+            Y_next_batch = np.array(Y_next_list).reshape(len(Y_next_list),1)
+            #update X_next_batch to successfully evaluated values
+            X_next_batch = ds.convert_GP_space(X_next_list)
 
             #update the bookeeping of values tried
-            hyper_parameters_tried = hyper_parameters_tried + X_next_PS
+            hyper_parameters_tried = hyper_parameters_tried + X_next_list
             objective_function_values = objective_function_values + Y_next_list
 
 
@@ -200,5 +206,18 @@ class Tuner():
 
 
     def runUserObjective(self,X_next_PS):
+
+        #initially assuming entire X_next_PS is evaluated and returned results are only Y values
+        X_list_evaluated = X_next_PS
         results = self.conf_Dict['userObjective'](X_next_PS)
-        return np.array(results).reshape(len(results),1),results
+        Y_list_evaluated = results
+
+        """
+        if result is a tuple, then there is possibility that partial values are evaluated
+        """
+        if isinstance(results, tuple):
+            X_list_evaluated,Y_list_evaluated = results
+            #return np.array(Y_list_evaluated).reshape(len(Y_list_evaluated),1),
+        #return np.array(results).reshape(len(results),1),results
+
+        return X_list_evaluated, Y_list_evaluated
