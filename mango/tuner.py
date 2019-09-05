@@ -31,8 +31,11 @@ class Tuner():
         self.conf_Dict['domain_size'] = None
         self.conf_Dict['initial_random'] = 1
         self.conf_Dict['num_iteration'] = 20
-        self.conf_Dict['objective'] = 'maximize'
+        self.conf_Dict['objective'] = "maximize" #only maximize is allowed
         self.conf_Dict['batch_size'] = 1
+
+        #setting default optimizer to Bayesian
+        self.conf_Dict['optimizer'] = "Bayesian"
 
 
         #in case the optional conf_dict is passed
@@ -53,6 +56,9 @@ class Tuner():
             if 'batch_size' in conf_dict:
                 if conf_dict['batch_size']>0:
                     self.conf_Dict['batch_size'] = conf_dict['batch_size']
+
+            if 'optimizer' in conf_dict:
+                self.conf_Dict['optimizer'] = conf_dict['optimizer']
 
         #Calculating the domain size based on the param_dict
         if self.conf_Dict['domain_size'] == None:
@@ -115,7 +121,12 @@ class Tuner():
     """
     def maximize(self):
         #running the optimizer
-        self.results =  self.runBayesianOptimizer()
+        if self.conf_Dict['optimizer'] == "Bayesian":
+            self.results =  self.runBayesianOptimizer()
+        elif self.conf_Dict['optimizer'] == "Random":
+            self.results =  self.runRandomOptimizer()
+        else:
+            print("Error: Unknowm Optimizer")
         return self.results
 
 
@@ -202,6 +213,35 @@ class Tuner():
         #saving the optimizer and ds in the tuner object which can save the surrogate function and ds details
         self.Optimizer = Optimizer
         self.ds = ds
+        return results
+
+
+    def runRandomOptimizer(self):
+        results = dict()
+        #domain space abstraction
+        ds = domain_space(self.conf_Dict['param_dict'],self.conf_Dict['domain_size'])
+
+        X_sample_list=[]
+        Y_sample_list=[]
+
+        #running the iterations
+        for i in range(self.conf_Dict['num_iteration']):
+
+            #getting batch by batch random values to try
+            random_hyper_parameters = ds.get_random_sample(self.conf_Dict['batch_size'])
+            X_list,Y_list = self.runUserObjective(random_hyper_parameters)
+
+            X_sample_list = X_sample_list + X_list
+            Y_sample_list = Y_sample_list + Y_list
+
+        #After all the iterations are done now bookeeping and best hyper parameter values
+        results['params_tried'] = X_sample_list
+        results['objective_values']= Y_sample_list
+
+        if len(Y_sample_list)>0:
+            results['best_objective']=np.max(np.array(Y_sample_list))
+            results['best_params'] = X_sample_list[np.argmax(np.array(Y_sample_list))]
+
         return results
 
 
