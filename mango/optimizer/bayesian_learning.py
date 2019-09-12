@@ -4,6 +4,8 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import Matern
 import math
 
+#used for clustering implementation
+from sklearn.cluster import KMeans
 
 from .base_predictor import BasePredictor
 
@@ -90,6 +92,25 @@ class BayesianLearning(BasePredictor):
 
         return self.remove_duplicates(X,X_Sample,mu, Value)
 
+    """
+    Returns the acqutition function
+    """
+    def Get_Upper_Confidence_Bound(self,X):
+        mu, sigma = self.surrogate.predict(X, return_std=True)
+        mu = mu.reshape(mu.shape[0],1)
+
+        sigma = sigma.reshape(sigma.shape[0],1)
+        alpha_inter = self.domain_size*(self.iteration_count)*(self.iteration_count)*math.pi*math.pi/(6*0.1)
+
+        if alpha_inter ==0:
+            print('Error: alpha_inter is zero in Upper_Confidence_Bound')
+
+        alpha = 2*math.log(alpha_inter) # We have set delta = 0.1
+        alpha = math.sqrt(alpha)
+
+        Value = mu + (alpha)*sigma
+
+        return Value
 
     def remove_duplicates(self,X,X_Sample,mu, Value):
         #print('*'*200)
@@ -159,6 +180,76 @@ class BayesianLearning(BasePredictor):
 
         batch = batch.reshape(-1,X.shape[1])
         return batch
+
+    """
+    Using clustering to select next batch
+    """
+
+    def get_next_batch_clustering(self, X,Y,X_tries,batch_size = 3):
+        #print('In get_next_batch')
+
+        X_temp = X
+        Y_temp = Y
+
+        self.surrogate.fit(X_temp, Y_temp)
+        self.iteration_count = self.iteration_count + 1
+
+
+        Acquition = self.Get_Upper_Confidence_Bound(X_tries)
+
+        if batch_size >1:
+            kmeans = KMeans(n_clusters=3, random_state=0).fit(Acquition)
+            cluster_pred = kmeans.labels_.reshape(kmeans.labels_.shape[0])
+            #select the best cluster in the acquition function, and now cluster in the domain space itself
+            acq_cluster_max_index = np.argmax(kmeans.cluster_centers_)
+
+            #select the points in acq_cluster_max_index
+            x_best_acq_domain =[]
+            x_best_acq_value  = []
+
+            for i in range(X_tries.shape[0]):
+                if cluster_pred[i]==acq_cluster_max_index:
+                    x_best_acq_domain.append(X_tries[i])
+                    x_best_acq_value.append(Acquition[i])
+
+            x_best_acq_domain= np.array(x_best_acq_domain)
+            x_best_acq_value= np.array(x_best_acq_value)
+
+            #Do the domain space based clustering on the best points
+            kmeans = KMeans(n_clusters=batch_size, random_state=0).fit(x_best_acq_domain)
+            cluster_pred_domain = kmeans.labels_.reshape(kmeans.labels_.shape[0])
+
+            #partition the space into the cluster in X and select the best X from each space
+            partitioned_space = dict()
+            partitioned_acq = dict()
+            for i in range(batch_size):
+                partitioned_space[i] = []
+                partitioned_acq[i] = []
+
+            for i in range(x_best_acq_domain.shape[0]):
+                partitioned_space[cluster_pred_domain[i]].append(x_best_acq_domain[i])
+                partitioned_acq[cluster_pred_domain[i]].append(x_best_acq_value[i])
+
+            batch=[]
+
+            for i in partitioned_space:
+                x_local = partitioned_space[i]
+                acq_local = partitioned_acq[i]
+                acq_local = np.array(acq_local)
+                x_index = np.argmax(acq_local)
+                x_final_selected = x_local[x_index]
+                batch.append([x_final_selected])
+
+        else: # batch_size ==1
+            batch=[]
+            x_index = np.argmax(Acquition)
+            x_final_selected = X_tries[x_index]
+            batch.append([x_final_selected])
+
+        batch = np.array(batch)
+        batch = batch.reshape(-1,X.shape[1])
+        return batch
+
 
     """
     Get the predictions from the surrogate function
