@@ -112,6 +112,10 @@ class BayesianLearning(BasePredictor):
 
         return Value
 
+    """
+    Returns the most optmal x along with mean value from the domain of x and making sure it is not a Duplicate (depending on closeness)
+    used in batch setting: As mean is also returned
+    """
     def remove_duplicates(self,X,X_Sample,mu, Value):
         #print('*'*200)
         v_sorting_index = np.argsort(-Value,axis=0)
@@ -137,6 +141,36 @@ class BayesianLearning(BasePredictor):
             index = 0
 
         return X[v_sorting_index[index]], mu[v_sorting_index[index]]
+
+    """
+    Returns the most optmal x only from the domain of x and making sure it is not a Duplicate (depending on closeness)
+    Intended for usage in serial and clustering setting: As no mean is also returned, and no hullicination is considered
+    """
+    def remove_duplicates_serial(self,X,X_Sample, Value):
+        #print('*'*200)
+        v_sorting_index = np.argsort(-Value,axis=0)
+        index = 0
+        #go through all the values in X_Sample and check if anyvalue is close
+        #to the optimal x value, if yes, don't consider this optimal x value
+
+        while index<v_sorting_index.shape[0]:
+            x_optimal = X[v_sorting_index[index]]
+
+            #check if x_optimal is in X_Sample
+            check_closeness = self.closeness(x_optimal,X_Sample)
+
+            if check_closeness==False: #No close element to x_optimal in X_Sample
+                break
+
+                #we will look for next optimal value to try
+            else:
+                index = index+1
+
+        #If entire domain is same to the already selected samples, we will just pick the best by value then
+        if(index == v_sorting_index.shape[0]):
+            index = 0
+
+        return X[v_sorting_index[index]]
 
 
     def closeness(self,x_optimal,X_Sample):
@@ -198,7 +232,7 @@ class BayesianLearning(BasePredictor):
         Acquition = self.Get_Upper_Confidence_Bound(X_tries)
 
         if batch_size >1:
-            kmeans = KMeans(n_clusters=3, random_state=0).fit(Acquition)
+            kmeans = KMeans(n_clusters=4, random_state=0).fit(Acquition)
             cluster_pred = kmeans.labels_.reshape(kmeans.labels_.shape[0])
             #select the best cluster in the acquition function, and now cluster in the domain space itself
             acq_cluster_max_index = np.argmax(kmeans.cluster_centers_)
@@ -243,7 +277,8 @@ class BayesianLearning(BasePredictor):
         else: # batch_size ==1
             batch=[]
             x_index = np.argmax(Acquition)
-            x_final_selected = X_tries[x_index]
+            x_final_selected = self.remove_duplicates_serial(X_tries,X_temp, Acquition)
+            #x_final_selected = X_tries[x_index]
             batch.append([x_final_selected])
 
         batch = np.array(batch)
