@@ -60,6 +60,9 @@ class Tuner():
             if 'optimizer' in conf_dict:
                 self.conf_Dict['optimizer'] = conf_dict['optimizer']
 
+            if 'surrogate' in conf_dict:
+                self.conf_Dict['surrogate'] = conf_dict['surrogate']
+
         #Calculating the domain size based on the param_dict
         if self.conf_Dict['domain_size'] == None:
             self.calculateDomainSize()
@@ -162,7 +165,7 @@ class Tuner():
         results['random_params_objective']= Y_list
 
 
-        Optimizer = BayesianLearning()
+        Optimizer = BayesianLearning(surrogate=self.conf_Dict.get('surrogate'))
         Optimizer.domain_size = self.conf_Dict['domain_size']
 
 

@@ -17,10 +17,16 @@ Bayesian Learning optimizer
 class BayesianLearning(BasePredictor):
 
 
-    def __init__(self):
+    def __init__(self, surrogate=None):
         #initialzing some of the default values
         # The default surrogate function is gaussian_process with matern kernel
-        self.surrogate = GaussianProcessRegressor(kernel=Matern(nu=2.5),n_restarts_optimizer=5,random_state =1 ,normalize_y=True)
+        if surrogate is None:
+            self.surrogate = GaussianProcessRegressor(kernel=Matern(nu=2.5),
+                n_restarts_optimizer=5,
+                random_state =1,
+                normalize_y=True)
+        else:
+            self.surrogate = surrogate
 
         # keep track of the iteration counts
         self.iteration_count = 0
