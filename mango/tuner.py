@@ -183,8 +183,8 @@ class Tuner():
             X_domain_np = ds.convert_GP_space(domain_list)
 
             #Black-Box Optimizer
-            #X_next_batch = Optimizer.get_next_batch(X_sample,Y_sample,X_domain_np,batch_size=self.conf_Dict['batch_size'])
-            X_next_batch = Optimizer.get_next_batch_clustering(X_sample,Y_sample,X_domain_np,batch_size=self.conf_Dict['batch_size'])
+            X_next_batch = Optimizer.get_next_batch(X_sample,Y_sample,X_domain_np,batch_size=self.conf_Dict['batch_size'])
+            # X_next_batch = Optimizer.get_next_batch_clustering(X_sample,Y_sample,X_domain_np,batch_size=self.conf_Dict['batch_size'])
 
             #Scheduler
             X_next_PS = ds.convert_PS_space(X_next_batch)
