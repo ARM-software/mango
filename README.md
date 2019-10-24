@@ -1,11 +1,11 @@
 # Mango: A parallel black-box optimization library
 
-**Mango** is a python library for parallel optimization over complex search spaces. Currently Mango is intended to find the optimal hyperparameters for machine learning algorithms.
-Mango internally uses parallel implementation of multi-armed bandit bayesian optimizer based on gaussian process. Some of the salient features of Mango are:
-- Ability to easily define complex search spaces which are compatible with the scikit-learn random search and gridsearch functions.
-- Internally uses state of art optimizer which allows to sample a batch of values in parallel for evaluation.
-- Objective function can be arbitrary complex which can be scheduled on local, cluster  or cloud infrastructure.
-- The ease of usage was kept in mind with ability to plugin new distributions for search space and new optimizer algorithms.
+**Mango** is a python library for parallel optimization over complex search spaces. Currently, Mango is intended to find the optimal hyperparameters for machine learning algorithms.
+Mango internally uses parallel implementation of a multi-armed bandit bayesian optimizer based on the gaussian process. Some of the salient features of Mango are:
+- Ability to easily define complex search spaces that are compatible with the scikit-learn random search and gridsearch functions.
+- Internally uses state of the art optimizer which allows sampling a batch of values in parallel for evaluation.
+- The objective function can be arbitrarily complex, which can be scheduled on local, cluster,  or cloud infrastructure.
+- The ease of usage was kept in mind with the ability to plugin new distributions for search space and new optimizer algorithms.
 
 ## Index
 1. [ Mango Setup ](#setup)
@@ -15,11 +15,11 @@ Mango internally uses parallel implementation of multi-armed bandit bayesian opt
 5. [ More on Objective Function](#ObjectiveFunction)
 6. [ Controlling Mango Configurations](#MangoConfigurations)
 7. [ Schedule Objective Function on Celery](#Celery)
-8. [ Tune Hyperparameters of Facebook Prophet ](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Prophet_Classifier.ipynb)
-9. [ Tune Hyperparameters of xgboost XGBRegressor ](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Xgboost_Example.ipynb)
-10. [ Tune Hyperparameters of xgboost XGBClassifier ](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Xgboost_XGBClassifier.ipynb)
-11. [Tune Hyperparameters of SVM](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/SVM_Example.ipynb)
-12. [ More Examples](https://gitlab.com/arm-research/isr/mango/tree/master/mango/examples)
+8. [ Tune Hyperparameters of Facebook Prophet ](https://github.com/ARM-software/mango/blob/master/examples/Prophet_Classifier.ipynb)
+9. [ Tune Hyperparameters of xgboost XGBRegressor ](https://github.com/ARM-software/mango/blob/master/examples/Xgboost_Example.ipynb)
+10. [ Tune Hyperparameters of xgboost XGBClassifier ](https://github.com/ARM-software/mango/blob/master/examples/Xgboost_XGBClassifier.ipynb)
+11. [Tune Hyperparameters of SVM](https://github.com/ARM-software/mango/blob/master/examples/SVM_Example.ipynb)
+12. [ More Examples](https://github.com/ARM-software/mango/tree/master/examples)
 13. [ Contact & Questions ](#contactDetails)
 
 <a name="setup"></a>
@@ -43,7 +43,7 @@ $ pytest
 
 <a name="simpleexample"></a>
 # 2. Simple Example
-Mango is very easy to use. The given example finds optimal value of the identity function whose input is a single variable between 1 and 1000.
+Mango is straightforward to use. The current example finds an optimal value of the identity function whose input is a single variable between 1 and 1000.
 More examples are available in the directory *mango/examples*.
 
 ```python
@@ -66,7 +66,7 @@ Sample output of above example.
 ```
 Optimal value of a: {'a': 999}  and objective: 999
 ```
-More details about this simple example are available [here.](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Getting_Started.ipynb)
+More details about this simple example are available [here.](https://github.com/ARM-software/mango/blob/master/examples/Getting_Started.ipynb)
 
 <a name="knnexample"></a>
 # 3. Mango Example to Tune Hyperparameters of KNeighborsClassifier
@@ -104,7 +104,7 @@ results = tuner_knn.maximize()
 print('best parameters:',results['best_params'])
 print('best accuracy:',results['best_objective'])
 ```
-Sample output of above example. Note output may be different for your program.
+Sample output of the above example. Note output may be different for machine.
 
 ```
 best parameters: {'algorithm': 'auto', 'n_neighbors': 11}
@@ -115,10 +115,11 @@ best accuracy: 0.931486122714193
 # 4. Domain Space of Variables
 The domain space defines the search space of variables from which optimal values are chosen. Mango allows definitions of domain space
 to define complex search spaces. Domain space definitions are compatible with the [RandomizedSearchCV](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.RandomizedSearchCV.html) of the
-scikit-learn. The parameter dictionary concept of scikit-learn is used. Dictionary with parameters names (string) as keys and distributions or 
+scikit-learn. The parameter dictionary concept of scikit-learn is used. Dictionary with parameter names (string) as keys and distributions or 
 lists of parameters to try. Distributions must provide a rvs method for sampling (such as those from scipy.stats.distributions). 
-If a list is given, it is sampled uniformly. We have defined a new [loguniform](https://gitlab.com/arm-research/isr/mango/blob/master/mango/domain/distribution.py) distribution by extending the scipy.stats.distributions constructs.
-**loguniform** can be used in SVM classifiers where *C* parameter can have search space defined using loguniform distribution. In these definitions categorical/discrete variables are defined using list of strings. List of ints is considered
+If a list is given, it is sampled uniformly. We have defined a new [loguniform](https://github.com/ARM-software/mango/blob/master/mango/domain/distribution.py) distribution by extending the scipy.stats.distributions constructs.
+
+**loguniform** can be used in SVM classifiers where *C* parameter can have search space defined using loguniform distribution. In these definitions, categorical/discrete variables are defined using list of strings. A list of ints is considered
 as the variable having interger values. Some of the sample domain space definitions are shown.
 
 ```python
@@ -161,7 +162,7 @@ param_dict = {"kernel": ['rbf'],
 
 <a name="ObjectiveFunction"></a>
 # 5. More on Objective Function
-The objective function has the structure as shown below.
+The objective function has the following structure.
 
 ```python
 def objective_function(args_list):
@@ -171,10 +172,9 @@ def objective_function(args_list):
         evaluations.append(result)
     return evaluations
 ```
-The objective function is called with the input list of hyper parameters. Each element of the list is the dictionary 
-which is a sample drawn from the domain space of variables. Mango expects the objective function to return the list of
-evaluations which has the same size as the args_list. Each value of evaluations list is the function evaluated at hyper parameters
-of args_list in the same order. A rich set of objective function is shown in the [examples](https://gitlab.com/arm-research/isr/mango/tree/master/mango/examples). The size of args_list is controlled by the batch_size configuration parameter of Mango. By default
+The objective function is called with the input list of hyper parameters. Each element of the list is the dictionary which is a sample drawn from the domain space of variables. Mango expects the objective function to return the list of
+evaluations which has the same size as the args_list. Each value of the evaluations list is the function evaluated at hyperparameters
+of args_list in the same order. A rich set of objective functions are shown in the [examples](https://github.com/ARM-software/mango/tree/master/examples). The size of the args_list is controlled by the batch_size configuration parameter of Mango. By default,
 batch_size is 1. The configuration parameters of Mango are explained in the [Mango Configurations](#MangoConfigurations) section. 
 
 <a name="MangoConfigurations"></a>
@@ -194,10 +194,11 @@ The configuration parameters are explained:
 - domain_size: The size which is explored in each iteration by the gaussian process. Generally, a larger size is prefered if higher dimensional functions are optimized. More on this will be added with details about the internals of bayesian optimization.
 - initial_random: The number of random samples tried.
 - num_iteration: The total number of iterations used by Mango to find the optimal value.
-- objective: Default objective of maximize is used. minimize objective is not supported yet. minimize objective can be acheived by evaluating the negative of the function.
+- objective: Default objective of maximizing is used. Minimize objective is not supported yet. Minimize objective can be achieved by evaluating the negative of the function.
 - batch_size: The size of args_list passed to the objective function for parallel evaluation. For larger batch sizes, Mango internally uses intelligent sampling to decide the optimal samples to evaluate.
 
-The default configuration parameters can be modified as shown below. Only the parameters whose values need to adjusted can be passed as the dictionary.
+The default configuration parameters can be modified, as shown below. Only the parameters whose values need to adjusted can be passed as the dictionary.
+
 ```python
 conf_dict = dict()
 conf_dict['batch_size'] = 5
@@ -212,20 +213,19 @@ tuner_user = Tuner(param_dict, objective_Xgboost,conf_dict)
 
 <a name="Celery"></a>
 # 7. Schedule Objective Function on Celery
-User defined objective function can be scheduled on local, cluster  or cloud infrastructure. The objective function scheduler
-is completely independent of the Mango. This design was chosen to enable the scheduling of varied resource objective 
-function according to developer needs. We have included examples using [Celery](http://www.celeryproject.org/). In the sample
-examples celery workers are used to evaluate the objective function in parallel. These examples assumes celery is installed and workers
-are running. Default celery configurations can be modified in the [file](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/classifiers/celery.py).
+User-defined objective function can be scheduled on local, cluster or cloud infrastructure. The objective function scheduler
+is entirely independent of the Mango. This design was chosen to enable the scheduling of varied resource objective function according to developer needs. We have included examples using [Celery](http://www.celeryproject.org/). In the sample
+examples, celery workers are used to evaluate the objective function in parallel. These examples assume celery is installed, and workers
+are running. Default celery configurations can be modified in the [file](https://github.com/ARM-software/mango/blob/master/examples/classifiers/celery.py).
 
-- [KNN example using celery workers](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/KNN_Celery.ipynb)
-- [Prophet example using celery workers](https://gitlab.com/arm-research/isr/mango/blob/master/mango/examples/Prophet_Celery.ipynb)
+- [KNN example using celery workers](https://github.com/ARM-software/mango/blob/master/examples/KNN_Celery.ipynb)
+- [Prophet example using celery workers](https://github.com/ARM-software/mango/blob/master/examples/Prophet_Celery.ipynb)
 
-More examples will be included to show scheduling of objective function using local threads/processes. By default examples schedule
+More examples will be included to show the scheduling of objective function using local threads/processes. By default examples schedule
 the objective function on the local machine itself.
 
 
 <a name="contactDetails"></a>
 # More Details
-Details about specifying parameter/variable domain space, user objective function and internals of Mango will be added.
+Details about specifying parameter/variable domain space, user objective function, and internals of Mango will be added.
 Please stay tuned. For any questions feel free to reach out to Sandeep Singh Sandha (iotresearch@arm.com)
