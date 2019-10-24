@@ -153,8 +153,20 @@ class Tuner():
 
         #getting first few random values
         random_hyper_parameters = ds.get_random_sample(self.conf_Dict['initial_random'])
-
         X_list,Y_list = self.runUserObjective(random_hyper_parameters)
+
+        # in case initial random results are invalid try different samples
+        n_tries = 1
+        while len(Y_list) < self.conf_Dict['initial_random'] and n_tries < 3:
+            random_hps = ds.get_random_sample(self.conf_Dict['initial_random'] - len(Y_list))
+            X_list2, Y_list2 = self.runUserObjective(random_hps)
+            random_hyper_parameters.extend(random_hps)
+            X_list.extend(X_list2)
+            Y_list.extend(Y_list2)
+            n_tries += 1
+
+        if len(Y_list) == 0:
+            raise ValueError("No valid configuration found to initiate the Bayesian Optimizer")
 
         #evaluated hyper parameters are used
         X_init = ds.convert_GP_space(X_list)
