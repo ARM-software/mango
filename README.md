@@ -15,12 +15,13 @@ Mango internally uses parallel implementation of a multi-armed bandit bayesian o
 5. [ More on Objective Function](#ObjectiveFunction)
 6. [ Controlling Mango Configurations](#MangoConfigurations)
 7. [ Schedule Objective Function on Celery](#Celery)
-8. [ Tune Hyperparameters of Facebook Prophet ](https://github.com/ARM-software/mango/blob/master/examples/Prophet_Classifier.ipynb)
-9. [ Tune Hyperparameters of xgboost XGBRegressor ](https://github.com/ARM-software/mango/blob/master/examples/Xgboost_Example.ipynb)
-10. [ Tune Hyperparameters of xgboost XGBClassifier ](https://github.com/ARM-software/mango/blob/master/examples/Xgboost_XGBClassifier.ipynb)
-11. [Tune Hyperparameters of SVM](https://github.com/ARM-software/mango/blob/master/examples/SVM_Example.ipynb)
-12. [ More Examples](https://github.com/ARM-software/mango/tree/master/examples)
-13. [ Contact & Questions ](#contactDetails)
+8. [Parallel Algorithms](#mangoAlgorithms)
+9. [ Tune Hyperparameters of Facebook Prophet ](https://github.com/ARM-software/mango/blob/master/examples/Prophet_Classifier.ipynb)
+10. [ Tune Hyperparameters of xgboost XGBRegressor ](https://github.com/ARM-software/mango/blob/master/examples/Xgboost_Example.ipynb)
+11. [ Tune Hyperparameters of xgboost XGBClassifier ](https://github.com/ARM-software/mango/blob/master/examples/Xgboost_XGBClassifier.ipynb)
+12. [Tune Hyperparameters of SVM](https://github.com/ARM-software/mango/blob/master/examples/SVM_Example.ipynb)
+13. [ More Examples](https://github.com/ARM-software/mango/tree/master/examples)
+14. [ Contact & Questions ](#contactDetails)
 
 <a name="setup"></a>
 # 1. Mango Setup
@@ -162,20 +163,38 @@ param_dict = {"kernel": ['rbf'],
 
 <a name="ObjectiveFunction"></a>
 # 5. More on Objective Function
-The objective function has the following structure.
+The serial objective function has the following structure.
 
 ```python
-def objective_function(args_list):
+def objective_function(params_list):
     evaluations = []
-    for hyper_par in args_list:
+    for hyper_par in params_list:
         result =  evaluate_function_on_hyper_par
         evaluations.append(result)
     return evaluations
 ```
 The objective function is called with the input list of hyper parameters. Each element of the list is the dictionary which is a sample drawn from the domain space of variables. Mango expects the objective function to return the list of
 evaluations which has the same size as the args_list. Each value of the evaluations list is the function evaluated at hyperparameters
-of args_list in the same order. A rich set of objective functions are shown in the [examples](https://github.com/ARM-software/mango/tree/master/examples). The size of the args_list is controlled by the batch_size configuration parameter of Mango. By default,
+of params_list in the same order. A rich set of objective functions are shown in the [examples](https://github.com/ARM-software/mango/tree/master/examples). The size of the params_list is controlled by the batch_size configuration parameter of Mango. By default,
 batch_size is 1. The configuration parameters of Mango are explained in the [Mango Configurations](#MangoConfigurations) section. 
+
+The sample skeleton of the Celery based parallel objective function in Mango is as following.
+
+```python
+def objective_celery(params_list):
+    process_queue = []
+    for par in params_list:
+        process = train_clf.delay(par)
+        process_queue.append((process, par))
+    evals = []
+    params = []
+    for process, par in process_queue:
+        result = process.get()
+        evals.append(result)
+        params.append(par)
+    return evals, params
+```
+
 
 <a name="MangoConfigurations"></a>
 # 6. Controlling Mango Configurations
@@ -224,6 +243,9 @@ are running. Default celery configurations can be modified in the [file](https:/
 More examples will be included to show the scheduling of objective function using local threads/processes. By default examples schedule
 the objective function on the local machine itself.
 
+<a name ="mangoAlgorithms"></a>
+# 8. Mango Algorithms
+The optimization algorithms in Mango are based on widely used Bayesian optimization techniques, extended to sample a batch of configurations in parallel. Currently, Mango provides two parallel optimization algorithms that use the upper confidence bound as the acquisition function. The first algorithm uses hallucination combined with exponential rescaling of the surrogate function to select a batch. In the second algorithm, we create clusters of acquisition function in spatially distinct search spaces, and select the maximum value within each cluster to create the batch. 
 
 <a name="contactDetails"></a>
 # More Details
