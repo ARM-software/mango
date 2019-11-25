@@ -5,7 +5,7 @@ from mango.domain.domain_space import domain_space
 
 def test_domain():
     params = {
-        'a': (1, 2, 4),
+        'a': range(10),
         'b': np.random.randint(0, 1e6, size=50),
         'c': np.random.uniform(low=-100., high=100., size=(50,)),
         'd': [1, 0.1, 2.0],
@@ -13,8 +13,10 @@ def test_domain():
         'f': ['1', '-1']
     }
     ds = domain_space(params, domain_size=1000)
-    assert all(k not in ds.mapping_categorical for k in ['a', 'b', 'c', 'd'])
-    assert all(k in ds.mapping_categorical for k in ['e', 'f'])
+    print(ds.mapping_categorical)
+    print(ds.mapping_int)
+    assert all(k in ds.mapping_int for k in ['a', 'b'])
+    assert all(k in ds.mapping_categorical for k in ['c', 'd', 'e', 'f'])
     samples = ds.get_domain()
 
     for sample in samples:

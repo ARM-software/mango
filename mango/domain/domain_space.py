@@ -7,7 +7,7 @@ Define the domain space abstractions for the Optimizer
 from scipy.stats._distn_infrastructure import rv_frozen
 import numpy as np
 from sklearn.model_selection import ParameterSampler
-
+from collections.abc import Iterable
 
 class domain_space():
     """
@@ -68,21 +68,25 @@ class domain_space():
         param_dict = self.param_dict
         for par in param_dict:
             if isinstance(param_dict[par], rv_frozen):
+                # FIXME: what if the distribution generators ints , GP would convert it to float
                 pass  # we are not doing anything at present, and will directly use its value for GP.
 
             elif isinstance(param_dict[par], range):
                 mapping_int[par] = param_dict[par]
 
-            elif isinstance(param_dict[par], list):
+            elif isinstance(param_dict[par], Iterable):
 
-                # for list with all int or float, we are considering it as non-categorical
-                if all(isinstance(x, (int, float)) for x in param_dict[par]):
+                # for list with all int we are considering it as non-categorical
+                try:
+                    # this check takes care of numpy ints as well
+                    all_int = all(x == int(x) for x in param_dict[par])
+                except (ValueError, TypeError):
+                    all_int = False
+
+                if all_int:
                     mapping_int[par] = param_dict[par]
 
-                ## for list with values of string, we are considering categorical or discrete
-                ## if all(isinstance(x, str) for x in param_dict[par]):
-
-                # For lists with mixed type or strings we consider them categorical or discrete
+                # For lists with mixed type, floats or strings we consider them categorical or discrete
                 else:
                     mapping_categorical[par] = param_dict[par]
 
@@ -162,7 +166,7 @@ class domain_space():
 
                 # this has to have integer values
                 if par in mapping_int:
-                    curr_x_ps[par] = curr_x_gp[index]
+                    curr_x_ps[par] = int(curr_x_gp[index])
                     index = index + 1
 
                 # this par is a categorical variable and we need to handle it carefully
