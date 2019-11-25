@@ -80,7 +80,7 @@ class domain_space():
                     mapping_categorical[par] = param_dict[par]
 
                 #for list with all int, we are considering it as a int
-                elif all(isinstance(x, int) for x in param_dict[par]):
+                elif all(isinstance(x, (int, float)) for x in param_dict[par]):
                     mapping_int[par] = param_dict[par]
 
         self.mapping_categorical = mapping_categorical
@@ -163,7 +163,7 @@ class domain_space():
 
                 #this has to have integer values
                 if par in mapping_int:
-                    curr_x_ps[par] = int(curr_x_gp[index])
+                    curr_x_ps[par] = curr_x_gp[index]
                     index = index+1
 
                 #this par is a categorical variable and we need to handle it carefully

@@ -16,12 +16,11 @@ from scipy._lib._util import check_random_state
 import numpy as np
 
 
-
 class log_uniform_gen(rv_continuous):
 
     def _rvs(self):
         variable = self._random_state.uniform(0.0, 1.0, self._size)
-        #print('_rvs variable is:',variable)
+        # print('_rvs variable is:',variable)
         return variable
 
     def rvs(self, *args, **kwds):
@@ -55,7 +54,7 @@ class log_uniform_gen(rv_continuous):
             raise ValueError("Domain error in arguments.")
 
         if np.all(scale == 0):
-            return loc*ones(size, 'd')
+            return loc * ones(size, 'd')
 
         # extra gymnastics needed for a custom random_state
         if rndm is not None:
@@ -68,29 +67,29 @@ class log_uniform_gen(rv_continuous):
         self._size = size
         vals = self._rvs(*args)
 
-        #print('scale is:',scale,' loc is:',loc)
+        # print('scale is:',scale,' loc is:',loc)
 
         # Scale is second parameter, location is first parameter
         # Logic is uniformly sample the values, then Scale them to the
-        #logarithic values of the scale and loc parameter, and then return
+        # logarithic values of the scale and loc parameter, and then return
         # the exponent from that value
 
         vals = vals * scale + loc
         shape = vals.shape
         if shape is np.array(None).shape:
-            #print('vals shape is:',vals.shape)
+            # print('vals shape is:',vals.shape)
             shape = 1
         else:
             shape = shape[0]
 
-        if shape>1:
+        if shape > 1:
             array_10 = np.full((shape), 10)
-            vals = np.power(array_10,vals)
+            vals = np.power(array_10, vals)
 
         else:
-            vals = 10**vals
+            vals = 10 ** vals
 
-        #vals = np.exp(vals)
+        # vals = np.exp(vals)
         # do not forget to restore the _random_state
         if rndm is not None:
             self._random_state = random_state_saved
