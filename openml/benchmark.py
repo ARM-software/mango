@@ -44,15 +44,12 @@ _results_dir = "results"
 
 
 @scope.define
-def hp_int_local(a):
+def hp_int(a):
     return int(a)
 
 
 def hp_range(label, low, high):
-    if getattr(scope, 'hp_int_local'):
-        return scope.hp_int_local(hp.quniform(label, low, high, 1))
-    else:
-        return scope.hp_int(hp.quniform(label, low, high, 1))
+    return scope.hp_int(hp.quniform(label, low, high, 1))
 
 
 class RandomForest(RandomForestClassifier):
