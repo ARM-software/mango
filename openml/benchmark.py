@@ -247,7 +247,7 @@ class Benchmark:
 
     def hp_parallel(self):
         trials = MongoTrials('mongo://localhost:27017/foo_db/jobs',
-                             exp_key=self.task.id + random.getrandbits(64))
+                             exp_key=self.task.id + str(random.getrandbits(64)))
         batch_size = self.n_parallel
         best_params = fmin(
             fn=self.hp_objective,
