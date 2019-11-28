@@ -1,0 +1,474 @@
+      {
+    "data_id": "1067",
+    "name": "kc1",
+    "exact_name": "kc1",
+    "version": 1,
+    "version_label": null,
+    "description": "**Author**: Mike Chapman, NASA  \r\n**Source**: [tera-PROMISE](http:\/\/openscience.us\/repo\/defect\/mccabehalsted\/kc1.html) - 2004  \r\n**Please cite**: Sayyad Shirabad, J. and Menzies, T.J. (2005) The PROMISE Repository of Software Engineering Databases. School of Information Technology and Engineering, University of Ottawa, Canada.  \r\n  \r\n**KC1 Software defect prediction**  \r\nOne of the NASA Metrics Data Program defect data sets. Data from software for storage management for receiving and processing ground data. Data comes from McCabe and Halstead features extractors of source code.  These features were defined in the 70s in an attempt to objectively characterize code features that are associated with software quality.\r\n\r\n### Attribute Information  \r\n\r\n1. loc             : numeric % McCabe's line count of code\r\n2. v(g)            : numeric % McCabe \"cyclomatic complexity\"\r\n3. ev(g)           : numeric % McCabe \"essential complexity\"\r\n4. iv(g)           : numeric % McCabe \"design complexity\"\r\n5. n               : numeric % Halstead total operators + operands\r\n6. v               : numeric % Halstead \"volume\"\r\n7. l               : numeric % Halstead \"program length\"\r\n8. d               : numeric % Halstead \"difficulty\"\r\n9. i               : numeric % Halstead \"intelligence\"\r\n10. e               : numeric % Halstead \"effort\"\r\n11. b               : numeric % Halstead \r\n12. t               : numeric % Halstead's time estimator\r\n13. lOCode          : numeric % Halstead's line count\r\n14. lOComment       : numeric % Halstead's count of lines of comments\r\n15. lOBlank         : numeric % Halstead's count of blank lines\r\n16. lOCodeAndComment: numeric\r\n17. uniq_Op         : numeric % unique operators\r\n18. uniq_Opnd       : numeric % unique operands\r\n19. total_Op        : numeric % total operators\r\n20. total_Opnd      : numeric % total operands\r\n21. branchCount     : numeric % of the flow graph\r\n22. problems        : {false,true} % module has\/has not one or more reported defects\r\n\r\n### Relevant papers  \r\n\r\n- Shepperd, M. and Qinbao Song and Zhongbin Sun and Mair, C. (2013)\r\nData Quality: Some Comments on the NASA Software Defect Datasets, IEEE Transactions on Software Engineering, 39.\r\n\r\n- Tim Menzies and Justin S. Di Stefano (2004) How Good is Your Blind Spot Sampling Policy? 2004 IEEE Conference on High Assurance\r\nSoftware Engineering.\r\n\r\n- T. Menzies and J. DiStefano and A. Orrego and R. Chapman (2004) Assessing Predictors of Software Defects\", Workshop on Predictive Software Models, Chicago\r\n",
+    "format": "ARFF",
+    "uploader": "Joaquin Vanschoren",
+    "uploader_id": 2,
+    "visibility": "public",
+    "creator": null,
+    "contributor": null,
+    "date": "2014-10-06 23:57:43",
+    "update_comment": null,
+    "last_update": "2014-10-06 23:57:43",
+    "licence": "Public",
+    "status": "active",
+    "error_message": null,
+    "url": "https:\/\/www.openml.org\/data\/download\/53950\/kc1.arff",
+    "default_target_attribute": "defects",
+    "row_id_attribute": null,
+    "ignore_attribute": null,
+    "runs": 159209,
+    "suggest": {
+        "input": [
+            "kc1",
+            "One of the NASA Metrics Data Program defect data sets. Data from software for storage management for receiving and processing ground data. Data comes from McCabe and Halstead features extractors of source code. These features were defined in the 70s in an attempt to objectively characterize code features that are associated with software quality. ### Attribute Information 1. loc : numeric % McCabe's line count of code 2. v(g) : numeric % McCabe \"cyclomatic complexity\" 3. ev(g) : numeric % McCabe "
+        ],
+        "weight": 5
+    },
+    "qualities": {
+        "NumberOfInstances": 2109,
+        "NumberOfFeatures": 22,
+        "NumberOfClasses": 2,
+        "NumberOfMissingValues": 0,
+        "NumberOfInstancesWithMissingValues": 0,
+        "NumberOfNumericFeatures": 21,
+        "NumberOfSymbolicFeatures": 1,
+        "MajorityClassPercentage": 84.54243717401611,
+        "MeanStdDevOfNumericAtts": 915.455014376506,
+        "Quartile2AttributeEntropy": null,
+        "REPTreeDepth2ErrRate": 0.14414414414414414,
+        "CfsSubsetEval_kNN1NKappa": 0.2604340674054145,
+        "kNN1NErrRate": 0.1512565196775723,
+        "kNN1NKappa": 0.3504547881404616,
+        "MajorityClassSize": 1783,
+        "MinAttributeEntropy": null,
+        "Quartile2KurtosisOfNumericAtts": 22.422776708097334,
+        "REPTreeDepth2Kappa": 0.18493789806892894,
+        "ClassEntropy": 0.6211733422333798,
+        "MaxAttributeEntropy": null,
+        "MinKurtosisOfNumericAtts": 1.2413950208681674,
+        "Quartile2MeansOfNumericAtts": 7.631673779042244,
+        "REPTreeDepth3AUC": 0.7649357084117553,
+        "DecisionStumpAUC": 0.7123747114018215,
+        "MaxKurtosisOfNumericAtts": 103.07904520134113,
+        "MinMeansOfNumericAtts": 0.08673779042200101,
+        "Quartile2MutualInformation": null,
+        "REPTreeDepth3ErrRate": 0.14414414414414414,
+        "DecisionStumpErrRate": 0.15457562825983878,
+        "MaxMeansOfNumericAtts": 5242.386239924155,
+        "MinMutualInformation": null,
+        "Quartile2SkewnessOfNumericAtts": 3.7371013785570546,
+        "REPTreeDepth3Kappa": 0.18493789806892894,
+        "DecisionStumpKappa": 0,
+        "MaxMutualInformation": null,
+        "MinNominalAttDistinctValues": 2,
+        "PercentageOfBinaryFeatures": 4.545454545454546,
+        "Quartile2StdDevOfNumericAtts": 7.863645549059788,
+        "RandomTreeDepth1AUC": 0.6404083900780722,
+        "Dimensionality": 0.010431484115694643,
+        "MaxNominalAttDistinctValues": 2,
+        "MinSkewnessOfNumericAtts": 1.1407658504141103,
+        "PercentageOfInstancesWithMissingValues": 0,
+        "Quartile3AttributeEntropy": null,
+        "RandomTreeDepth1ErrRate": 0.1763869132290185,
+        "EquivalentNumberOfAtts": null,
+        "MaxSkewnessOfNumericAtts": 8.789034149895826,
+        "MinStdDevOfNumericAtts": 0.17550652636316466,
+        "PercentageOfMissingValues": 0,
+        "Quartile3KurtosisOfNumericAtts": 36.53033082841476,
+        "AutoCorrelation": 0.9990512333965844,
+        "RandomTreeDepth1Kappa": 0.3113191316041728,
+        "J48.00001.AUC": 0.7030784952637211,
+        "MaxStdDevOfNumericAtts": 17444.98121137856,
+        "MinorityClassPercentage": 15.457562825983878,
+        "PercentageOfNumericFeatures": 95.45454545454545,
+        "Quartile3MeansOfNumericAtts": 26.141894262683927,
+        "CfsSubsetEval_DecisionStumpAUC": 0.7072599430889553,
+        "RandomTreeDepth2AUC": 0.6404083900780722,
+        "J48.00001.ErrRate": 0.15267899478425795,
+        "MeanAttributeEntropy": null,
+        "MinorityClassSize": 326,
+        "PercentageOfSymbolicFeatures": 4.545454545454546,
+        "Quartile3MutualInformation": null,
+        "CfsSubsetEval_DecisionStumpErrRate": 0.15647226173541964,
+        "RandomTreeDepth2ErrRate": 0.1763869132290185,
+        "J48.00001.Kappa": 0.22302666956511774,
+        "MeanKurtosisOfNumericAtts": 31.853391931073038,
+        "NaiveBayesAUC": 0.7895503283577173,
+        "Quartile1AttributeEntropy": null,
+        "Quartile3SkewnessOfNumericAtts": 4.706421340727173,
+        "CfsSubsetEval_DecisionStumpKappa": 0.2604340674054145,
+        "RandomTreeDepth2Kappa": 0.3113191316041728,
+        "J48.0001.AUC": 0.7030784952637211,
+        "MeanMeansOfNumericAtts": 285.0969166158651,
+        "NaiveBayesErrRate": 0.17449027975343764,
+        "Quartile1KurtosisOfNumericAtts": 12.284905644252186,
+        "Quartile3StdDevOfNumericAtts": 41.92522717121333,
+        "CfsSubsetEval_NaiveBayesAUC": 0.7072599430889553,
+        "RandomTreeDepth3AUC": 0.6404083900780722,
+        "J48.0001.ErrRate": 0.15267899478425795,
+        "MeanMutualInformation": null,
+        "NaiveBayesKappa": 0.3008403119099438,
+        "Quartile1MeansOfNumericAtts": 1.7170222854433477,
+        "REPTreeDepth1AUC": 0.7649357084117553,
+        "CfsSubsetEval_NaiveBayesErrRate": 0.15647226173541964,
+        "RandomTreeDepth3ErrRate": 0.1763869132290185,
+        "J48.0001.Kappa": 0.22302666956511774,
+        "MeanNoiseToSignalRatio": null,
+        "NumberOfBinaryFeatures": 1,
+        "Quartile1MutualInformation": null,
+        "REPTreeDepth1ErrRate": 0.14414414414414414,
+        "CfsSubsetEval_NaiveBayesKappa": 0.2604340674054145,
+        "RandomTreeDepth3Kappa": 0.3113191316041728,
+        "J48.001.AUC": 0.7030784952637211,
+        "J48.001.ErrRate": 0.15267899478425795,
+        "MeanNominalAttDistinctValues": 2,
+        "Quartile1SkewnessOfNumericAtts": 2.869811695669978,
+        "REPTreeDepth1Kappa": 0.18493789806892894,
+        "CfsSubsetEval_kNN1NAUC": 0.7072599430889553,
+        "StdvNominalAttDistinctValues": 0,
+        "J48.001.Kappa": 0.22302666956511774,
+        "MeanSkewnessOfNumericAtts": 4.203178136828403,
+        "Quartile1StdDevOfNumericAtts": 3.2305652323985976,
+        "REPTreeDepth2AUC": 0.7649357084117553,
+        "CfsSubsetEval_kNN1NErrRate": 0.15647226173541964,
+        "kNN1NAUC": 0.7470447488121043
+    },
+    "tags": [
+        {
+            "tag": "mythbusting_1",
+            "uploader": "1"
+        },
+        {
+            "tag": "OpenML-CC18",
+            "uploader": "1"
+        },
+        {
+            "tag": "OpenML100",
+            "uploader": "348"
+        },
+        {
+            "tag": "study_1",
+            "uploader": "2"
+        },
+        {
+            "tag": "study_123",
+            "uploader": "3886"
+        },
+        {
+            "tag": "study_14",
+            "uploader": "64"
+        },
+        {
+            "tag": "study_15",
+            "uploader": "939"
+        },
+        {
+            "tag": "study_20",
+            "uploader": "939"
+        },
+        {
+            "tag": "study_218",
+            "uploader": "869"
+        },
+        {
+            "tag": "study_34",
+            "uploader": "1"
+        },
+        {
+            "tag": "study_41",
+            "uploader": "1"
+        },
+        {
+            "tag": "study_52",
+            "uploader": "64"
+        },
+        {
+            "tag": "study_7",
+            "uploader": "64"
+        },
+        {
+            "tag": "study_98",
+            "uploader": "1935"
+        },
+        {
+            "tag": "study_99",
+            "uploader": "1"
+        },
+        {
+            "tag": "study_225",
+            "uploader": "0"
+        }
+    ],
+    "features": [
+        {
+            "name": "defects",
+            "index": "21",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "target": "1",
+            "distr": [
+                [
+                    "false",
+                    "true"
+                ],
+                [
+                    [
+                        "1783",
+                        "0"
+                    ],
+                    [
+                        "0",
+                        "326"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "loc",
+            "index": "0",
+            "type": "numeric",
+            "distinct": "139",
+            "missing": "0",
+            "min": "1",
+            "max": "288",
+            "mean": "20",
+            "stdev": "30"
+        },
+        {
+            "name": "v(g)",
+            "index": "1",
+            "type": "numeric",
+            "distinct": "31",
+            "missing": "0",
+            "min": "1",
+            "max": "45",
+            "mean": "3",
+            "stdev": "4"
+        },
+        {
+            "name": "ev(g)",
+            "index": "2",
+            "type": "numeric",
+            "distinct": "21",
+            "missing": "0",
+            "min": "1",
+            "max": "26",
+            "mean": "2",
+            "stdev": "2"
+        },
+        {
+            "name": "iv(g)",
+            "index": "3",
+            "type": "numeric",
+            "distinct": "26",
+            "missing": "0",
+            "min": "1",
+            "max": "45",
+            "mean": "3",
+            "stdev": "3"
+        },
+        {
+            "name": "n",
+            "index": "4",
+            "type": "numeric",
+            "distinct": "278",
+            "missing": "0",
+            "min": "0",
+            "max": "1106",
+            "mean": "50",
+            "stdev": "84"
+        },
+        {
+            "name": "v",
+            "index": "5",
+            "type": "numeric",
+            "distinct": "729",
+            "missing": "0",
+            "min": "0",
+            "max": "7919",
+            "mean": "259",
+            "stdev": "516"
+        },
+        {
+            "name": "l",
+            "index": "6",
+            "type": "numeric",
+            "distinct": "52",
+            "missing": "0",
+            "min": "0",
+            "max": "2",
+            "mean": "0",
+            "stdev": "0"
+        },
+        {
+            "name": "d",
+            "index": "7",
+            "type": "numeric",
+            "distinct": "548",
+            "missing": "0",
+            "min": "0",
+            "max": "54",
+            "mean": "7",
+            "stdev": "8"
+        },
+        {
+            "name": "i",
+            "index": "8",
+            "type": "numeric",
+            "distinct": "893",
+            "missing": "0",
+            "min": "0",
+            "max": "193",
+            "mean": "21",
+            "stdev": "22"
+        },
+        {
+            "name": "e",
+            "index": "9",
+            "type": "numeric",
+            "distinct": "961",
+            "missing": "0",
+            "min": "0",
+            "max": "324804",
+            "mean": "5242",
+            "stdev": "17445"
+        },
+        {
+            "name": "b",
+            "index": "10",
+            "type": "numeric",
+            "distinct": "92",
+            "missing": "0",
+            "min": "0",
+            "max": "3",
+            "mean": "0",
+            "stdev": "0"
+        },
+        {
+            "name": "t",
+            "index": "11",
+            "type": "numeric",
+            "distinct": "947",
+            "missing": "0",
+            "min": "0",
+            "max": "18045",
+            "mean": "291",
+            "stdev": "969"
+        },
+        {
+            "name": "lOCode",
+            "index": "12",
+            "type": "numeric",
+            "distinct": "121",
+            "missing": "0",
+            "min": "0",
+            "max": "262",
+            "mean": "15",
+            "stdev": "24"
+        },
+        {
+            "name": "lOComment",
+            "index": "13",
+            "type": "numeric",
+            "distinct": "28",
+            "missing": "0",
+            "min": "0",
+            "max": "44",
+            "mean": "1",
+            "stdev": "3"
+        },
+        {
+            "name": "lOBlank",
+            "index": "14",
+            "type": "numeric",
+            "distinct": "31",
+            "missing": "0",
+            "min": "0",
+            "max": "58",
+            "mean": "2",
+            "stdev": "4"
+        },
+        {
+            "name": "locCodeAndComment",
+            "index": "15",
+            "type": "numeric",
+            "distinct": "12",
+            "missing": "0",
+            "min": "0",
+            "max": "12",
+            "mean": "0",
+            "stdev": "1"
+        },
+        {
+            "name": "uniq_Op",
+            "index": "16",
+            "type": "numeric",
+            "distinct": "34",
+            "missing": "0",
+            "min": "0",
+            "max": "37",
+            "mean": "8",
+            "stdev": "6"
+        },
+        {
+            "name": "uniq_Opnd",
+            "index": "17",
+            "type": "numeric",
+            "distinct": "73",
+            "missing": "0",
+            "min": "0",
+            "max": "120",
+            "mean": "10",
+            "stdev": "12"
+        },
+        {
+            "name": "total_Op",
+            "index": "18",
+            "type": "numeric",
+            "distinct": "207",
+            "missing": "0",
+            "min": "0",
+            "max": "678",
+            "mean": "31",
+            "stdev": "52"
+        },
+        {
+            "name": "total_Opnd",
+            "index": "19",
+            "type": "numeric",
+            "distinct": "153",
+            "missing": "0",
+            "min": "0",
+            "max": "428",
+            "mean": "19",
+            "stdev": "32"
+        },
+        {
+            "name": "branchCount",
+            "index": "20",
+            "type": "numeric",
+            "distinct": "44",
+            "missing": "0",
+            "min": "1",
+            "max": "89",
+            "mean": "5",
+            "stdev": "8"
+        }
+    ],
+    "nr_of_issues": 0,
+    "nr_of_downvotes": 0,
+    "nr_of_likes": 2,
+    "nr_of_downloads": 22,
+    "total_downloads": 24,
+    "reach": 24,
+    "reuse": 19,
+    "impact_of_reuse": 0,
+    "reach_of_reuse": 0,
+    "impact": 19
+}

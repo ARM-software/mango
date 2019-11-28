@@ -1,0 +1,1097 @@
+      {
+    "data_id": "3",
+    "name": "kr-vs-kp",
+    "exact_name": "kr-vs-kp",
+    "version": 1,
+    "version_label": "1",
+    "description": "**Author**: Alen Shapiro\r\n**Source**: [UCI](https:\/\/archive.ics.uci.edu\/ml\/datasets\/Chess+(King-Rook+vs.+King-Pawn))    \r\n**Please cite**: [UCI citation policy](https:\/\/archive.ics.uci.edu\/ml\/citation_policy.html)  \r\n\r\n1. Title: Chess End-Game -- King+Rook versus King+Pawn on a7\r\n    (usually abbreviated KRKPA7).  The pawn on a7 means it is one square\r\n    away from queening.  It is the King+Rook's side (white) to move.\r\n \r\n 2. Sources:\r\n     (a) Database originally generated and described by Alen Shapiro.\r\n     (b) Donor\/Coder: Rob Holte (holte@uottawa.bitnet).  The database\r\n         was supplied to Holte by Peter Clark of the Turing Institute\r\n         in Glasgow (pete@turing.ac.uk).\r\n     (c) Date: 1 August 1989\r\n \r\n 3. Past Usage:\r\n      - Alen D. Shapiro (1983,1987), \"Structured Induction in Expert Systems\",\r\n        Addison-Wesley.  This book is based on Shapiro's Ph.D. thesis (1983)\r\n        at the University of Edinburgh entitled \"The Role of Structured\r\n        Induction in Expert Systems\".\r\n      - Stephen Muggleton (1987), \"Structuring Knowledge by Asking Questions\",\r\n        pp.218-229 in \"Progress in Machine Learning\", edited by I. Bratko\r\n        and Nada Lavrac, Sigma Press, Wilmslow, England  SK9 5BB.\r\n      - Robert C. Holte, Liane Acker, and Bruce W. Porter (1989),\r\n        \"Concept Learning and the Problem of Small Disjuncts\",\r\n        Proceedings of IJCAI.  Also available as technical report AI89-106,\r\n        Computer Sciences Department, University of Texas at Austin,\r\n        Austin, Texas 78712.\r\n \r\n 4. Relevant Information:\r\n       The dataset format is described below.  Note: the format of this\r\n     database was modified on 2\/26\/90 to conform with the format of all\r\n     the other databases in the UCI repository of machine learning databases.\r\n \r\n 5. Number of Instances: 3196 total\r\n \r\n 6. Number of Attributes: 36\r\n \r\n 7. Attribute Summaries:\r\n     Classes (2):  -- White-can-win (\"won\") and White-cannot-win (\"nowin\").\r\n           I believe that White is deemed to be unable to win if the Black pawn\r\n           can safely advance.\r\n     Attributes: see Shapiro's book.\r\n \r\n 8. Missing Attributes: --  none\r\n \r\n 9. Class Distribution:\r\n     In 1669 of the positions (52%), White can win.\r\n     In 1527 of the positions (48%), White cannot win.\r\n \r\n The format for instances in this database is a sequence of 37 attribute values.\r\n Each instance is a board-descriptions for this chess endgame.  The first\r\n 36 attributes describe the board.  The last (37th) attribute is the\r\n classification: \"win\" or \"nowin\".  There are 0 missing values.\r\n A typical board-description is\r\n \r\n f,f,f,f,f,f,f,f,f,f,f,f,l,f,n,f,f,t,f,f,f,f,f,f,f,t,f,f,f,f,f,f,f,t,t,n,won\r\n \r\n The names of the features do not appear in the board-descriptions.\r\n Instead, each feature correponds to a particular position in the\r\n feature-value list.  For example, the head of this list is the value\r\n for the feature \"bkblk\".  The following is the list of features, in\r\n the order in which their values appear in the feature-value list:\r\n \r\n [bkblk,bknwy,bkon8,bkona,bkspr,bkxbq,bkxcr,bkxwp,blxwp,bxqsq,cntxt,dsopp,dwipd,\r\n  hdchk,katri,mulch,qxmsq,r2ar8,reskd,reskr,rimmx,rkxwp,rxmsq,simpl,skach,skewr,\r\n  skrxp,spcop,stlmt,thrsk,wkcti,wkna8,wknck,wkovl,wkpos,wtoeg]\r\n \r\n In the file, there is one instance (board position) per line.\r\n \r\n \r\n Num Instances:     3196\r\n Num Attributes:    37\r\n Num Continuous:    0 (Int 0 \/ Real 0)\r\n Num Discrete:      37\r\n Missing values:    0 \/  0.0%\r\n\r\n     name                      type enum ints real     missing    distinct  (1)\r\n   1 'bkblk'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n   2 'bknwy'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n   3 'bkon8'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n   4 'bkona'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n   5 'bkspr'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n   6 'bkxbq'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n   7 'bkxcr'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n   8 'bkxwp'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n   9 'blxwp'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  10 'bxqsq'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  11 'cntxt'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  12 'dsopp'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  13 'dwipd'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  14 'hdchk'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  15 'katri'                   Enum 100%   0%   0%     0 \/  0%     3 \/  0%   0% \r\n  16 'mulch'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  17 'qxmsq'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  18 'r2ar8'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  19 'reskd'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  20 'reskr'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  21 'rimmx'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  22 'rkxwp'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  23 'rxmsq'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  24 'simpl'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  25 'skach'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  26 'skewr'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  27 'skrxp'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  28 'spcop'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  29 'stlmt'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  30 'thrsk'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  31 'wkcti'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  32 'wkna8'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  33 'wknck'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  34 'wkovl'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  35 'wkpos'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  36 'wtoeg'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0% \r\n  37 'class'                   Enum 100%   0%   0%     0 \/  0%     2 \/  0%   0%",
+    "format": "ARFF",
+    "uploader": "Jan van Rijn",
+    "uploader_id": 1,
+    "visibility": "public",
+    "creator": null,
+    "contributor": null,
+    "date": "2014-04-06 23:19:28",
+    "update_comment": null,
+    "last_update": "2014-04-06 23:19:28",
+    "licence": "Public",
+    "status": "active",
+    "error_message": null,
+    "url": "https:\/\/www.openml.org\/data\/download\/3\/dataset_3_kr-vs-kp.arff",
+    "default_target_attribute": "class",
+    "row_id_attribute": null,
+    "ignore_attribute": null,
+    "runs": 270415,
+    "suggest": {
+        "input": [
+            "kr-vs-kp",
+            "1. Title: Chess End-Game -- King+Rook versus King+Pawn on a7 (usually abbreviated KRKPA7). The pawn on a7 means it is one square away from queening. It is the King+Rook's side (white) to move. 2. Sources: (a) Database originally generated and described by Alen Shapiro. (b) Donor\/Coder: Rob Holte (holte@uottawa.bitnet). The database was supplied to Holte by Peter Clark of the Turing Institute in Glasgow (pete@turing.ac.uk). (c) Date: 1 August 1989 3. Past Usage: - Alen D. Shapiro (1983,1987), \"St "
+        ],
+        "weight": 5
+    },
+    "qualities": {
+        "NumberOfInstances": 3196,
+        "NumberOfFeatures": 37,
+        "NumberOfClasses": 2,
+        "NumberOfMissingValues": 0,
+        "NumberOfInstancesWithMissingValues": 0,
+        "NumberOfNumericFeatures": 0,
+        "NumberOfSymbolicFeatures": 37,
+        "NaiveBayesKappa": 0.7569708778154078,
+        "Quartile1MeansOfNumericAtts": null,
+        "REPTreeDepth1AUC": 0.997615519019934,
+        "CfsSubsetEval_NaiveBayesErrRate": 0.05913642052565707,
+        "RandomTreeDepth3ErrRate": 0.05444305381727159,
+        "J48.0001.Kappa": 0.9843258097219999,
+        "MeanMutualInformation": 0.01915166562113,
+        "NumberOfBinaryFeatures": 35,
+        "Quartile1MutualInformation": 0.000777595577705,
+        "REPTreeDepth1ErrRate": 0.01376720901126408,
+        "CfsSubsetEval_NaiveBayesKappa": 0.8811920214059075,
+        "RandomTreeDepth3Kappa": 0.8908498653739637,
+        "J48.001.AUC": 0.9960622907889662,
+        "MeanNoiseToSignalRatio": 29.814462977732955,
+        "Quartile1SkewnessOfNumericAtts": null,
+        "REPTreeDepth1Kappa": 0.972417266903898,
+        "CfsSubsetEval_kNN1NAUC": 0.9619120657405762,
+        "StdvNominalAttDistinctValues": 0.1643989873053572,
+        "J48.001.ErrRate": 0.007822277847309137,
+        "MeanNominalAttDistinctValues": 2.027027027027027,
+        "Quartile1StdDevOfNumericAtts": null,
+        "REPTreeDepth2AUC": 0.997615519019934,
+        "CfsSubsetEval_kNN1NErrRate": 0.05913642052565707,
+        "kNN1NAUC": 0.9728427352982838,
+        "J48.001.Kappa": 0.9843258097219999,
+        "MeanSkewnessOfNumericAtts": null,
+        "Quartile2AttributeEntropy": 0.6794996247614244,
+        "REPTreeDepth2ErrRate": 0.01376720901126408,
+        "CfsSubsetEval_kNN1NKappa": 0.8811920214059075,
+        "kNN1NErrRate": 0.06914893617021277,
+        "MajorityClassPercentage": 52.221526908635795,
+        "MeanStdDevOfNumericAtts": null,
+        "Quartile2KurtosisOfNumericAtts": null,
+        "REPTreeDepth2Kappa": 0.972417266903898,
+        "ClassEntropy": 0.9985755386554582,
+        "kNN1NKappa": 0.8609676573571107,
+        "MajorityClassSize": 1669,
+        "MinAttributeEntropy": 0.004094030352641959,
+        "Quartile2MeansOfNumericAtts": null,
+        "REPTreeDepth3AUC": 0.997615519019934,
+        "DecisionStumpAUC": 0.6714034536324981,
+        "MaxAttributeEntropy": 0.9956521852360185,
+        "MinKurtosisOfNumericAtts": null,
+        "Quartile2MutualInformation": 0.00542648921343,
+        "REPTreeDepth3ErrRate": 0.01376720901126408,
+        "DecisionStumpErrRate": 0.33948685857321653,
+        "MaxKurtosisOfNumericAtts": null,
+        "MinMeansOfNumericAtts": null,
+        "Quartile2SkewnessOfNumericAtts": null,
+        "REPTreeDepth3Kappa": 0.972417266903898,
+        "DecisionStumpKappa": 0.3396437687719142,
+        "MaxMeansOfNumericAtts": null,
+        "MinMutualInformation": 1.18053e-9,
+        "PercentageOfBinaryFeatures": 94.5945945945946,
+        "Quartile2StdDevOfNumericAtts": null,
+        "RandomTreeDepth1AUC": 0.9451363376145694,
+        "Dimensionality": 0.011576971214017523,
+        "MaxMutualInformation": 0.19826687955488,
+        "MinNominalAttDistinctValues": 2,
+        "PercentageOfInstancesWithMissingValues": 0,
+        "Quartile3AttributeEntropy": 0.9132329806576945,
+        "RandomTreeDepth1ErrRate": 0.05444305381727159,
+        "EquivalentNumberOfAtts": 52.14040169716265,
+        "MaxNominalAttDistinctValues": 3,
+        "MinSkewnessOfNumericAtts": null,
+        "PercentageOfMissingValues": 0,
+        "Quartile3KurtosisOfNumericAtts": null,
+        "AutoCorrelation": 0.9990610328638497,
+        "RandomTreeDepth1Kappa": 0.8908498653739637,
+        "J48.00001.AUC": 0.9960622907889662,
+        "MaxSkewnessOfNumericAtts": null,
+        "MinStdDevOfNumericAtts": null,
+        "MinorityClassPercentage": 47.778473091364205,
+        "PercentageOfNumericFeatures": 0,
+        "Quartile3MeansOfNumericAtts": null,
+        "CfsSubsetEval_DecisionStumpAUC": 0.9619120657405762,
+        "RandomTreeDepth2AUC": 0.9451363376145694,
+        "J48.00001.ErrRate": 0.007822277847309137,
+        "MaxStdDevOfNumericAtts": null,
+        "MinorityClassSize": 1527,
+        "PercentageOfSymbolicFeatures": 100,
+        "Quartile3MutualInformation": 0.0184861208375775,
+        "CfsSubsetEval_DecisionStumpErrRate": 0.05913642052565707,
+        "RandomTreeDepth2ErrRate": 0.05444305381727159,
+        "J48.00001.Kappa": 0.9843258097219999,
+        "MeanAttributeEntropy": 0.5901482912442314,
+        "NaiveBayesAUC": 0.9520419938608541,
+        "Quartile1AttributeEntropy": 0.28756000355035294,
+        "Quartile3SkewnessOfNumericAtts": null,
+        "CfsSubsetEval_DecisionStumpKappa": 0.8811920214059075,
+        "RandomTreeDepth2Kappa": 0.8908498653739637,
+        "J48.0001.AUC": 0.9960622907889662,
+        "MeanKurtosisOfNumericAtts": null,
+        "NaiveBayesErrRate": 0.12108886107634544,
+        "Quartile1KurtosisOfNumericAtts": null,
+        "Quartile3StdDevOfNumericAtts": null,
+        "CfsSubsetEval_NaiveBayesAUC": 0.9619120657405762,
+        "RandomTreeDepth3AUC": 0.9451363376145694,
+        "J48.0001.ErrRate": 0.007822277847309137,
+        "MeanMeansOfNumericAtts": null
+    },
+    "tags": [
+        {
+            "tag": "mythbusting_1",
+            "uploader": "1"
+        },
+        {
+            "tag": "OpenML-CC18",
+            "uploader": "1"
+        },
+        {
+            "tag": "OpenML100",
+            "uploader": "348"
+        },
+        {
+            "tag": "study_1",
+            "uploader": "2"
+        },
+        {
+            "tag": "study_123",
+            "uploader": "3886"
+        },
+        {
+            "tag": "study_14",
+            "uploader": "64"
+        },
+        {
+            "tag": "study_144",
+            "uploader": "5824"
+        },
+        {
+            "tag": "study_15",
+            "uploader": "939"
+        },
+        {
+            "tag": "study_20",
+            "uploader": "939"
+        },
+        {
+            "tag": "study_218",
+            "uploader": "869"
+        },
+        {
+            "tag": "study_34",
+            "uploader": "1"
+        },
+        {
+            "tag": "study_37",
+            "uploader": "1"
+        },
+        {
+            "tag": "study_41",
+            "uploader": "1"
+        },
+        {
+            "tag": "study_50",
+            "uploader": "64"
+        },
+        {
+            "tag": "study_52",
+            "uploader": "64"
+        },
+        {
+            "tag": "study_7",
+            "uploader": "64"
+        },
+        {
+            "tag": "study_70",
+            "uploader": "1856"
+        },
+        {
+            "tag": "study_98",
+            "uploader": "1935"
+        },
+        {
+            "tag": "study_99",
+            "uploader": "1"
+        },
+        {
+            "tag": "uci",
+            "uploader": "1"
+        }
+    ],
+    "features": [
+        {
+            "name": "class",
+            "index": "36",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "target": "1",
+            "distr": [
+                [
+                    "won",
+                    "nowin"
+                ],
+                [
+                    [
+                        "1669",
+                        "0"
+                    ],
+                    [
+                        "0",
+                        "1527"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "bkblk",
+            "index": "0",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "187",
+                        "170"
+                    ],
+                    [
+                        "1482",
+                        "1357"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "bknwy",
+            "index": "1",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "119",
+                        "106"
+                    ],
+                    [
+                        "1550",
+                        "1421"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "bkon8",
+            "index": "2",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "35",
+                        "85"
+                    ],
+                    [
+                        "1634",
+                        "1442"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "bkona",
+            "index": "3",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "162",
+                        "160"
+                    ],
+                    [
+                        "1507",
+                        "1367"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "bkspr",
+            "index": "4",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "528",
+                        "539"
+                    ],
+                    [
+                        "1141",
+                        "988"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "bkxbq",
+            "index": "5",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "881",
+                        "593"
+                    ],
+                    [
+                        "788",
+                        "934"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "bkxcr",
+            "index": "6",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "485",
+                        "685"
+                    ],
+                    [
+                        "1184",
+                        "842"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "bkxwp",
+            "index": "7",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "210",
+                        "486"
+                    ],
+                    [
+                        "1459",
+                        "1041"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "blxwp",
+            "index": "8",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "569",
+                        "647"
+                    ],
+                    [
+                        "1100",
+                        "880"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "bxqsq",
+            "index": "9",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "228",
+                        "743"
+                    ],
+                    [
+                        "1441",
+                        "784"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "cntxt",
+            "index": "10",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "774",
+                        "605"
+                    ],
+                    [
+                        "895",
+                        "922"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "dsopp",
+            "index": "11",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "183",
+                        "153"
+                    ],
+                    [
+                        "1486",
+                        "1374"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "dwipd",
+            "index": "12",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "g",
+                    "l"
+                ],
+                [
+                    [
+                        "444",
+                        "547"
+                    ],
+                    [
+                        "1225",
+                        "980"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "hdchk",
+            "index": "13",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "0",
+                        "15"
+                    ],
+                    [
+                        "1669",
+                        "1512"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "katri",
+            "index": "14",
+            "type": "nominal",
+            "distinct": "3",
+            "missing": "0",
+            "distr": [
+                [
+                    "b",
+                    "n",
+                    "w"
+                ],
+                [
+                    [
+                        "79",
+                        "145"
+                    ],
+                    [
+                        "1242",
+                        "1284"
+                    ],
+                    [
+                        "348",
+                        "98"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "mulch",
+            "index": "15",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "27",
+                        "129"
+                    ],
+                    [
+                        "1642",
+                        "1398"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "qxmsq",
+            "index": "16",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "54",
+                        "43"
+                    ],
+                    [
+                        "1615",
+                        "1484"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "r2ar8",
+            "index": "17",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "1025",
+                        "1171"
+                    ],
+                    [
+                        "644",
+                        "356"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "reskd",
+            "index": "18",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "18",
+                        "8"
+                    ],
+                    [
+                        "1651",
+                        "1519"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "reskr",
+            "index": "19",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "256",
+                        "226"
+                    ],
+                    [
+                        "1413",
+                        "1301"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "rimmx",
+            "index": "20",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "584",
+                        "0"
+                    ],
+                    [
+                        "1085",
+                        "1527"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "rkxwp",
+            "index": "21",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "399",
+                        "241"
+                    ],
+                    [
+                        "1270",
+                        "1286"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "rxmsq",
+            "index": "22",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "63",
+                        "120"
+                    ],
+                    [
+                        "1606",
+                        "1407"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "simpl",
+            "index": "23",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "673",
+                        "548"
+                    ],
+                    [
+                        "996",
+                        "979"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "skach",
+            "index": "24",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "2",
+                        "9"
+                    ],
+                    [
+                        "1667",
+                        "1518"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "skewr",
+            "index": "25",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "1130",
+                        "1086"
+                    ],
+                    [
+                        "539",
+                        "441"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "skrxp",
+            "index": "26",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "44",
+                        "131"
+                    ],
+                    [
+                        "1625",
+                        "1396"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "spcop",
+            "index": "27",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "0",
+                        "1"
+                    ],
+                    [
+                        "1669",
+                        "1526"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "stlmt",
+            "index": "28",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "0",
+                        "47"
+                    ],
+                    [
+                        "1669",
+                        "1480"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "thrsk",
+            "index": "29",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "84",
+                        "52"
+                    ],
+                    [
+                        "1585",
+                        "1475"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "wkcti",
+            "index": "30",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "372",
+                        "193"
+                    ],
+                    [
+                        "1297",
+                        "1334"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "wkna8",
+            "index": "31",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "20",
+                        "155"
+                    ],
+                    [
+                        "1649",
+                        "1372"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "wknck",
+            "index": "32",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "350",
+                        "862"
+                    ],
+                    [
+                        "1319",
+                        "665"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "wkovl",
+            "index": "33",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "1017",
+                        "990"
+                    ],
+                    [
+                        "652",
+                        "537"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "wkpos",
+            "index": "34",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "1328",
+                        "1017"
+                    ],
+                    [
+                        "341",
+                        "510"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "wtoeg",
+            "index": "35",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "n",
+                    "t",
+                    "f"
+                ],
+                [
+                    [
+                        "1257",
+                        "1150"
+                    ],
+                    [
+                        "412",
+                        "377"
+                    ],
+                    [
+                        "0",
+                        "0"
+                    ]
+                ]
+            ]
+        }
+    ],
+    "nr_of_issues": 0,
+    "nr_of_downvotes": 0,
+    "nr_of_likes": 0,
+    "nr_of_downloads": 36,
+    "total_downloads": 47,
+    "reach": 36,
+    "reuse": 3,
+    "impact_of_reuse": 0,
+    "reach_of_reuse": 0,
+    "impact": 3
+}

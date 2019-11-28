@@ -7,6 +7,7 @@ from mango.domain.domain_space import domain_space
 from mango.optimizer.bayesian_learning import BayesianLearning
 from scipy.stats._distn_infrastructure import rv_frozen
 
+from tqdm.auto import tqdm
 import numpy as np
 
 ##setting warnings to ignore for now
@@ -185,7 +186,7 @@ class Tuner():
         objective_function_values = Y_list
 
         # running the iterations
-        for i in range(self.conf_Dict['num_iteration']):
+        for i in tqdm(range(self.conf_Dict['num_iteration'])):
             # Domain Space
             domain_list = ds.get_domain()
             X_domain_np = ds.convert_GP_space(domain_list)
@@ -233,7 +234,7 @@ class Tuner():
         Y_sample_list = []
 
         # running the iterations
-        for i in range(self.conf_Dict['num_iteration']):
+        for i in tqdm(range(self.conf_Dict['num_iteration'])):
             # getting batch by batch random values to try
             random_hyper_parameters = ds.get_random_sample(self.conf_Dict['batch_size'])
             X_list, Y_list = self.runUserObjective(random_hyper_parameters)

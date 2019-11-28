@@ -1,0 +1,515 @@
+      {
+    "data_id": "50",
+    "name": "tic-tac-toe",
+    "exact_name": "tic-tac-toe",
+    "version": 1,
+    "version_label": "1",
+    "description": "**Author**: David W. Aha    \r\n**Source**: [UCI](https:\/\/archive.ics.uci.edu\/ml\/datasets\/Tic-Tac-Toe+Endgame) - 1991   \r\n**Please cite**: [UCI](http:\/\/archive.ics.uci.edu\/ml\/citation_policy.html)\r\n\r\n**Tic-Tac-Toe Endgame database**  \r\nThis database encodes the complete set of possible board configurations at the end of tic-tac-toe games, where \"x\" is assumed to have played first.  The target concept is \"win for x\" (i.e., true when \"x\" has one of 8 possible ways to create a \"three-in-a-row\").  \r\n\r\n### Attribute Information  \r\n\r\n     (x=player x has taken, o=player o has taken, b=blank)\r\n     1. top-left-square: {x,o,b}\r\n     2. top-middle-square: {x,o,b}\r\n     3. top-right-square: {x,o,b}\r\n     4. middle-left-square: {x,o,b}\r\n     5. middle-middle-square: {x,o,b}\r\n     6. middle-right-square: {x,o,b}\r\n     7. bottom-left-square: {x,o,b}\r\n     8. bottom-middle-square: {x,o,b}\r\n     9. bottom-right-square: {x,o,b}\r\n    10. Class: {positive,negative}",
+    "format": "ARFF",
+    "uploader": "Jan van Rijn",
+    "uploader_id": 1,
+    "visibility": "public",
+    "creator": null,
+    "contributor": null,
+    "date": "2014-04-06 23:22:59",
+    "update_comment": null,
+    "last_update": "2014-04-06 23:22:59",
+    "licence": "Public",
+    "status": "active",
+    "error_message": null,
+    "url": "https:\/\/www.openml.org\/data\/download\/50\/dataset_50_tic-tac-toe.arff",
+    "default_target_attribute": "Class",
+    "row_id_attribute": null,
+    "ignore_attribute": null,
+    "runs": 385258,
+    "suggest": {
+        "input": [
+            "tic-tac-toe",
+            "This database encodes the complete set of possible board configurations at the end of tic-tac-toe games, where \"x\" is assumed to have played first. The target concept is \"win for x\" (i.e., true when \"x\" has one of 8 possible ways to create a \"three-in-a-row\"). ### Attribute Information (x=player x has taken, o=player o has taken, b=blank) 1. top-left-square: {x,o,b} 2. top-middle-square: {x,o,b} 3. top-right-square: {x,o,b} 4. middle-left-square: {x,o,b} 5. middle-middle-square: {x,o,b} 6. middl "
+        ],
+        "weight": 5
+    },
+    "qualities": {
+        "NumberOfInstances": 958,
+        "NumberOfFeatures": 10,
+        "NumberOfClasses": 2,
+        "NumberOfMissingValues": 0,
+        "NumberOfInstancesWithMissingValues": 0,
+        "NumberOfNumericFeatures": 0,
+        "NumberOfSymbolicFeatures": 10,
+        "NaiveBayesKappa": 0.314300141070155,
+        "Quartile1MeansOfNumericAtts": null,
+        "REPTreeDepth1AUC": 0.8254263058624274,
+        "CfsSubsetEval_NaiveBayesErrRate": 0.23903966597077245,
+        "RandomTreeDepth3ErrRate": 0.22964509394572025,
+        "J48.0001.Kappa": 0.5771950530105427,
+        "MeanMutualInformation": 0.018825995881285557,
+        "NumberOfBinaryFeatures": 1,
+        "Quartile1MutualInformation": 0.00700514266598,
+        "REPTreeDepth1ErrRate": 0.2035490605427975,
+        "CfsSubsetEval_NaiveBayesKappa": 0.41922178864715764,
+        "RandomTreeDepth3Kappa": 0.49792748582590873,
+        "J48.001.AUC": 0.8493254166827052,
+        "MeanNoiseToSignalRatio": 80.69748634203775,
+        "Quartile1SkewnessOfNumericAtts": null,
+        "REPTreeDepth1Kappa": 0.5296140926922863,
+        "CfsSubsetEval_kNN1NAUC": 0.7435139920705185,
+        "StdvNominalAttDistinctValues": 0.31622776601683794,
+        "J48.001.ErrRate": 0.18580375782881003,
+        "MeanNominalAttDistinctValues": 2.9,
+        "Quartile1StdDevOfNumericAtts": null,
+        "REPTreeDepth2AUC": 0.8254263058624274,
+        "CfsSubsetEval_kNN1NErrRate": 0.23903966597077245,
+        "kNN1NAUC": 0.9962734323876977,
+        "J48.001.Kappa": 0.5771950530105427,
+        "MeanSkewnessOfNumericAtts": null,
+        "Quartile2AttributeEntropy": 1.5281455950064875,
+        "REPTreeDepth2ErrRate": 0.2035490605427975,
+        "CfsSubsetEval_kNN1NKappa": 0.41922178864715764,
+        "kNN1NErrRate": 0.028183716075156576,
+        "MajorityClassPercentage": 65.34446764091858,
+        "MeanStdDevOfNumericAtts": null,
+        "Quartile2KurtosisOfNumericAtts": null,
+        "REPTreeDepth2Kappa": 0.5296140926922863,
+        "ClassEntropy": 0.9309539862507961,
+        "kNN1NKappa": 0.9367427892257802,
+        "MajorityClassSize": 626,
+        "MinAttributeEntropy": 1.4706284549040332,
+        "Quartile2MeansOfNumericAtts": null,
+        "REPTreeDepth3AUC": 0.8254263058624274,
+        "DecisionStumpAUC": 0.6678422957003733,
+        "MaxAttributeEntropy": 1.5647795093873218,
+        "MinKurtosisOfNumericAtts": null,
+        "Quartile2MutualInformation": 0.01355667250927,
+        "REPTreeDepth3ErrRate": 0.2035490605427975,
+        "DecisionStumpErrRate": 0.30062630480167013,
+        "MaxKurtosisOfNumericAtts": null,
+        "MinMeansOfNumericAtts": null,
+        "Quartile2SkewnessOfNumericAtts": null,
+        "REPTreeDepth3Kappa": 0.5296140926922863,
+        "DecisionStumpKappa": 0.33996784812064595,
+        "MaxMeansOfNumericAtts": null,
+        "MinMutualInformation": 0.00700514266598,
+        "PercentageOfBinaryFeatures": 10,
+        "Quartile2StdDevOfNumericAtts": null,
+        "RandomTreeDepth1AUC": 0.7703626005619924,
+        "Dimensionality": 0.010438413361169102,
+        "MaxMutualInformation": 0.08718670223057,
+        "MinNominalAttDistinctValues": 2,
+        "PercentageOfInstancesWithMissingValues": 0,
+        "Quartile3AttributeEntropy": 1.5647795093873218,
+        "RandomTreeDepth1ErrRate": 0.22964509394572025,
+        "EquivalentNumberOfAtts": 49.45045096797422,
+        "MaxNominalAttDistinctValues": 3,
+        "MinSkewnessOfNumericAtts": null,
+        "PercentageOfMissingValues": 0,
+        "Quartile3KurtosisOfNumericAtts": null,
+        "AutoCorrelation": 0.9989550679205852,
+        "RandomTreeDepth1Kappa": 0.49792748582590873,
+        "J48.00001.AUC": 0.8493254166827052,
+        "MaxSkewnessOfNumericAtts": null,
+        "MinStdDevOfNumericAtts": null,
+        "MinorityClassPercentage": 34.65553235908142,
+        "PercentageOfNumericFeatures": 0,
+        "Quartile3MeansOfNumericAtts": null,
+        "CfsSubsetEval_DecisionStumpAUC": 0.7435139920705185,
+        "RandomTreeDepth2AUC": 0.7703626005619924,
+        "J48.00001.ErrRate": 0.18580375782881003,
+        "MaxStdDevOfNumericAtts": null,
+        "MinorityClassSize": 332,
+        "PercentageOfSymbolicFeatures": 100,
+        "Quartile3MutualInformation": 0.01355667250927,
+        "CfsSubsetEval_DecisionStumpErrRate": 0.23903966597077245,
+        "RandomTreeDepth2ErrRate": 0.22964509394572025,
+        "J48.00001.Kappa": 0.5771950530105427,
+        "MeanAttributeEntropy": 1.5380365413865855,
+        "NaiveBayesAUC": 0.7461459255552562,
+        "Quartile1AttributeEntropy": 1.5281455950064875,
+        "Quartile3SkewnessOfNumericAtts": null,
+        "CfsSubsetEval_DecisionStumpKappa": 0.41922178864715764,
+        "RandomTreeDepth2Kappa": 0.49792748582590873,
+        "J48.0001.AUC": 0.8493254166827052,
+        "MeanKurtosisOfNumericAtts": null,
+        "NaiveBayesErrRate": 0.2870563674321503,
+        "Quartile1KurtosisOfNumericAtts": null,
+        "Quartile3StdDevOfNumericAtts": null,
+        "CfsSubsetEval_NaiveBayesAUC": 0.7435139920705185,
+        "RandomTreeDepth3AUC": 0.7703626005619924,
+        "J48.0001.ErrRate": 0.18580375782881003,
+        "MeanMeansOfNumericAtts": null
+    },
+    "tags": [
+        {
+            "tag": "mythbusting_1",
+            "uploader": "1"
+        },
+        {
+            "tag": "OpenML-CC18",
+            "uploader": "1"
+        },
+        {
+            "tag": "OpenML100",
+            "uploader": "348"
+        },
+        {
+            "tag": "study_1",
+            "uploader": "2"
+        },
+        {
+            "tag": "study_123",
+            "uploader": "3886"
+        },
+        {
+            "tag": "study_135",
+            "uploader": "5824"
+        },
+        {
+            "tag": "study_14",
+            "uploader": "64"
+        },
+        {
+            "tag": "study_144",
+            "uploader": "5824"
+        },
+        {
+            "tag": "study_15",
+            "uploader": "939"
+        },
+        {
+            "tag": "study_20",
+            "uploader": "939"
+        },
+        {
+            "tag": "study_29",
+            "uploader": "348"
+        },
+        {
+            "tag": "study_30",
+            "uploader": "348"
+        },
+        {
+            "tag": "study_37",
+            "uploader": "1"
+        },
+        {
+            "tag": "study_41",
+            "uploader": "1"
+        },
+        {
+            "tag": "study_52",
+            "uploader": "64"
+        },
+        {
+            "tag": "study_7",
+            "uploader": "64"
+        },
+        {
+            "tag": "study_70",
+            "uploader": "1856"
+        },
+        {
+            "tag": "study_89",
+            "uploader": "2"
+        },
+        {
+            "tag": "study_98",
+            "uploader": "1935"
+        },
+        {
+            "tag": "study_99",
+            "uploader": "1"
+        },
+        {
+            "tag": "uci",
+            "uploader": "1"
+        }
+    ],
+    "features": [
+        {
+            "name": "Class",
+            "index": "9",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "target": "1",
+            "distr": [
+                [
+                    "negative",
+                    "positive"
+                ],
+                [
+                    [
+                        "332",
+                        "0"
+                    ],
+                    [
+                        "0",
+                        "626"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "top-left-square",
+            "index": "0",
+            "type": "nominal",
+            "distinct": "3",
+            "missing": "0",
+            "distr": [
+                [
+                    "b",
+                    "o",
+                    "x"
+                ],
+                [
+                    [
+                        "63",
+                        "142"
+                    ],
+                    [
+                        "146",
+                        "189"
+                    ],
+                    [
+                        "123",
+                        "295"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "top-middle-square",
+            "index": "1",
+            "type": "nominal",
+            "distinct": "3",
+            "missing": "0",
+            "distr": [
+                [
+                    "b",
+                    "o",
+                    "x"
+                ],
+                [
+                    [
+                        "78",
+                        "172"
+                    ],
+                    [
+                        "101",
+                        "229"
+                    ],
+                    [
+                        "153",
+                        "225"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "top-right-square",
+            "index": "2",
+            "type": "nominal",
+            "distinct": "3",
+            "missing": "0",
+            "distr": [
+                [
+                    "b",
+                    "o",
+                    "x"
+                ],
+                [
+                    [
+                        "63",
+                        "142"
+                    ],
+                    [
+                        "146",
+                        "189"
+                    ],
+                    [
+                        "123",
+                        "295"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "middle-left-square",
+            "index": "3",
+            "type": "nominal",
+            "distinct": "3",
+            "missing": "0",
+            "distr": [
+                [
+                    "b",
+                    "o",
+                    "x"
+                ],
+                [
+                    [
+                        "78",
+                        "172"
+                    ],
+                    [
+                        "101",
+                        "229"
+                    ],
+                    [
+                        "153",
+                        "225"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "middle-middle-square",
+            "index": "4",
+            "type": "nominal",
+            "distinct": "3",
+            "missing": "0",
+            "distr": [
+                [
+                    "b",
+                    "o",
+                    "x"
+                ],
+                [
+                    [
+                        "48",
+                        "112"
+                    ],
+                    [
+                        "192",
+                        "148"
+                    ],
+                    [
+                        "92",
+                        "366"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "middle-right-square",
+            "index": "5",
+            "type": "nominal",
+            "distinct": "3",
+            "missing": "0",
+            "distr": [
+                [
+                    "b",
+                    "o",
+                    "x"
+                ],
+                [
+                    [
+                        "78",
+                        "172"
+                    ],
+                    [
+                        "101",
+                        "229"
+                    ],
+                    [
+                        "153",
+                        "225"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "bottom-left-square",
+            "index": "6",
+            "type": "nominal",
+            "distinct": "3",
+            "missing": "0",
+            "distr": [
+                [
+                    "b",
+                    "o",
+                    "x"
+                ],
+                [
+                    [
+                        "63",
+                        "142"
+                    ],
+                    [
+                        "146",
+                        "189"
+                    ],
+                    [
+                        "123",
+                        "295"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "bottom-middle-square",
+            "index": "7",
+            "type": "nominal",
+            "distinct": "3",
+            "missing": "0",
+            "distr": [
+                [
+                    "b",
+                    "o",
+                    "x"
+                ],
+                [
+                    [
+                        "78",
+                        "172"
+                    ],
+                    [
+                        "101",
+                        "229"
+                    ],
+                    [
+                        "153",
+                        "225"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "bottom-right-square",
+            "index": "8",
+            "type": "nominal",
+            "distinct": "3",
+            "missing": "0",
+            "distr": [
+                [
+                    "b",
+                    "o",
+                    "x"
+                ],
+                [
+                    [
+                        "63",
+                        "142"
+                    ],
+                    [
+                        "146",
+                        "189"
+                    ],
+                    [
+                        "123",
+                        "295"
+                    ]
+                ]
+            ]
+        }
+    ],
+    "nr_of_issues": 0,
+    "nr_of_downvotes": 0,
+    "nr_of_likes": 1,
+    "nr_of_downloads": 59,
+    "total_downloads": 68,
+    "reach": 60,
+    "reuse": 1,
+    "impact_of_reuse": 0,
+    "reach_of_reuse": 0,
+    "impact": 1
+}
