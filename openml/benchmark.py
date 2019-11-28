@@ -319,13 +319,16 @@ class Benchmark:
 
 
 if __name__ == "__main__":
-    # clf_ids = ['rf', 'svm', 'xgb']
-    # optimizers = ['mango_serial', 'mango_parallel', 'random_serial',
-    #               'hp_serial', 'hp_parallel']
-    # clf_id = 'xgb'
-    # optimizer = 'mango_serial'
-    optimizer = os.environ.get("OPTIMIZER")
+    optimizers = ['mango_serial', 'mango_parallel', 'random_serial',
+                  'hp_serial', 'hp_parallel']
+    clf_ids = ['rf', 'xgb', 'svm']
+    optimizer = os.environ.get("OPTIMIZER", 'mango_serial')
+    assert optimizer in optimizers
+
     b = Benchmark(max_evals=50, n_parallel=5, n_repeat=10)
-    for clf_id in ['rf', 'svm', 'xgb']:
+    for clf_id in clf_ids:
         for task in optimization_tasks(clf_id):
-            b.run(task, optimizer, refresh=False)
+            try:
+                b.run(task, optimizer, refresh=False)
+            except Exception as e:
+                print(str(e))
