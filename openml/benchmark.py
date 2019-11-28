@@ -44,12 +44,15 @@ _results_dir = "results"
 
 
 @scope.define
-def hp_int(a):
+def hp_int_local(a):
     return int(a)
 
 
 def hp_range(label, low, high):
-    return scope.hp_int(hp.quniform(label, low, high, 1))
+    if getattr(scope, 'hp_int_local'):
+        return scope.hp_int_local(hp.quniform(label, low, high, 1))
+    else:
+        return scope.hp_int(hp.quniform(label, low, high, 1))
 
 
 class RandomForest(RandomForestClassifier):
@@ -253,7 +256,7 @@ class Benchmark:
             fn=self.hp_objective,
             space=self.task.hp_space,
             algo=tpe.suggest,
-            max_evals=self.max_evals,
+            max_evals=self.max_evals * batch_size,
             trials=trials
         )
         scores = [-t['result']['loss'] for t in trials.trials]
