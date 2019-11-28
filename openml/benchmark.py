@@ -2,6 +2,7 @@ import json
 import warnings
 from collections import namedtuple
 import os
+import random
 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
@@ -13,6 +14,8 @@ from joblib import Parallel, delayed
 import pandas as pd
 from hyperopt import fmin, tpe, hp, STATUS_OK, Trials, STATUS_FAIL
 from hyperopt.pyll import scope
+from hyperopt.mongoexp import MongoTrials
+
 
 from mango.domain.distribution import loguniform
 from mango.tuner import Tuner
@@ -238,6 +241,23 @@ class Benchmark:
         )
         scores = [-t['result']['loss'] for t in trials.trials]
         print("hp serial task: %s, best: %s, params: %s" %
+              (self.task.id, max(scores), best_params))
+
+        return self.accumulate_max(scores, self.max_evals, batch_size)
+
+    def hp_parallel(self):
+        trials = MongoTrials('mongo://localhost:27017/foo_db/jobs',
+                             exp_key=self.task.id + random.getrandbits(64))
+        batch_size = self.n_parallel
+        best_params = fmin(
+            fn=self.hp_objective,
+            space=self.task.hp_space,
+            algo=tpe.suggest,
+            max_evals=self.max_evals,
+            trials=trials
+        )
+        scores = [-t['result']['loss'] for t in trials.trials]
+        print("hp parallel task: %s, best: %s, params: %s" %
               (self.task.id, max(scores), best_params))
 
         return self.accumulate_max(scores, self.max_evals, batch_size)
