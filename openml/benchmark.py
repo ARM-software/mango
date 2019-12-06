@@ -37,7 +37,7 @@ _rf_taskids = [125923, 145804, 145836, 145839, 145855, 145862, 145878,
                3913, 3917, 3918, 3950, 3, 49, 9914, 9952, 9957, 9967,
                9970, 9971, 9978, 9983]
 
-_bad_tasks = [6566, 34536]  # no features
+_bad_tasks = [6566, 34536, 3950]  # no features (3950 tkes too much time)
 
 _data_dir = "data"
 _results_dir = "results"
@@ -322,8 +322,8 @@ class Benchmark:
             with open(result_file, 'r') as f:
                 res = json.load(f)
             if res['max_evals'] == self.max_evals and \
-                    res['batch_size'] == self.n_parallel and \
-                    res['n_repeat'] == self.n_repeat:
+                    res['batch_size'] == self.n_parallel: # and \
+                    # res['n_repeat'] == self.n_repeat:
                 print("%s already exists" % optimization_task.id)
                 return res
 
@@ -358,7 +358,7 @@ if __name__ == "__main__":
     assert optimizer in optimizers
 
     # b = Benchmark(max_evals=5, n_parallel=4, n_repeat=1)
-    b = Benchmark(max_evals=50, n_parallel=5, n_repeat=10)
+    b = Benchmark(max_evals=50, n_parallel=5, n_repeat=3)
     for clf_id in clf_ids:
         for task in optimization_tasks(clf_id):
             try:
