@@ -2,6 +2,7 @@ import json
 import warnings
 from collections import namedtuple
 import os
+import random
 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
@@ -13,6 +14,8 @@ from joblib import Parallel, delayed
 import pandas as pd
 from hyperopt import fmin, tpe, hp, STATUS_OK, Trials, STATUS_FAIL
 from hyperopt.pyll import scope
+from hyperopt.mongoexp import MongoTrials
+
 
 from mango.domain.distribution import loguniform
 from mango.tuner import Tuner
@@ -34,7 +37,7 @@ _rf_taskids = [125923, 145804, 145836, 145839, 145855, 145862, 145878,
                3913, 3917, 3918, 3950, 3, 49, 9914, 9952, 9957, 9967,
                9970, 9971, 9978, 9983]
 
-_bad_tasks = [6566, 34536]  # no features
+_bad_tasks = [6566, 34536, 3950]  # no features (3950 tkes too much time)
 
 _data_dir = "data"
 _results_dir = "results"
@@ -242,6 +245,23 @@ class Benchmark:
 
         return self.accumulate_max(scores, self.max_evals, batch_size)
 
+    def hp_parallel(self):
+        trials = MongoTrials('mongo://localhost:27017/foo_db/jobs',
+                             exp_key=self.task.id + str(random.getrandbits(64)))
+        batch_size = self.n_parallel
+        best_params = fmin(
+            fn=self.hp_objective,
+            space=self.task.hp_space,
+            algo=tpe.suggest,
+            max_evals=self.max_evals * batch_size,
+            trials=trials
+        )
+        scores = [-t['result']['loss'] for t in trials.trials]
+        print("hp parallel task: %s, best: %s, params: %s" %
+              (self.task.id, max(scores), best_params))
+
+        return self.accumulate_max(scores, self.max_evals, batch_size)
+
     def mango_serial(self):
         batch_size = 1
         tuner = Tuner(self.task.mango_space,
@@ -302,8 +322,8 @@ class Benchmark:
             with open(result_file, 'r') as f:
                 res = json.load(f)
             if res['max_evals'] == self.max_evals and \
-                    res['batch_size'] == self.n_parallel and \
-                    res['n_repeat'] == self.n_repeat:
+                    res['batch_size'] == self.n_parallel: # and \
+                    # res['n_repeat'] == self.n_repeat:
                 print("%s already exists" % optimization_task.id)
                 return res
 
@@ -337,8 +357,13 @@ if __name__ == "__main__":
     optimizer = os.environ.get("OPTIMIZER", 'mango_serial')
     assert optimizer in optimizers
 
+    clf_ids = os.environ.get("CLF_IDS")
+    if clf_ids:
+        clf_ids = clf_ids.split(',')
+    print(clf_ids)
+
     # b = Benchmark(max_evals=5, n_parallel=4, n_repeat=1)
-    b = Benchmark(max_evals=50, n_parallel=5, n_repeat=10)
+    b = Benchmark(max_evals=50, n_parallel=5, n_repeat=3)
     for clf_id in clf_ids:
         for task in optimization_tasks(clf_id):
             try:
