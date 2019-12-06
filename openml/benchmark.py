@@ -357,6 +357,11 @@ if __name__ == "__main__":
     optimizer = os.environ.get("OPTIMIZER", 'mango_serial')
     assert optimizer in optimizers
 
+    clf_ids = os.environ.get("CLF_IDS")
+    if clf_ids:
+        clf_ids = clf_ids.split(',')
+    print(clf_ids)
+
     # b = Benchmark(max_evals=5, n_parallel=4, n_repeat=1)
     b = Benchmark(max_evals=50, n_parallel=5, n_repeat=3)
     for clf_id in clf_ids:
