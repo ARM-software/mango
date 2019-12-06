@@ -10,7 +10,7 @@ from scipy.stats._distn_infrastructure import rv_frozen
 from tqdm.auto import tqdm
 import numpy as np
 
-##setting warnings to ignore for now
+## setting warnings to ignore for now
 import warnings
 
 warnings.filterwarnings('ignore')

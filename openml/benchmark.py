@@ -2,6 +2,7 @@ import json
 import warnings
 from collections import namedtuple
 import os
+import random
 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
@@ -9,9 +10,12 @@ from xgboost import XGBClassifier
 from sklearn.svm import SVC
 from sklearn.model_selection import cross_val_score
 from scipy.stats import uniform
+from joblib import Parallel, delayed
 import pandas as pd
 from hyperopt import fmin, tpe, hp, STATUS_OK, Trials, STATUS_FAIL
 from hyperopt.pyll import scope
+from hyperopt.mongoexp import MongoTrials
+
 
 from mango.domain.distribution import loguniform
 from mango.tuner import Tuner
@@ -214,6 +218,17 @@ class Benchmark:
 
         return objective
 
+    @property
+    def mango_parallel_objective(self):
+
+        def objective(params_list):
+            scores = Parallel(n_jobs=len(params_list))(
+                delayed(self.task.scorer)(params) for params in params_list)
+
+            return params_list, scores
+
+        return objective
+
     def hp_serial(self):
         trials = Trials()
         batch_size = 1
@@ -226,6 +241,23 @@ class Benchmark:
         )
         scores = [-t['result']['loss'] for t in trials.trials]
         print("hp serial task: %s, best: %s, params: %s" %
+              (self.task.id, max(scores), best_params))
+
+        return self.accumulate_max(scores, self.max_evals, batch_size)
+
+    def hp_parallel(self):
+        trials = MongoTrials('mongo://localhost:27017/foo_db/jobs',
+                             exp_key=self.task.id + str(random.getrandbits(64)))
+        batch_size = self.n_parallel
+        best_params = fmin(
+            fn=self.hp_objective,
+            space=self.task.hp_space,
+            algo=tpe.suggest,
+            max_evals=self.max_evals * batch_size,
+            trials=trials
+        )
+        scores = [-t['result']['loss'] for t in trials.trials]
+        print("hp parallel task: %s, best: %s, params: %s" %
               (self.task.id, max(scores), best_params))
 
         return self.accumulate_max(scores, self.max_evals, batch_size)
@@ -254,7 +286,7 @@ class Benchmark:
     def mango_parallel(self):
         batch_size = self.n_parallel
         tuner = Tuner(self.task.mango_space,
-                      self.mango_objective,
+                      self.mango_parallel_objective,
                       dict(num_iteration=self.max_evals,
                            batch_size=batch_size))
         results = tuner.maximize()
@@ -325,6 +357,7 @@ if __name__ == "__main__":
     optimizer = os.environ.get("OPTIMIZER", 'mango_serial')
     assert optimizer in optimizers
 
+    # b = Benchmark(max_evals=5, n_parallel=4, n_repeat=1)
     b = Benchmark(max_evals=50, n_parallel=5, n_repeat=10)
     for clf_id in clf_ids:
         for task in optimization_tasks(clf_id):
