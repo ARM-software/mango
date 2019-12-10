@@ -37,7 +37,7 @@ _rf_taskids = [125923, 145804, 145836, 145839, 145855, 145862, 145878,
                3913, 3917, 3918, 3950, 3, 49, 9914, 9952, 9957, 9967,
                9970, 9971, 9978, 9983]
 
-_bad_tasks = [6566, 34536, 3950]  # no features (3950 tkes too much time)
+_bad_tasks = [6566, 34536, 3950]  # no features (3950, 10101 takes too much time)
 
 _data_dir = "data"
 _results_dir = "results"
@@ -88,18 +88,18 @@ class SVM(SVC):
     def mango_space(cls):
         return {
             'C': loguniform(-3, 6),  # 10^-3 to 10^3
-            'kernel': ['poly', 'linear', 'rbf', 'sigmoid'],
+            'kernel': ['rbf', 'sigmoid'],
             'gamma': loguniform(-3, 6),  # 10^-3 to 10^3
-            'degree': range(2, 6),
+            # 'degree': range(2, 6),
         }
 
     @classmethod
     def hp_space(cls):
         return {
             'C': hp.loguniform('C', np.log(10 ** -3), np.log(10 ** 3)),  # 10^-3 to 10^3
-            'kernel': hp.choice('kernel', ['poly', 'linear', 'rbf', 'sigmoid']),
+            'kernel': hp.choice('kernel', ['rbf', 'sigmoid']),
             'gamma': hp.loguniform('gamma', np.log(10 ** -3), np.log(10 ** 3)),  # 10^-3 to 10^3
-            'degree': hp_range('degree', 2, 5),
+            # 'degree': hp_range('degree', 2, 5),
         }
 
 
