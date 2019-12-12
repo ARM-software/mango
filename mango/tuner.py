@@ -38,6 +38,7 @@ class Tuner():
 
         # setting default optimizer to Bayesian
         self.conf_Dict['optimizer'] = "Bayesian"
+        self.conf_Dict['parallel_strategy'] = "penalty"
 
         # in case the optional conf_dict is passed
         if conf_dict != None:
@@ -63,6 +64,9 @@ class Tuner():
 
             if 'surrogate' in conf_dict:
                 self.conf_Dict['surrogate'] = conf_dict['surrogate']
+
+            if 'parallel_strategy' in conf_dict:
+                self.conf_Dict['parallel_strategy'] = conf_dict['parallel_strategy']
 
         # Calculating the domain size based on the param_dict
         if self.conf_Dict['domain_size'] == None:
@@ -98,7 +102,6 @@ class Tuner():
             elif isinstance(param_dict[par], list):
                 domain_size = domain_size * len(param_dict[par])
 
-        # print('Calculated Domain Size:',domain_size)
         if domain_size < domain_min:
             domain_size = domain_min
 
@@ -147,6 +150,9 @@ class Tuner():
         return np.array(results).reshape(len(results), 1), results
 
     def runBayesianOptimizer(self):
+        parallel_strategy = self.conf_Dict['parallel_strategy']
+        assert parallel_strategy in ['penalty', 'clustering']
+
         results = dict()
         # domain space abstraction
         ds = domain_space(self.conf_Dict['param_dict'], self.conf_Dict['domain_size'])
@@ -186,15 +192,23 @@ class Tuner():
         objective_function_values = Y_list
 
         # running the iterations
-        for i in tqdm(range(self.conf_Dict['num_iteration'])):
+        pbar = tqdm(range(self.conf_Dict['num_iteration']))
+        for i in pbar:
             # Domain Space
             domain_list = ds.get_domain()
             X_domain_np = ds.convert_GP_space(domain_list)
 
             # Black-Box Optimizer
-            X_next_batch = Optimizer.get_next_batch(X_sample, Y_sample, X_domain_np,
+            if parallel_strategy == 'penalty':
+                X_next_batch = Optimizer.get_next_batch(X_sample, Y_sample, X_domain_np,
                                                     batch_size=self.conf_Dict['batch_size'])
-            # X_next_batch = Optimizer.get_next_batch_clustering(X_sample,Y_sample,X_domain_np,batch_size=self.conf_Dict['batch_size'])
+            elif parallel_strategy == 'clustering':
+                X_next_batch = Optimizer.get_next_batch_clustering(X_sample,Y_sample,X_domain_np,batch_size=self.conf_Dict['batch_size'])
+            else:
+                # assume penalty approach
+                X_next_batch = Optimizer.get_next_batch(X_sample, Y_sample, X_domain_np,
+                                                        batch_size=self.conf_Dict['batch_size'])
+
 
             # Scheduler
             X_next_PS = ds.convert_PS_space(X_next_batch)
@@ -213,6 +227,7 @@ class Tuner():
             # Appending to the current samples
             X_sample = np.vstack((X_sample, X_next_batch))
             Y_sample = np.vstack((Y_sample, Y_next_batch))
+            pbar.set_description("Best score: %s" % np.max(Y_sample))
 
         results['params_tried'] = hyper_parameters_tried
         results['objective_values'] = objective_function_values

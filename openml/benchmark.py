@@ -40,7 +40,7 @@ _rf_taskids = [125923, 145804, 145836, 145839, 145855, 145862, 145878,
 _bad_tasks = [6566, 34536, 3950]  # no features (3950, 10101 takes too much time)
 
 _data_dir = "data"
-_results_dir = "results"
+_results_dir = "results2"
 
 
 @scope.define
@@ -207,6 +207,7 @@ class Benchmark:
 
     @property
     def mango_objective(self):
+
         def objective(params_list):
             scores = []
             params_evaluated = []
@@ -214,6 +215,7 @@ class Benchmark:
                 score = self.task.scorer(params)
                 scores.append(score)
                 params_evaluated.append(params)
+
             return params_evaluated, scores
 
         return objective
@@ -299,6 +301,23 @@ class Benchmark:
         scores = results['objective_values']
         return self.accumulate_max(scores[-self.max_evals * batch_size:], self.max_evals, batch_size)
 
+    def mango_parallel_cluster(self):
+        batch_size = self.n_parallel
+        tuner = Tuner(self.task.mango_space,
+                      self.mango_parallel_objective,
+                      dict(num_iteration=self.max_evals,
+                           batch_size=batch_size,
+                           parallel_strategy='clustering'))
+        results = tuner.maximize()
+
+        print("mango parallel task: %s, best: %s, params: %s" %
+              (self.task.id,
+               results['best_objective'],
+               results['best_params']))
+
+        scores = results['objective_values']
+        return self.accumulate_max(scores[-self.max_evals * batch_size:], self.max_evals, batch_size)
+
     def random_serial(self):
         batch_size = 1
         tuner = Tuner(self.task.mango_space,
@@ -351,22 +370,51 @@ class Benchmark:
 
 
 if __name__ == "__main__":
-    optimizers = ['mango_serial', 'mango_parallel', 'random_serial',
-                  'hp_serial', 'hp_parallel']
-    clf_ids = ['rf', 'xgb', 'svm']
+    optimizers = ['mango_serial', 'random_serial', 'hp_serial', 'mango_parallel', 'mango_parallel_cluster']
+    all_clf_ids = ['rf', 'xgb', 'svm']
     optimizer = os.environ.get("OPTIMIZER", 'mango_serial')
     assert optimizer in optimizers
 
     clf_ids = os.environ.get("CLF_IDS")
     if clf_ids:
         clf_ids = clf_ids.split(',')
+    else:
+        clf_ids = all_clf_ids
     print(clf_ids)
 
     # b = Benchmark(max_evals=5, n_parallel=4, n_repeat=1)
     b = Benchmark(max_evals=50, n_parallel=5, n_repeat=3)
     for clf_id in clf_ids:
         for task in optimization_tasks(clf_id):
+            # if task.id not in ['xgb-146064',]:
+            #     continue
             try:
                 b.run(task, optimizer, refresh=False)
             except Exception as e:
                 print(str(e))
+
+
+
+"""
+
+            'n_estimators': range(3, 5000),
+            'max_depth': range(1, 15),
+            'reg_alpha': loguniform(-3, 6),  # 10^-3 to 10^3
+            'booster': ['gbtree', 'gblinear'],
+            'colsample_bylevel': uniform(0.05, 0.95),
+            'colsample_bytree': uniform(0.05, 0.95),
+            'learning_rate': loguniform(-3, 3),  # 0.001 to 1
+            'reg_lambda': loguniform(-3, 6),  # 10^-3 to 10^3
+            'min_child_weight': loguniform(0, 2),
+            'subsample': uniform(0.1, 0.89),
+            
+Benchmark hp_serial on xgb-146064, max evals: 50, batch_size: 5, n_repeat: 1
+hp serial task: xgb-146064, best: 0.9865662211165457, params: {'booster': 0, 'colsample_bylevel': 0.16659793323235653, 'colsample_bytree': 0.6639739912492748, 'learning_rate': 0.20055675364463627, 'max_depth': 2.0, 'min_child_weight': 1.8790966841235113, 'n_estimators': 3180.0, 'reg_alpha': 0.0012038936899647617, 'reg_lambda': 0.0018377165958774174, 'subsample': 0.6613420064261579}
+
+Benchmark random_serial on xgb-146064, max evals: 50, batch_size: 5, n_repeat: 1
+random task: xgb-146064, best: 0.7311772853769607, params: {'booster': 'gbtree', 'colsample_bylevel': 0.959399345514509, 'colsample_bytree': 0.9498495624669465, 'learning_rate': 0.0014002953931664818, 'max_depth': 13, 'min_child_weight': 8.963225235753109, 'n_estimators': 3016, 'reg_alpha': 0.004629184070684072, 'reg_lambda': 0.634735819701405, 'subsample': 0.7993237016254977}
+random task: xgb-146064, best: 0.8389869497385731, params: {'booster': 'gbtree', 'colsample_bylevel': 0.27132408394037894, 'colsample_bytree': 0.6201623160391286, 'learning_rate': 0.07129365629279757, 'max_depth': 6, 'min_child_weight': 1.8360956352383773, 'n_estimators': 566, 'reg_alpha': 0.0025974628039601906, 'reg_lambda': 1.9431125528549607, 'subsample': 0.7776543717690461}
+
+mango serial task: xgb-146064, best: 0.7854548616967449, params: {'booster': 'gbtree', 'colsample_bylevel': 0.5177913190802533, 'colsample_bytree': 0.7134898210079639, 'learning_rate': 0.45782989090666154, 'max_depth': 14, 'min_child_weight': 1.0386523391167433, 'n_estimators': 494, 'reg_alpha': 2.2436052149354104, 'reg_lambda': 110.91369625161579, 'subsample': 0.6860898048969027}
+
+"""
