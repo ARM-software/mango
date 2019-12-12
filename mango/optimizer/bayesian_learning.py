@@ -72,7 +72,7 @@ class BayesianLearning(BasePredictor):
     """
     Check if the returned index value is already present in X_Sample
     """
-    def Upper_Confidence_Bound_Remove_Duplicates(self,X,X_Sample):
+    def Upper_Confidence_Bound_Remove_Duplicates(self, X, X_Sample, batch_size):
         mu, sigma = self.surrogate.predict(X, return_std=True)
         mu = mu.reshape(mu.shape[0],1)
 
@@ -92,8 +92,12 @@ class BayesianLearning(BasePredictor):
         alpha = 2*math.log(alpha_inter) # We have set delta = 0.1
         alpha = math.sqrt(alpha)
 
-        beta = np.exp(2*C)*alpha
-        beta = np.sqrt(beta)
+        if batch_size == 1:
+            beta = alpha
+        else:
+            beta = np.exp(2*C)*alpha
+            beta = np.sqrt(beta)
+
         Value = mu + (beta)*sigma
 
         return self.remove_duplicates(X,X_Sample,mu, Value)
@@ -208,7 +212,7 @@ class BayesianLearning(BasePredictor):
             self.iteration_count = self.iteration_count + 1
             self.surrogate.fit(X_temp, Y_temp)
 
-            X_next,u_value = self.Upper_Confidence_Bound_Remove_Duplicates(X_tries,X_temp)
+            X_next,u_value = self.Upper_Confidence_Bound_Remove_Duplicates(X_tries,X_temp, batch_size)
 
             u_value = u_value.reshape(-1,1)
             Y_temp = np.vstack((Y_temp, u_value))

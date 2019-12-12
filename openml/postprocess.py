@@ -51,7 +51,7 @@ class PostProcess():
 
 if __name__ == "__main__":
     # collect results
-    pp = PostProcess('results/')
+    pp = PostProcess('results2/')
     # for task_id, scores in pp.task_results.items():
     #     pp.plot(task_id, scores, 'plots')
     task_results = pp.task_results
@@ -80,4 +80,4 @@ if __name__ == "__main__":
                                             if re.match("^%s.*" % clf, task_id)])
         mean_scores[optimizer] = np.mean(mean_scores[optimizer], axis=0)
 
-    pp.plot("mean_scores_%s" % clf, mean_scores, 'plots_normalized')
+    pp.plot("mean_scores_%s" % clf, mean_scores, 'plots2')
