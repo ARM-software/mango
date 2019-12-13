@@ -259,18 +259,13 @@ class Tuner():
         return results
 
     def runUserObjective(self, X_next_PS):
-
         # initially assuming entire X_next_PS is evaluated and returned results are only Y values
         X_list_evaluated = X_next_PS
         results = self.objective_function(X_next_PS)
         Y_list_evaluated = results
 
-        """
-        if result is a tuple, then there is possibility that partial values are evaluated
-        """
+        # if result is a tuple, then there is possibility that partial values are evaluated
         if isinstance(results, tuple):
             X_list_evaluated, Y_list_evaluated = results
-            # return np.array(Y_list_evaluated).reshape(len(Y_list_evaluated),1),
-        # return np.array(results).reshape(len(results),1),results
 
         return X_list_evaluated, Y_list_evaluated
