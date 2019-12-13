@@ -8,14 +8,14 @@ Mango internally uses parallel implementation of a multi-armed bandit bayesian o
 - The ease of usage was kept in mind with the ability to plugin new distributions for search space and new optimizer algorithms.
 
 ## Index
-1. [ Installation](#setup)
-2. [ Getting started ](#getting-started)
-3. [ Hyperparameter tuning example ](#knnexample)
-4. [ More on search space definitions](#DomainSpace)
-5. [ More on objective function](#ObjectiveFunction)
-6. [ Optional configurations](#MangoConfigurations)
-7. [ Schedule Objective Function on Celery](#Celery)
-8. [Parallel Algorithms](#mangoAlgorithms)
+1. [Installation](#setup)
+2. [Getting started ](#getting-started)
+3. [Hyperparameter tuning example ](#knnexample)
+4. [Search space definitions](#DomainSpace)
+5. [More on objective function](#ObjectiveFunction)
+6. [Optional configurations](#MangoConfigurations)
+7. [Schedule Objective Function on Celery](#Celery)
+8. [Algorithms](#mangoAlgorithms)
 
 <!--
 9. [ Tune Hyperparameters of Facebook Prophet ](https://github.com/ARM-software/mango/blob/master/examples/Prophet_Classifier.ipynb)
@@ -46,7 +46,7 @@ Mango is straightforward to use. Following example minimizes the quadratic funct
 
 ```python
 from mango.tuner import Tuner
-from mango.scheduler import  simple_local
+from mango.scheduler import simple_local
 
 # Search space
 param_space = dict(x=range(-10,10))
@@ -111,7 +111,9 @@ list of discreet choices, range of integers or the distributions. Example of som
 ### Integer
 Following space defines `x` as an integer parameters with values in `range(-10, 11)` (11 is not included):
 ```python
-param_space = dict(x=range(-10, 11))
+param_space = dict(x=range(-10, 11)) #=> -10, -9, ..., 10
+# you can use steps for sparse ranges
+param_space = dict(x=range(0, 101, 10)) #=> 0, 10, 20, ..., 100
 ```
 Integers are uniformly sampled from the given range and are assumed to be ordered and treated as continuous variables.
 
@@ -141,7 +143,7 @@ param_space = dict(a=uniform(-1, 2))
 ```
 
 #### Log uniform distribution
-We have defined a new [loguniform](https://github.com/ARM-software/mango/blob/master/mango/domain/distribution.py) distribution by extending the `scipy.stats.distributions` constructs.
+We have added [loguniform](https://github.com/ARM-software/mango/blob/master/mango/domain/distribution.py) distribution by extending the `scipy.stats.distributions` constructs.
 Using `loguniform(loc, scale)` one obtains the loguniform distribution on <code>[10<sup>loc</sup>, 10<sup>loc + scale</sup>]</code>.
 ```python
 from mango.domain.distribution import loguniform
@@ -156,7 +158,7 @@ Example hyperparameter search space for [Random Forest Classifier](https://sciki
 ```python
 param_space =  dict(
     max_features=['sqrt', 'log2', .1, .3, .5, .7, .9],
-    n_estimators=range(1, 1000),
+    n_estimators=range(10, 1000, 50), # 10 to 1000 in steps of 50
     bootstrap=[True, False],
     max_depth=range(1, 20),
     min_samples_leaf=range(1, 10)
@@ -170,7 +172,7 @@ from scipy.stats import uniform
 from mango.domain.distribution import loguniform
 
 param_space = {
-    'n_estimators': range(3, 2001), # 3 to 2000
+    'n_estimators': range(10, 2001, 100), # 10 to 2000 in steps of 100
     'max_depth': range(1, 15), # 1 to 14
     'reg_alpha': loguniform(-3, 6),  # 10^-3 to 10^3
     'booster': ['gbtree', 'gblinear'],
