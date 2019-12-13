@@ -21,6 +21,7 @@ class Tuner():
         self.conf_Dict = dict()
 
         # stores the results of using the tuner
+        self.maximize_objective = True
         self.results = dict()
 
         # param_dict is a required parameter
@@ -109,20 +110,7 @@ class Tuner():
     def getConf(self):
         return self.conf_Dict
 
-    """
-    Main function used by tuner to run the classifier evaluation
-    """
-
     def run(self):
-        # running the optimizer
-        self.results = self.runBayesianOptimizer()
-        return self.results
-
-    """
-    Main function used by tuner to run the classifier evaluation
-    """
-
-    def maximize(self):
         # running the optimizer
         if self.conf_Dict['optimizer'] == "Bayesian":
             self.results = self.runBayesianOptimizer()
@@ -131,6 +119,17 @@ class Tuner():
         else:
             print("Error: Unknowm Optimizer")
         return self.results
+
+    """
+    Main function used by tuner to run the classifier evaluation
+    """
+
+    def maximize(self):
+        return self.run()
+
+    def minimize(self):
+        self.maximize_objective = False
+        return self.run()
 
     """
     - Called by runLocal.
@@ -160,8 +159,8 @@ class Tuner():
             random_hps = ds.get_random_sample(self.conf_Dict['initial_random'] - len(Y_list))
             X_list2, Y_list2 = self.runUserObjective(random_hps)
             random_hyper_parameters.extend(random_hps)
-            X_list.extend(X_list2)
-            Y_list.extend(Y_list2)
+            X_list = np.append(X_list, X_list2)
+            Y_list = np.append(Y_list, Y_list2)
             n_tries += 1
 
         if len(Y_list) == 0:
@@ -169,7 +168,7 @@ class Tuner():
 
         # evaluated hyper parameters are used
         X_init = ds.convert_GP_space(X_list)
-        Y_init = np.array(Y_list).reshape(len(Y_list), 1)
+        Y_init = Y_list.reshape(len(Y_list), 1)
 
         # setting the initial random hyper parameters tried
         results['random_params'] = X_list
@@ -201,13 +200,13 @@ class Tuner():
             # Evaluate the Objective function
             # Y_next_batch, Y_next_list = self.runUserObjective(X_next_PS)
             X_next_list, Y_next_list = self.runUserObjective(X_next_PS)
-            Y_next_batch = np.array(Y_next_list).reshape(len(Y_next_list), 1)
+            Y_next_batch = Y_next_list.reshape(len(Y_next_list), 1)
             # update X_next_batch to successfully evaluated values
             X_next_batch = ds.convert_GP_space(X_next_list)
 
             # update the bookeeping of values tried
-            hyper_parameters_tried = hyper_parameters_tried + X_next_list
-            objective_function_values = objective_function_values + Y_next_list
+            hyper_parameters_tried = np.append(hyper_parameters_tried, X_next_list)
+            objective_function_values = np.append(objective_function_values, Y_next_list)
 
             # Appending to the current samples
             X_sample = np.vstack((X_sample, X_next_batch))
@@ -238,16 +237,16 @@ class Tuner():
             random_hyper_parameters = ds.get_random_sample(self.conf_Dict['batch_size'])
             X_list, Y_list = self.runUserObjective(random_hyper_parameters)
 
-            X_sample_list = X_sample_list + X_list
-            Y_sample_list = Y_sample_list + Y_list
+            X_sample_list = np.append(X_sample_list, X_list)
+            Y_sample_list = np.append(Y_sample_list, Y_list)
 
         # After all the iterations are done now bookeeping and best hyper parameter values
         results['params_tried'] = X_sample_list
         results['objective_values'] = Y_sample_list
 
         if len(Y_sample_list) > 0:
-            results['best_objective'] = np.max(np.array(Y_sample_list))
-            results['best_params'] = X_sample_list[np.argmax(np.array(Y_sample_list))]
+            results['best_objective'] = np.max(Y_sample_list)
+            results['best_params'] = X_sample_list[np.argmax(Y_sample_list)]
 
         return results
 
@@ -265,5 +264,11 @@ class Tuner():
             X_list_evaluated, Y_list_evaluated = results
             # return np.array(Y_list_evaluated).reshape(len(Y_list_evaluated),1),
         # return np.array(results).reshape(len(results),1),results
+
+        X_list_evaluated = np.array(X_list_evaluated)
+        if self.maximize_objective is False:
+            Y_list_evaluated = -1 * np.array(Y_list_evaluated)
+        else:
+            Y_list_evaluated = np.array(Y_list_evaluated)
 
         return X_list_evaluated, Y_list_evaluated
