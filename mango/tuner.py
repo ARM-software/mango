@@ -1,7 +1,9 @@
 """
 Main Tuner Class which uses other abstractions.
-Genereal usage is to find the optimal hyper-parameters of the classifier
+General usage is to find the optimal hyper-parameters of the classifier
 """
+
+from dataclasses import dataclass
 
 from mango.domain.domain_space import domain_space
 from mango.optimizer.bayesian_learning import BayesianLearning
@@ -17,72 +19,73 @@ warnings.filterwarnings('ignore')
 
 
 class Tuner():
-    def __init__(self, param_dict, objective, conf_dict=None):
+
+    @dataclass
+    class Config:
+        domain_size: int = None
+        initial_random: int = 1
+        num_iteration: int = 20
+        batch_size: int = 1
+        objective: str = 'maximize'
+        optimizer: str = 'Bayesian'
+        parallel_strategy: str = 'penalty'
+        surrogate: object = None # used to test different kernel functions
+
+        valid_objectives = ['maximize']
+        valid_optimizers = ['Bayesian', 'Random']
+        valid_parallel_strategies = ['penalty', 'clustering']
+
+        def __post_init__(self):
+            if self.objective not in self.valid_objectives:
+                raise ValueError(f'objective: {self.objective} is not valid, should be one of {self.valid_objectives}')
+            if self.optimizer not in self.valid_optimizers:
+                raise ValueError(f'optimizer: {self.optimizer} is not valid, should be one of {self.valid_optmizers}')
+            if self.parallel_strategy not in self.valid_parallel_strategies:
+                raise ValueError(f'parallel strategy: {self.parallel_strategy} is not valid, should be one of {self.valid_parallel_strategies}')
+
+        @property
+        def is_bayesian(self):
+            return self.optimizer == 'Bayesian'
+
+        @property
+        def is_random(self):
+            return self.optimizer == 'Random'
+
+        @property
+        def strategy_is_penalty(self):
+            return self.parallel_strategy == 'penalty'
+
+        @property
+        def strategy_is_clustering(self):
+            return self.parallel_strategy == 'clustering'
+
+
+    def __init__(self, param_dict, objective, conf_dict={}):
+
+        # param_dict is a required parameter
+        self.param_dict = param_dict
+
+        # Objective function is a required parameter
+        self.objective_function = objective
+
         # stores the configuration used by the tuner
-        self.conf_Dict = dict()
+        self.config = Tuner.Config(**conf_dict)
+        if self.config.domain_size is None:
+            self.config.domain_size = self.calculateDomainSize(self.param_dict)
 
         # stores the results of using the tuner
         self.results = dict()
 
-        # param_dict is a required parameter
-        self.conf_Dict['param_dict'] = param_dict
-
-        # Objective funtion is a required parameter
-        self.conf_Dict['userObjective'] = objective
-
-        self.conf_Dict['domain_size'] = None
-        self.conf_Dict['initial_random'] = 1
-        self.conf_Dict['num_iteration'] = 20
-        self.conf_Dict['objective'] = "maximize"  # only maximize is allowed
-        self.conf_Dict['batch_size'] = 1
-
-        # setting default optimizer to Bayesian
-        self.conf_Dict['optimizer'] = "Bayesian"
-        self.conf_Dict['parallel_strategy'] = "penalty"
-
-        # in case the optional conf_dict is passed
-        if conf_dict != None:
-            if 'objective' in conf_dict:
-                self.conf_Dict['objective'] = conf_dict['objective']
-
-            if 'num_iteration' in conf_dict:
-                self.conf_Dict['num_iteration'] = conf_dict['num_iteration']
-
-            if 'domain_size' in conf_dict:
-                self.conf_Dict['domain_size'] = conf_dict['domain_size']
-
-            if 'initial_random' in conf_dict:
-                if conf_dict['initial_random'] > 0:
-                    self.conf_Dict['initial_random'] = conf_dict['initial_random']
-
-            if 'batch_size' in conf_dict:
-                if conf_dict['batch_size'] > 0:
-                    self.conf_Dict['batch_size'] = conf_dict['batch_size']
-
-            if 'optimizer' in conf_dict:
-                self.conf_Dict['optimizer'] = conf_dict['optimizer']
-
-            if 'surrogate' in conf_dict:
-                self.conf_Dict['surrogate'] = conf_dict['surrogate']
-
-            if 'parallel_strategy' in conf_dict:
-                self.conf_Dict['parallel_strategy'] = conf_dict['parallel_strategy']
-
-        # Calculating the domain size based on the param_dict
-        if self.conf_Dict['domain_size'] == None:
-            self.calculateDomainSize()
-
-    """
-    Calculating the domain size to be explored for finding
-    optimum of bayesian optimizer
-    """
-
-    def calculateDomainSize(self):
+    @staticmethod
+    def calculateDomainSize(param_dict):
+        """
+           Calculating the domain size to be explored for finding
+           optimum of bayesian optimizer
+        """
         # Minimum and maximum domain size
         domain_min = 5000
         domain_max = 50000
 
-        param_dict = self.conf_Dict['param_dict']
         domain_size = 1
 
         for par in param_dict:
@@ -108,63 +111,45 @@ class Tuner():
         if domain_size > domain_max:
             domain_size = domain_max
 
-        self.conf_Dict['domain_size'] = domain_size
-
-    def getConf(self):
-        return self.conf_Dict
-
-    """
-    Main function used by tuner to run the classifier evaluation
-    """
+        return domain_size
 
     def run(self):
-        # running the optimizer
-        self.results = self.runBayesianOptimizer()
-        return self.results
-
-    """
-    Main function used by tuner to run the classifier evaluation
-    """
+        """
+            Main function used by tuner to run the classifier evaluation
+        """
+        if self.config.objective == 'maximize':
+            return self.maximize()
+        else:
+            raise ValueError(f'objective {self.config.objective} is not valid')
 
     def maximize(self):
+        """
+            Main function used by tuner to run the classifier evaluation
+        """
         # running the optimizer
-        if self.conf_Dict['optimizer'] == "Bayesian":
+        if self.config.is_bayesian:
             self.results = self.runBayesianOptimizer()
-        elif self.conf_Dict['optimizer'] == "Random":
+        elif self.config.is_random:
             self.results = self.runRandomOptimizer()
         else:
-            print("Error: Unknowm Optimizer")
+            raise ValueError("Unknown Optimizer %s" % self.config.optimizer)
+
         return self.results
 
-    """
-    - Called by runLocal.
-    - Used to locally evaluate the classifier
-    - calls run_clf_local function which is available in scheduler.LocalTasks
-    """
-
-    def runBatchLocal(self, X_batch_list):
-        results = []
-        for hyper_par in X_batch_list:
-            result = run_clf_local(self.conf_Dict['clf_name'], self.conf_Dict['dataset_name'], hyper_par)
-            results.append(result)
-        return np.array(results).reshape(len(results), 1), results
-
     def runBayesianOptimizer(self):
-        parallel_strategy = self.conf_Dict['parallel_strategy']
-        assert parallel_strategy in ['penalty', 'clustering']
-
         results = dict()
+
         # domain space abstraction
-        ds = domain_space(self.conf_Dict['param_dict'], self.conf_Dict['domain_size'])
+        ds = domain_space(self.param_dict, self.config.domain_size)
 
         # getting first few random values
-        random_hyper_parameters = ds.get_random_sample(self.conf_Dict['initial_random'])
+        random_hyper_parameters = ds.get_random_sample(self.config.initial_random)
         X_list, Y_list = self.runUserObjective(random_hyper_parameters)
 
         # in case initial random results are invalid try different samples
         n_tries = 1
-        while len(Y_list) < self.conf_Dict['initial_random'] and n_tries < 3:
-            random_hps = ds.get_random_sample(self.conf_Dict['initial_random'] - len(Y_list))
+        while len(Y_list) < self.config.initial_random and n_tries < 3:
+            random_hps = ds.get_random_sample(self.config.initial_random - len(Y_list))
             X_list2, Y_list2 = self.runUserObjective(random_hps)
             random_hyper_parameters.extend(random_hps)
             X_list.extend(X_list2)
@@ -182,8 +167,8 @@ class Tuner():
         results['random_params'] = X_list
         results['random_params_objective'] = Y_list
 
-        Optimizer = BayesianLearning(surrogate=self.conf_Dict.get('surrogate'))
-        Optimizer.domain_size = self.conf_Dict['domain_size']
+        Optimizer = BayesianLearning(surrogate=self.config.surrogate)
+        Optimizer.domain_size = self.config.domain_size
 
         X_sample = X_init
         Y_sample = Y_init
@@ -192,22 +177,24 @@ class Tuner():
         objective_function_values = Y_list
 
         # running the iterations
-        pbar = tqdm(range(self.conf_Dict['num_iteration']))
+        pbar = tqdm(range(self.config.num_iteration))
         for i in pbar:
             # Domain Space
             domain_list = ds.get_domain()
             X_domain_np = ds.convert_GP_space(domain_list)
 
             # Black-Box Optimizer
-            if parallel_strategy == 'penalty':
-                X_next_batch = Optimizer.get_next_batch(X_sample, Y_sample, X_domain_np,
-                                                    batch_size=self.conf_Dict['batch_size'])
-            elif parallel_strategy == 'clustering':
-                X_next_batch = Optimizer.get_next_batch_clustering(X_sample,Y_sample,X_domain_np,batch_size=self.conf_Dict['batch_size'])
+            Y_scaled = Y_sample / np.max(np.abs(Y_sample))
+            if self.config.strategy_is_penalty:
+                X_next_batch = Optimizer.get_next_batch(X_sample, Y_scaled, X_domain_np,
+                                                    batch_size=self.config.batch_size)
+            elif self.config.strategy_is_clustering:
+                X_next_batch = Optimizer.get_next_batch_clustering(X_sample,Y_scaled, X_domain_np,
+                                                                   batch_size=self.config.batch_size)
             else:
                 # assume penalty approach
-                X_next_batch = Optimizer.get_next_batch(X_sample, Y_sample, X_domain_np,
-                                                        batch_size=self.conf_Dict['batch_size'])
+                X_next_batch = Optimizer.get_next_batch(X_sample, Y_scaled, X_domain_np,
+                                                        batch_size=self.config.batch_size)
 
 
             # Scheduler
@@ -243,21 +230,23 @@ class Tuner():
     def runRandomOptimizer(self):
         results = dict()
         # domain space abstraction
-        ds = domain_space(self.conf_Dict['param_dict'], self.conf_Dict['domain_size'])
+        ds = domain_space(self.param_dict, self.config.domain_size)
 
         X_sample_list = []
         Y_sample_list = []
 
         # running the iterations
-        for i in tqdm(range(self.conf_Dict['num_iteration'])):
+        pbar = tqdm(range(self.config.num_iteration))
+        for i in pbar:
             # getting batch by batch random values to try
-            random_hyper_parameters = ds.get_random_sample(self.conf_Dict['batch_size'])
+            random_hyper_parameters = ds.get_random_sample(self.config.batch_size)
             X_list, Y_list = self.runUserObjective(random_hyper_parameters)
 
             X_sample_list = X_sample_list + X_list
             Y_sample_list = Y_sample_list + Y_list
+            pbar.set_description("Best score: %s" % np.max(np.array(Y_sample_list)))
 
-        # After all the iterations are done now bookeeping and best hyper parameter values
+        # After all the iterations are done now bookkeeping and best hyper parameter values
         results['params_tried'] = X_sample_list
         results['objective_values'] = Y_sample_list
 
@@ -271,7 +260,7 @@ class Tuner():
 
         # initially assuming entire X_next_PS is evaluated and returned results are only Y values
         X_list_evaluated = X_next_PS
-        results = self.conf_Dict['userObjective'](X_next_PS)
+        results = self.objective_function(X_next_PS)
         Y_list_evaluated = results
 
         """
