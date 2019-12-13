@@ -8,7 +8,6 @@ Testing the capabilities of Mango
 import math
 
 from mango.domain.domain_space import domain_space
-from mango.optimizer.bayesian_learning import BayesianLearning
 from scipy.stats import uniform
 from mango.tuner import Tuner
 

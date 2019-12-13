@@ -26,18 +26,15 @@ class Tuner():
         initial_random: int = 1
         num_iteration: int = 20
         batch_size: int = 1
-        objective: str = 'maximize'
         optimizer: str = 'Bayesian'
         parallel_strategy: str = 'penalty'
         surrogate: object = None # used to test different kernel functions
+        scale_y: bool = False
 
-        valid_objectives = ['maximize']
         valid_optimizers = ['Bayesian', 'Random']
         valid_parallel_strategies = ['penalty', 'clustering']
 
         def __post_init__(self):
-            if self.objective not in self.valid_objectives:
-                raise ValueError(f'objective: {self.objective} is not valid, should be one of {self.valid_objectives}')
             if self.optimizer not in self.valid_optimizers:
                 raise ValueError(f'optimizer: {self.optimizer} is not valid, should be one of {self.valid_optmizers}')
             if self.parallel_strategy not in self.valid_parallel_strategies:
@@ -59,8 +56,7 @@ class Tuner():
         def strategy_is_clustering(self):
             return self.parallel_strategy == 'clustering'
 
-
-    def __init__(self, param_dict, objective, conf_dict={}):
+    def __init__(self, param_dict, objective, conf_dict=None):
 
         # param_dict is a required parameter
         self.param_dict = param_dict
@@ -69,6 +65,8 @@ class Tuner():
         self.objective_function = objective
 
         # stores the configuration used by the tuner
+        if conf_dict is None:
+            conf_dict = {}
         self.config = Tuner.Config(**conf_dict)
         if self.config.domain_size is None:
             self.config.domain_size = self.calculateDomainSize(self.param_dict)
@@ -117,10 +115,7 @@ class Tuner():
         """
             Main function used by tuner to run the classifier evaluation
         """
-        if self.config.objective == 'maximize':
-            return self.maximize()
-        else:
-            raise ValueError(f'objective {self.config.objective} is not valid')
+        return self.maximize()
 
     def maximize(self):
         """
@@ -184,7 +179,14 @@ class Tuner():
             X_domain_np = ds.convert_GP_space(domain_list)
 
             # Black-Box Optimizer
-            Y_scaled = Y_sample / np.max(np.abs(Y_sample))
+            if self.config.scale_y:
+                scale = np.max(Y_sample) - np.min(Y_sample)
+                if scale == 0:
+                    scale = np.max(np.abs(Y_sample))
+                Y_scaled = (Y_sample - np.mean(Y_sample)) / scale
+            else:
+                Y_scaled = Y_sample
+
             if self.config.strategy_is_penalty:
                 X_next_batch = Optimizer.get_next_batch(X_sample, Y_scaled, X_domain_np,
                                                     batch_size=self.config.batch_size)
