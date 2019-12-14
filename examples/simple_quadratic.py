@@ -1,7 +1,6 @@
 from mango.tuner import Tuner
 from mango.scheduler import simple_local
 
-
 # search space
 param_space = dict(x=range(-10, 10))
 

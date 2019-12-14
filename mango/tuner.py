@@ -68,6 +68,12 @@ class Tuner():
         if self.conf_Dict['domain_size'] == None:
             self.calculateDomainSize()
 
+        # overwrite batch size if given as a property of objective function
+        # see schedulers
+        if hasattr(objective, 'batch_size'):
+            self.conf_Dict['batch_size'] = objective.batch_size
+
+
     """
     Calculating the domain size to be explored for finding
     optimum of bayesian optimizer

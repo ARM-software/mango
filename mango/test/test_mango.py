@@ -5,12 +5,11 @@ Testing the capabilities of Mango
 - Test the bayesian learning optimizer iterations
 - Test the results of tuner for simple objective function
 """
-import math
 
 from mango.domain.domain_space import domain_space
-from mango.optimizer.bayesian_learning import BayesianLearning
 from scipy.stats import uniform
 from mango.tuner import Tuner
+from mango.scheduler import simple_local, parallel_local
 
 # Simple param_dict
 param_dict = {"a": uniform(0, 1),  # uniform distribution
@@ -185,3 +184,36 @@ def test_convex():
 #
 #     assert abs(results['best_hyper_parameter']['x']) - abs(x_opt) <= 0.1
 #     assert abs(results['best_hyper_parameter']['y']) - abs(y_opt) <= 0.1
+
+
+def test_local_scheduler():
+    param_space = dict(x=range(-10, 10),
+                        y=range(-10, 10))
+
+    @simple_local
+    def obj(x, y):
+        return x - y
+
+    results = Tuner(param_space, obj).maximize()
+
+    assert abs(results['best_params']['x'] - 10) <= 3
+    assert abs(results['best_params']['y'] + 10) <= 3
+
+    @parallel_local(n_jobs=-1)
+    def obj(x, y):
+        return x - y
+
+    results = Tuner(param_space, obj).maximize()
+
+    assert abs(results['best_params']['x'] - 10) <= 3
+    assert abs(results['best_params']['y'] + 10) <= 3
+
+    @parallel_local(n_jobs=2)
+    def obj(x, y):
+        return x - y
+
+    results = Tuner(param_space, obj).maximize()
+
+    assert abs(results['best_params']['x'] - 10) <= 3
+    assert abs(results['best_params']['y'] + 10) <= 3
+
