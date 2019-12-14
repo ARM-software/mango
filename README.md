@@ -228,7 +228,7 @@ def objective_celery(params_list):
         result = process.get()
         evals.append(result)
         params.append(par)
-    return evals, params
+    return params, evals
 ```
 
 

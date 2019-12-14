@@ -1,0 +1,900 @@
+      {
+    "data_id": "4534",
+    "name": "PhishingWebsites",
+    "exact_name": "PhishingWebsites",
+    "version": 1,
+    "version_label": null,
+    "description": "**Author**: Rami Mustafa A Mohammad ( University of Huddersfield\",\"rami.mohammad '@' hud.ac.uk\",\"rami.mustafa.a '@' gmail.com) Lee McCluskey (University of Huddersfield\",\"t.l.mccluskey '@' hud.ac.uk )  Fadi Thabtah (Canadian University of Dubai\",\"fadi '@' cud.ac.ae)  \r\n**Source**: [UCI](https:\/\/archive.ics.uci.edu\/ml\/datasets\/phishing+websites)  \r\n**Please cite**: Please refer to the [Machine Learning Repository's citation policy](https:\/\/archive.ics.uci.edu\/ml\/citation_policy.html)  \r\n\r\nSource:\r\n\r\nRami Mustafa A Mohammad ( University of Huddersfield, rami.mohammad '@' hud.ac.uk, rami.mustafa.a '@' gmail.com)\r\nLee McCluskey (University of Huddersfield,t.l.mccluskey '@' hud.ac.uk )\r\nFadi Thabtah (Canadian University of Dubai,fadi '@' cud.ac.ae)\r\n\r\n\r\nData Set Information:\r\n\r\nOne of the challenges faced by our research was the unavailability of reliable training datasets. In fact this challenge faces any researcher in the field. However, although plenty of articles about predicting phishing websites have been disseminated these days, no reliable training dataset has been published publically, may be because there is no agreement in literature on the definitive features that characterize phishing webpages, hence it is difficult to shape a dataset that covers all possible features. \r\nIn this dataset, we shed light on the important features that have proved to be sound and effective in predicting phishing websites. In addition, we propose some new features.\r\n\r\n\r\nAttribute Information:\r\n\r\nFor Further information about the features see the features file in the [data folder](https:\/\/archive.ics.uci.edu\/ml\/machine-learning-databases\/00327\/Phishing Websites Features.docx) of UCI.\r\n\r\nRelevant Papers:\r\n\r\nMohammad, Rami, McCluskey, T.L. and Thabtah, Fadi (2012) An Assessment of Features Related to Phishing Websites using an Automated Technique. In: International Conferece For Internet Technology And Secured Transactions. ICITST 2012 . IEEE, London, UK, pp. 492-497. ISBN 978-1-4673-5325-0\r\n\r\nMohammad, Rami, Thabtah, Fadi Abdeljaber and McCluskey, T.L. (2014) Predicting phishing websites based on self-structuring neural network. Neural Computing and Applications, 25 (2). pp. 443-458. ISSN 0941-0643\r\n\r\nMohammad, Rami, McCluskey, T.L. and Thabtah, Fadi Abdeljaber (2014) Intelligent Rule based Phishing Websites Classification. IET Information Security, 8 (3). pp. 153-160. ISSN 1751-8709\r\n\r\n \r\n\r\nCitation Request:\r\n\r\nPlease refer to the Machine Learning Repository's citation policy",
+    "format": "ARFF",
+    "uploader": "Hilda Fabiola Bernard",
+    "uploader_id": 874,
+    "visibility": "public",
+    "creator": "\"Rami Mustafa A Mohammad ( University of Huddersfield\",\"rami.mohammad '@' hud.ac.uk\",\"rami.mustafa.a '@' gmail.com) Lee McCluskey (University of Huddersfield\",\"t.l.mccluskey '@' hud.ac.uk )  Fadi Thabtah (Canadian University of Dubai\",\"fadi '@' cud.ac.ae)\"",
+    "contributor": null,
+    "date": "2016-02-16 15:30:33",
+    "update_comment": null,
+    "last_update": "2016-02-16 15:30:33",
+    "licence": "Public",
+    "status": "active",
+    "error_message": null,
+    "url": "https:\/\/www.openml.org\/data\/download\/1798106\/phpV5QYya",
+    "default_target_attribute": "Result",
+    "row_id_attribute": null,
+    "ignore_attribute": null,
+    "runs": 50472,
+    "suggest": {
+        "input": [
+            "PhishingWebsites",
+            "Source: Rami Mustafa A Mohammad ( University of Huddersfield, rami.mohammad '@' hud.ac.uk, rami.mustafa.a '@' gmail.com) Lee McCluskey (University of Huddersfield,t.l.mccluskey '@' hud.ac.uk ) Fadi Thabtah (Canadian University of Dubai,fadi '@' cud.ac.ae) Data Set Information: One of the challenges faced by our research was the unavailability of reliable training datasets. In fact this challenge faces any researcher in the field. However, although plenty of articles about predicting phishing web "
+        ],
+        "weight": 5
+    },
+    "qualities": {
+        "NumberOfInstances": 11055,
+        "NumberOfFeatures": 31,
+        "NumberOfClasses": 2,
+        "NumberOfMissingValues": 0,
+        "NumberOfInstancesWithMissingValues": 0,
+        "NumberOfNumericFeatures": 0,
+        "NumberOfSymbolicFeatures": 31,
+        "Quartile2MutualInformation": 0.004244512283695,
+        "MajorityClassPercentage": 55.69425599276345,
+        "MeanStdDevOfNumericAtts": null,
+        "Quartile2SkewnessOfNumericAtts": null,
+        "MajorityClassSize": 6157,
+        "MinAttributeEntropy": 0.2561389659388827,
+        "PercentageOfBinaryFeatures": 74.19354838709677,
+        "Quartile2StdDevOfNumericAtts": null,
+        "MaxAttributeEntropy": 1.5804621985076048,
+        "MinKurtosisOfNumericAtts": null,
+        "PercentageOfInstancesWithMissingValues": 0,
+        "Quartile3AttributeEntropy": 0.995608283342358,
+        "MaxKurtosisOfNumericAtts": null,
+        "MinMeansOfNumericAtts": null,
+        "PercentageOfMissingValues": 0,
+        "Quartile3KurtosisOfNumericAtts": null,
+        "MaxMeansOfNumericAtts": null,
+        "MinMutualInformation": 5.321e-9,
+        "PercentageOfNumericFeatures": 0,
+        "Quartile3MeansOfNumericAtts": null,
+        "MaxMutualInformation": 0.49948275653695,
+        "MinNominalAttDistinctValues": 2,
+        "PercentageOfSymbolicFeatures": 100,
+        "Quartile3MutualInformation": 0.0397568479047425,
+        "MaxNominalAttDistinctValues": 3,
+        "MinSkewnessOfNumericAtts": null,
+        "MinStdDevOfNumericAtts": null,
+        "Quartile1AttributeEntropy": 0.5710587174076079,
+        "Quartile3SkewnessOfNumericAtts": null,
+        "MaxSkewnessOfNumericAtts": null,
+        "MinorityClassPercentage": 44.30574400723655,
+        "Quartile1KurtosisOfNumericAtts": null,
+        "Quartile3StdDevOfNumericAtts": null,
+        "MaxStdDevOfNumericAtts": null,
+        "MinorityClassSize": 4898,
+        "Quartile1MeansOfNumericAtts": null,
+        "StdvNominalAttDistinctValues": 0.44480272297456935,
+        "MeanAttributeEntropy": 0.8349962447495504,
+        "NumberOfBinaryFeatures": 23,
+        "Quartile1MutualInformation": 0.001051012802985,
+        "MeanKurtosisOfNumericAtts": null,
+        "Quartile1SkewnessOfNumericAtts": null,
+        "MeanMeansOfNumericAtts": null,
+        "Quartile1StdDevOfNumericAtts": null,
+        "AutoCorrelation": 0.5140220734575719,
+        "MeanMutualInformation": 0.05198088722790433,
+        "Quartile2AttributeEntropy": 0.7003712324940401,
+        "ClassEntropy": 0.9906239227414301,
+        "MeanNoiseToSignalRatio": 15.063524292854096,
+        "Quartile2KurtosisOfNumericAtts": null,
+        "Dimensionality": 0.002804161013116237,
+        "MeanNominalAttDistinctValues": 2.2580645161290325,
+        "Quartile2MeansOfNumericAtts": null,
+        "EquivalentNumberOfAtts": 19.057464686936783,
+        "MeanSkewnessOfNumericAtts": null
+    },
+    "tags": [
+        {
+            "tag": "OpenML-CC18",
+            "uploader": "1"
+        },
+        {
+            "tag": "OpenML100",
+            "uploader": "348"
+        },
+        {
+            "tag": "study_123",
+            "uploader": "3886"
+        },
+        {
+            "tag": "study_14",
+            "uploader": "64"
+        },
+        {
+            "tag": "study_144",
+            "uploader": "5824"
+        },
+        {
+            "tag": "study_34",
+            "uploader": "1"
+        },
+        {
+            "tag": "study_52",
+            "uploader": "64"
+        },
+        {
+            "tag": "study_98",
+            "uploader": "1935"
+        },
+        {
+            "tag": "study_99",
+            "uploader": "1"
+        }
+    ],
+    "features": [
+        {
+            "name": "Result",
+            "index": "30",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "target": "1",
+            "distr": [
+                [
+                    "-1",
+                    "1"
+                ],
+                [
+                    [
+                        "4898",
+                        "0"
+                    ],
+                    [
+                        "0",
+                        "6157"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "having_IP_Address",
+            "index": "0",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "-1",
+                    "1"
+                ],
+                [
+                    [
+                        "1926",
+                        "1867"
+                    ],
+                    [
+                        "2972",
+                        "4290"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "URL_Length",
+            "index": "1",
+            "type": "nominal",
+            "distinct": "3",
+            "missing": "0",
+            "distr": [
+                [
+                    "1",
+                    "0",
+                    "-1"
+                ],
+                [
+                    [
+                        "736",
+                        "1224"
+                    ],
+                    [
+                        "83",
+                        "52"
+                    ],
+                    [
+                        "4079",
+                        "4881"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "Shortining_Service",
+            "index": "2",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "1",
+                    "-1"
+                ],
+                [
+                    [
+                        "4384",
+                        "5227"
+                    ],
+                    [
+                        "514",
+                        "930"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "having_At_Symbol",
+            "index": "3",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "1",
+                    "-1"
+                ],
+                [
+                    [
+                        "4061",
+                        "5339"
+                    ],
+                    [
+                        "837",
+                        "818"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "double_slash_redirecting",
+            "index": "4",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "-1",
+                    "1"
+                ],
+                [
+                    [
+                        "562",
+                        "867"
+                    ],
+                    [
+                        "4336",
+                        "5290"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "Prefix_Suffix",
+            "index": "5",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "-1",
+                    "1"
+                ],
+                [
+                    [
+                        "4898",
+                        "4692"
+                    ],
+                    [
+                        "0",
+                        "1465"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "having_Sub_Domain",
+            "index": "6",
+            "type": "nominal",
+            "distinct": "3",
+            "missing": "0",
+            "distr": [
+                [
+                    "-1",
+                    "0",
+                    "1"
+                ],
+                [
+                    [
+                        "1836",
+                        "1527"
+                    ],
+                    [
+                        "2252",
+                        "1370"
+                    ],
+                    [
+                        "810",
+                        "3260"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "SSLfinal_State",
+            "index": "7",
+            "type": "nominal",
+            "distinct": "3",
+            "missing": "0",
+            "distr": [
+                [
+                    "-1",
+                    "1",
+                    "0"
+                ],
+                [
+                    [
+                        "3051",
+                        "506"
+                    ],
+                    [
+                        "701",
+                        "5630"
+                    ],
+                    [
+                        "1146",
+                        "21"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "Domain_registeration_length",
+            "index": "8",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "-1",
+                    "1"
+                ],
+                [
+                    [
+                        "2690",
+                        "4699"
+                    ],
+                    [
+                        "2208",
+                        "1458"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "Favicon",
+            "index": "9",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "1",
+                    "-1"
+                ],
+                [
+                    [
+                        "3989",
+                        "5013"
+                    ],
+                    [
+                        "909",
+                        "1144"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "port",
+            "index": "10",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "1",
+                    "-1"
+                ],
+                [
+                    [
+                        "4164",
+                        "5389"
+                    ],
+                    [
+                        "734",
+                        "768"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "HTTPS_token",
+            "index": "11",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "-1",
+                    "1"
+                ],
+                [
+                    [
+                        "715",
+                        "1081"
+                    ],
+                    [
+                        "4183",
+                        "5076"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "Request_URL",
+            "index": "12",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "1",
+                    "-1"
+                ],
+                [
+                    [
+                        "2223",
+                        "4337"
+                    ],
+                    [
+                        "2675",
+                        "1820"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "URL_of_Anchor",
+            "index": "13",
+            "type": "nominal",
+            "distinct": "3",
+            "missing": "0",
+            "distr": [
+                [
+                    "-1",
+                    "0",
+                    "1"
+                ],
+                [
+                    [
+                        "3246",
+                        "36"
+                    ],
+                    [
+                        "1502",
+                        "3835"
+                    ],
+                    [
+                        "150",
+                        "2286"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "Links_in_tags",
+            "index": "14",
+            "type": "nominal",
+            "distinct": "3",
+            "missing": "0",
+            "distr": [
+                [
+                    "1",
+                    "-1",
+                    "0"
+                ],
+                [
+                    [
+                        "767",
+                        "1883"
+                    ],
+                    [
+                        "2387",
+                        "1569"
+                    ],
+                    [
+                        "1744",
+                        "2705"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "SFH",
+            "index": "15",
+            "type": "nominal",
+            "distinct": "3",
+            "missing": "0",
+            "distr": [
+                [
+                    "-1",
+                    "1",
+                    "0"
+                ],
+                [
+                    [
+                        "4238",
+                        "4202"
+                    ],
+                    [
+                        "397",
+                        "1457"
+                    ],
+                    [
+                        "263",
+                        "498"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "Submitting_to_email",
+            "index": "16",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "-1",
+                    "1"
+                ],
+                [
+                    [
+                        "931",
+                        "1083"
+                    ],
+                    [
+                        "3967",
+                        "5074"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "Abnormal_URL",
+            "index": "17",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "-1",
+                    "1"
+                ],
+                [
+                    [
+                        "604",
+                        "1025"
+                    ],
+                    [
+                        "4294",
+                        "5132"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "Redirect",
+            "index": "18",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "0",
+                    "1"
+                ],
+                [
+                    [
+                        "4296",
+                        "5480"
+                    ],
+                    [
+                        "602",
+                        "677"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "on_mouseover",
+            "index": "19",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "1",
+                    "-1"
+                ],
+                [
+                    [
+                        "4241",
+                        "5499"
+                    ],
+                    [
+                        "657",
+                        "658"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "RightClick",
+            "index": "20",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "1",
+                    "-1"
+                ],
+                [
+                    [
+                        "4673",
+                        "5906"
+                    ],
+                    [
+                        "225",
+                        "251"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "popUpWidnow",
+            "index": "21",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "1",
+                    "-1"
+                ],
+                [
+                    [
+                        "3951",
+                        "4967"
+                    ],
+                    [
+                        "947",
+                        "1190"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "Iframe",
+            "index": "22",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "1",
+                    "-1"
+                ],
+                [
+                    [
+                        "4455",
+                        "5588"
+                    ],
+                    [
+                        "443",
+                        "569"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "age_of_domain",
+            "index": "23",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "-1",
+                    "1"
+                ],
+                [
+                    [
+                        "2632",
+                        "2557"
+                    ],
+                    [
+                        "2266",
+                        "3600"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "DNSRecord",
+            "index": "24",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "-1",
+                    "1"
+                ],
+                [
+                    [
+                        "1718",
+                        "1725"
+                    ],
+                    [
+                        "3180",
+                        "4432"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "web_traffic",
+            "index": "25",
+            "type": "nominal",
+            "distinct": "3",
+            "missing": "0",
+            "distr": [
+                [
+                    "-1",
+                    "0",
+                    "1"
+                ],
+                [
+                    [
+                        "1673",
+                        "982"
+                    ],
+                    [
+                        "1718",
+                        "851"
+                    ],
+                    [
+                        "1507",
+                        "4324"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "Page_Rank",
+            "index": "26",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "-1",
+                    "1"
+                ],
+                [
+                    [
+                        "3885",
+                        "4316"
+                    ],
+                    [
+                        "1013",
+                        "1841"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "Google_Index",
+            "index": "27",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "1",
+                    "-1"
+                ],
+                [
+                    [
+                        "3971",
+                        "5545"
+                    ],
+                    [
+                        "927",
+                        "612"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "Links_pointing_to_page",
+            "index": "28",
+            "type": "nominal",
+            "distinct": "3",
+            "missing": "0",
+            "distr": [
+                [
+                    "1",
+                    "0",
+                    "-1"
+                ],
+                [
+                    [
+                        "1776",
+                        "2575"
+                    ],
+                    [
+                        "2929",
+                        "3227"
+                    ],
+                    [
+                        "193",
+                        "355"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "Statistical_report",
+            "index": "29",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "-1",
+                    "1"
+                ],
+                [
+                    [
+                        "839",
+                        "711"
+                    ],
+                    [
+                        "4059",
+                        "5446"
+                    ]
+                ]
+            ]
+        }
+    ],
+    "nr_of_issues": 0,
+    "nr_of_downvotes": 0,
+    "nr_of_likes": 0,
+    "nr_of_downloads": 18,
+    "total_downloads": 25,
+    "reach": 18,
+    "reuse": 18,
+    "impact_of_reuse": 0,
+    "reach_of_reuse": 0,
+    "impact": 18
+}
