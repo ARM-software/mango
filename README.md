@@ -319,28 +319,20 @@ The default configuration parameters used by the Mango as below:
  'domain_size': 5000,
  'initial_random': 1,
  'num_iteration': 20,
- 'objective': 'maximize',
  'batch_size': 1}
 ```
 The configuration parameters are explained:
-- domain_size: The size which is explored in each iteration by the gaussian process. Generally, a larger size is prefered if higher dimensional functions are optimized. More on this will be added with details about the internals of bayesian optimization.
+- domain_size: The size which is explored in each iteration by the gaussian process. Generally, a larger size is preferred if higher dimensional functions are optimized. More on this will be added with details about the internals of bayesian optimization.
 - initial_random: The number of random samples tried.
 - num_iteration: The total number of iterations used by Mango to find the optimal value.
-- objective: Default objective of maximizing is used. Minimize objective is not supported yet. Minimize objective can be achieved by evaluating the negative of the function.
 - batch_size: The size of args_list passed to the objective function for parallel evaluation. For larger batch sizes, Mango internally uses intelligent sampling to decide the optimal samples to evaluate.
 
 The default configuration parameters can be modified, as shown below. Only the parameters whose values need to adjusted can be passed as the dictionary.
 
 ```python
-conf_dict = dict()
-conf_dict['batch_size'] = 5
-conf_dict['num_iteration'] = 40
-conf_dict['domain_size'] = 10000
-conf_dict['initial_random'] = 3
+conf_dict = dict(num_iteration=40, domain_size=10000, initial_random=3)
 
-tuner_user = Tuner(param_dict, objective_Xgboost,conf_dict) 
-
-# Now tuner_user can be used as shown in other examples.
+tuner = Tuner(param_dict, objective, conf_dict) 
 ```
 
 <!--
@@ -367,4 +359,4 @@ Details about specifying parameter/variable domain space, user objective functio
 Please stay tuned. 
 -->
 
-For any questions feel free to reach out by creating an issue [here](https://github.com/ARM-software/mango/issues/new)
+For any questions feel free to reach out by creating an issue [here](https://github.com/ARM-software/mango/issues/new).
