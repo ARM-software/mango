@@ -12,12 +12,12 @@ Mango internally uses parallel implementation of a multi-armed bandit bayesian o
 2. [Getting started ](#getting-started)
 3. [Hyperparameter tuning example ](#knnexample)
 4. [Search space definitions](#DomainSpace)
-5. [More on objective function](#ObjectiveFunction)
+5. [Scheduler](#scheduler)
 6. [Optional configurations](#MangoConfigurations)
-7. [Schedule Objective Function on Celery](#Celery)
-8. [Algorithms](#mangoAlgorithms)
 
 <!--
+7. [Schedule Objective Function on Celery](#Celery)
+8. [Algorithms](#mangoAlgorithms)
 9. [ Tune Hyperparameters of Facebook Prophet ](https://github.com/ARM-software/mango/blob/master/examples/Prophet_Classifier.ipynb)
 10. [ Tune Hyperparameters of xgboost XGBRegressor ](https://github.com/ARM-software/mango/blob/master/examples/Xgboost_Example.ipynb)
 11. [ Tune Hyperparameters of xgboost XGBClassifier ](https://github.com/ARM-software/mango/blob/master/examples/Xgboost_XGBClassifier.ipynb)
@@ -45,14 +45,13 @@ $ pip3 install .
 Mango is straightforward to use. Following example minimizes the quadratic function whose input is an integer between -10 and 10.
 
 ```python
-from mango.tuner import Tuner
-from mango.scheduler import simple_local
+from mango import scheduler, Tuner
 
 # Search space
 param_space = dict(x=range(-10,10))
              
 # Quadratic objective Function
-@simple_local
+@scheduler.serial
 def objective(x): 
     return x * x
 
@@ -72,8 +71,7 @@ from sklearn import datasets
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_val_score
 
-from mango.tuner import Tuner
-from mango.scheduler import simple_local
+from mango import Tuner, scheduler
 
 # search space for KNN classifier's hyperparameters
 # n_neighbors can vary between 1 and 50, with different choices of algorithm
@@ -81,7 +79,7 @@ param_space = dict(n_neighbors=range(1, 50),
                    algorithm=['auto', 'ball_tree', 'kd_tree', 'brute'])
 
 
-@simple_local
+@scheduler.serial
 def objective(**params):
     X, y = datasets.load_breast_cancer(return_X_y=True)
     clf = KNeighborsClassifier(**params)
@@ -96,7 +94,9 @@ print('best accuracy:', results['best_objective'])
 # => best parameters: {'algorithm': 'auto', 'n_neighbors': 11}
 # => best accuracy: 0.931486122714193
 ```
-Note that best parameters may be different but accuracy should be ~ 0.9315. More examples are available in the `examples` directory.
+Note that best parameters may be different but accuracy should be ~ 0.9315. More examples are available 
+in the `examples` directory ([Facebook's Prophet](https://github.com/ARM-software/mango/blob/master/examples/Prophet_Classifier.ipynb), 
+[XGBoost](https://github.com/ARM-software/mango/blob/master/examples/Xgboost_XGBClassifier.ipynb), [SVM](https://github.com/ARM-software/mango/blob/master/examples/SVM_Example.ipynb)).
 
 
 <a name="DomainSpace"></a>
@@ -153,7 +153,7 @@ param_space = dict(learning_rate=loguniform(-3, 2))
 ```
 
 
-#### Hyperparameter search space examples
+### Hyperparameter search space examples
 Example hyperparameter search space for [Random Forest Classifier](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html):
 ```python
 param_space =  dict(
@@ -197,6 +197,83 @@ param_dict = {
 } 
 ```
 
+<a name="scheduler"></a>
+## 5. Scheduler
+
+Mango is designed to take advantage of distributed computing. The objective function can be scheduled to 
+run locally or on a cluster with parallel evaluations. Mango is designed to allow the use of any distributed 
+computing framework (like Celery or Kubernetes). The `scheduler` module comes with some pre-defined 
+schedulers.
+
+### Serial scheduler
+Serial scheduler runs locally with one objective function evaluation at a time
+```python
+from mango import scheduler
+
+@scheduler.serial
+def objective(x): 
+    return x * x
+```
+
+### Parallel scheduler
+Parallel scheduler runs locally and uses `joblib` to evaluate the objective functions in parallel
+```python
+from mango import scheduler
+
+@scheduler.parallel(n_jobs=2)
+def objective(x): 
+    return x * x
+```
+`n_jobs` specifies the number of parallel evaluations. `n_jobs = -1` uses all the available cpu cores 
+on the machine. See [simple_parallel]([examples](https://github.com/ARM-software/mango/tree/master/example/simple_parallel.py)) 
+for full working example.
+
+### Custom distributed scheduler
+Users can define their own distribution strategies using `custom` scheduler. To do so, users need to define
+an objective function that takes a list of parameters and returns the list of results:
+```python
+from mango import scheduler
+
+@scheduler.custom(n_jobs=4)
+def objective(params_batch):
+    """ Template for custom distributed objective function
+    Args:
+        params_batch (list): Batch of parameter dictionaries to be evaluated in parallel 
+    
+    Returns:
+        list: Values of objective function at given parameters
+    """
+    # evaluate the objective on a distributed framework
+    ...
+    return results
+```
+
+For example the following snippet uses [Celery](http://www.celeryproject.org/): 
+```python
+import celery
+from mango import Tuner, scheduler
+
+# connect to celery backend
+app = celery.Celery('simple_celery', backend='rpc://')
+
+# remote celery task
+@app.task
+def remote_objective(x):
+    return x * x
+
+@scheduler.custom(n_jobs=4)
+def objective(params_batch):
+    jobs = celery.group(remote_objective.s(params['x']) for params in params_batch)()
+    return jobs.get()
+
+param_space = dict(x=range(-10, 10))
+
+tuner = Tuner(param_space, objective)
+results = tuner.minimize()
+```
+A working example to tune hyperparameters of KNN using Celery is [here](https://github.com/ARM-software/mango/tree/master/example/knn_celery.py).
+ 
+<!--
 <a name="ObjectiveFunction"></a>
 ## 5. More on Objective Function
 The serial objective function has the following structure.
@@ -230,10 +307,10 @@ def objective_celery(params_list):
         params.append(par)
     return params, evals
 ```
-
+-->
 
 <a name="MangoConfigurations"></a>
-## 6. Controlling Mango Configurations
+## 6. Optional configurations
 
 The default configuration parameters used by the Mango as below:
 ```python
@@ -266,6 +343,7 @@ tuner_user = Tuner(param_dict, objective_Xgboost,conf_dict)
 # Now tuner_user can be used as shown in other examples.
 ```
 
+<!--
 <a name="Celery"></a>
 ## 7. Schedule Objective Function on Celery
 User-defined objective function can be scheduled on local, cluster or cloud infrastructure. The objective function scheduler
@@ -277,7 +355,7 @@ are running. Default celery configurations can be modified in the [file](https:/
 - [Prophet example using celery workers](https://github.com/ARM-software/mango/blob/master/examples/Prophet_Celery.ipynb)
 
 More examples will be included to show the scheduling of objective function using local threads/processes. By default examples schedule
-the objective function on the local machine itself.
+the objective function on the local machine itself. 
 
 <a name ="mangoAlgorithms"></a>
 ## 8. Algorithms
@@ -286,4 +364,7 @@ The optimization algorithms in Mango are based on widely used Bayesian optimizat
 <a name="contactDetails"></a>
 ## More Details
 Details about specifying parameter/variable domain space, user objective function, and internals of Mango will be added.
-Please stay tuned. For any questions feel free to reach out by creating an issue [here](https://github.com/ARM-software/mango/issues/new).
+Please stay tuned. 
+-->
+
+For any questions feel free to reach out by creating an issue [here](https://github.com/ARM-software/mango/issues/new)

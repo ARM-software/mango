@@ -171,6 +171,8 @@ class Tuner:
         hyper_parameters_tried = random_hyper_parameters
         objective_function_values = Y_list
 
+        x_failed_evaluations = np.array([])
+
         # running the iterations
         pbar = tqdm(range(self.config.num_iteration))
         for i in pbar:
@@ -202,9 +204,24 @@ class Tuner:
             # Scheduler
             X_next_PS = ds.convert_PS_space(X_next_batch)
 
+            # if all the xs have failed before, replace them with random sample
+            # as we will not get any new information otherwise
+            if all(x in x_failed_evaluations for x in X_next_PS):
+                X_next_PS = ds.get_random_sample(self.config.batch_size)
+
             # Evaluate the Objective function
             # Y_next_batch, Y_next_list = self.runUserObjective(X_next_PS)
             X_next_list, Y_next_list = self.runUserObjective(X_next_PS)
+
+            # keep track of all parameters that failed
+            x_failed = [x for x in X_next_PS if x not in X_next_list]
+            x_failed_evaluations = np.append(x_failed_evaluations, x_failed)
+
+            if len(Y_next_list) == 0:
+                # no values returned
+                # this is problematic if domain is small and same value is tried again in the next iteration as the optimizer would be stuck
+                continue
+
             Y_next_batch = Y_next_list.reshape(len(Y_next_list), 1)
             # update X_next_batch to successfully evaluated values
             X_next_batch = ds.convert_GP_space(X_next_list)
@@ -223,6 +240,10 @@ class Tuner:
 
         results['best_objective'] = np.max(Y_sample)
         results['best_params'] = hyper_parameters_tried[np.argmax(Y_sample)]
+
+        if self.maximize_objective is False:
+            results['objective_values'] = -1 * results['objective_values']
+            results['best_objective'] = -1 * results['best_objective']
 
         # saving the optimizer and ds in the tuner object which can save the surrogate function and ds details
         self.Optimizer = Optimizer
@@ -256,6 +277,10 @@ class Tuner:
         if len(Y_sample_list) > 0:
             results['best_objective'] = np.max(Y_sample_list)
             results['best_params'] = X_sample_list[np.argmax(Y_sample_list)]
+
+        if self.maximize_objective is False:
+            results['objective_values'] = -1 * results['objective_values']
+            results['best_objective'] = -1 * results['best_objective']
 
         return results
 
