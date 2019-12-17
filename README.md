@@ -225,7 +225,7 @@ def objective(x):
     return x * x
 ```
 `n_jobs` specifies the number of parallel evaluations. `n_jobs = -1` uses all the available cpu cores 
-on the machine. See [simple_parallel]([examples](https://github.com/ARM-software/mango/tree/master/example/simple_parallel.py)) 
+on the machine. See [simple_parallel]((https://github.com/ARM-software/mango/tree/master/example/simple_parallel.py)) 
 for full working example.
 
 ### Custom distributed scheduler
