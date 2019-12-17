@@ -6,7 +6,7 @@ import numpy as np
 import re
 
 
-class PostProcess():
+class PostProcess:
 
     def __init__(self, results_dir):
         self.results_dir = results_dir
@@ -51,7 +51,7 @@ class PostProcess():
 
 if __name__ == "__main__":
     # collect results
-    pp = PostProcess('results2/')
+    pp = PostProcess('results/')
     # for task_id, scores in pp.task_results.items():
     #     pp.plot(task_id, scores, 'plots')
     task_results = pp.task_results
@@ -68,7 +68,7 @@ if __name__ == "__main__":
         for optimizer in optimizers_required:
             normalized_scores[task_id][optimizer] = scores[optimizer] / max_random
 
-    clf = 'xgb'
+    clf = 'svm'
     print(clf)
     print(len(list(i for i in normalized_scores if re.match("^%s" % clf, i))))
     # for task_id, scores in normalized_scores.items():
@@ -76,8 +76,8 @@ if __name__ == "__main__":
 
     mean_scores = {}
     for optimizer in optimizers_required:
-        mean_scores[optimizer] = np.array([ scores[optimizer] for task_id, scores in normalized_scores.items()
-                                            if re.match("^%s.*" % clf, task_id)])
+        mean_scores[optimizer] = np.array([scores[optimizer] for task_id, scores in normalized_scores.items()
+                                           if re.match("^%s.*" % clf, task_id)])
         mean_scores[optimizer] = np.mean(mean_scores[optimizer], axis=0)
 
-    pp.plot("mean_scores_%s" % clf, mean_scores, 'plots2')
+    pp.plot("mean_scores_%s" % clf, mean_scores, 'plots')
