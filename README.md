@@ -225,7 +225,7 @@ def objective(x):
     return x * x
 ```
 `n_jobs` specifies the number of parallel evaluations. `n_jobs = -1` uses all the available cpu cores 
-on the machine. See [simple_parallel](https://github.com/ARM-software/mango/tree/master/example/simple_parallel.py) 
+on the machine. See [simple_parallel](https://github.com/ARM-software/mango/tree/master/examples/simple_parallel.py) 
 for full working example.
 
 ### Custom distributed scheduler
@@ -271,7 +271,7 @@ param_space = dict(x=range(-10, 10))
 tuner = Tuner(param_space, objective)
 results = tuner.minimize()
 ```
-A working example to tune hyperparameters of KNN using Celery is [here](https://github.com/ARM-software/mango/tree/master/example/knn_celery.py).
+A working example to tune hyperparameters of KNN using Celery is [here](https://github.com/ARM-software/mango/tree/master/examples/knn_celery.py).
  
 <!--
 <a name="ObjectiveFunction"></a>
