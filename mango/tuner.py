@@ -18,7 +18,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-class Tuner():
+class Tuner:
 
     @dataclass
     class Config:
@@ -58,18 +58,21 @@ class Tuner():
 
     def __init__(self, param_dict, objective, conf_dict=None):
 
-        # param_dict is a required parameter
         self.param_dict = param_dict
-
-        # Objective function is a required parameter
         self.objective_function = objective
+        self.maximize_objective = True
 
-        # stores the configuration used by the tuner
         if conf_dict is None:
             conf_dict = {}
+
         self.config = Tuner.Config(**conf_dict)
+
         if self.config.domain_size is None:
             self.config.domain_size = self.calculateDomainSize(self.param_dict)
+
+        # overwrite batch size if given as a property of objective function
+        if hasattr(objective, 'batch_size'):
+            self.config.batch_size = objective.batch_size
 
         # stores the results of using the tuner
         self.results = dict()
@@ -112,16 +115,6 @@ class Tuner():
         return domain_size
 
     def run(self):
-        """
-            Main function used by tuner to run the classifier evaluation
-        """
-        return self.maximize()
-
-    def maximize(self):
-        """
-            Main function used by tuner to run the classifier evaluation
-        """
-        # running the optimizer
         if self.config.is_bayesian:
             self.results = self.runBayesianOptimizer()
         elif self.config.is_random:
@@ -130,6 +123,13 @@ class Tuner():
             raise ValueError("Unknown Optimizer %s" % self.config.optimizer)
 
         return self.results
+
+    def maximize(self):
+        return self.run()
+
+    def minimize(self):
+        self.maximize_objective = False
+        return self.run()
 
     def runBayesianOptimizer(self):
         results = dict()
@@ -147,8 +147,8 @@ class Tuner():
             random_hps = ds.get_random_sample(self.config.initial_random - len(Y_list))
             X_list2, Y_list2 = self.runUserObjective(random_hps)
             random_hyper_parameters.extend(random_hps)
-            X_list.extend(X_list2)
-            Y_list.extend(Y_list2)
+            X_list = np.append(X_list, X_list2)
+            Y_list = np.append(Y_list, Y_list2)
             n_tries += 1
 
         if len(Y_list) == 0:
@@ -156,7 +156,7 @@ class Tuner():
 
         # evaluated hyper parameters are used
         X_init = ds.convert_GP_space(X_list)
-        Y_init = np.array(Y_list).reshape(len(Y_list), 1)
+        Y_init = Y_list.reshape(len(Y_list), 1)
 
         # setting the initial random hyper parameters tried
         results['random_params'] = X_list
@@ -170,6 +170,8 @@ class Tuner():
 
         hyper_parameters_tried = random_hyper_parameters
         objective_function_values = Y_list
+
+        x_failed_evaluations = np.array([])
 
         # running the iterations
         pbar = tqdm(range(self.config.num_iteration))
@@ -202,16 +204,31 @@ class Tuner():
             # Scheduler
             X_next_PS = ds.convert_PS_space(X_next_batch)
 
+            # if all the xs have failed before, replace them with random sample
+            # as we will not get any new information otherwise
+            if all(x in x_failed_evaluations for x in X_next_PS):
+                X_next_PS = ds.get_random_sample(self.config.batch_size)
+
             # Evaluate the Objective function
             # Y_next_batch, Y_next_list = self.runUserObjective(X_next_PS)
             X_next_list, Y_next_list = self.runUserObjective(X_next_PS)
-            Y_next_batch = np.array(Y_next_list).reshape(len(Y_next_list), 1)
+
+            # keep track of all parameters that failed
+            x_failed = [x for x in X_next_PS if x not in X_next_list]
+            x_failed_evaluations = np.append(x_failed_evaluations, x_failed)
+
+            if len(Y_next_list) == 0:
+                # no values returned
+                # this is problematic if domain is small and same value is tried again in the next iteration as the optimizer would be stuck
+                continue
+
+            Y_next_batch = Y_next_list.reshape(len(Y_next_list), 1)
             # update X_next_batch to successfully evaluated values
             X_next_batch = ds.convert_GP_space(X_next_list)
 
             # update the bookeeping of values tried
-            hyper_parameters_tried = hyper_parameters_tried + X_next_list
-            objective_function_values = objective_function_values + Y_next_list
+            hyper_parameters_tried = np.append(hyper_parameters_tried, X_next_list)
+            objective_function_values = np.append(objective_function_values, Y_next_list)
 
             # Appending to the current samples
             X_sample = np.vstack((X_sample, X_next_batch))
@@ -223,6 +240,10 @@ class Tuner():
 
         results['best_objective'] = np.max(Y_sample)
         results['best_params'] = hyper_parameters_tried[np.argmax(Y_sample)]
+
+        if self.maximize_objective is False:
+            results['objective_values'] = -1 * results['objective_values']
+            results['best_objective'] = -1 * results['best_objective']
 
         # saving the optimizer and ds in the tuner object which can save the surrogate function and ds details
         self.Optimizer = Optimizer
@@ -244,8 +265,9 @@ class Tuner():
             random_hyper_parameters = ds.get_random_sample(self.config.batch_size)
             X_list, Y_list = self.runUserObjective(random_hyper_parameters)
 
-            X_sample_list = X_sample_list + X_list
-            Y_sample_list = Y_sample_list + Y_list
+            X_sample_list = np.append(X_sample_list, X_list)
+            Y_sample_list = np.append(Y_sample_list, Y_list)
+
             pbar.set_description("Best score: %s" % np.max(np.array(Y_sample_list)))
 
         # After all the iterations are done now bookkeeping and best hyper parameter values
@@ -253,8 +275,12 @@ class Tuner():
         results['objective_values'] = Y_sample_list
 
         if len(Y_sample_list) > 0:
-            results['best_objective'] = np.max(np.array(Y_sample_list))
-            results['best_params'] = X_sample_list[np.argmax(np.array(Y_sample_list))]
+            results['best_objective'] = np.max(Y_sample_list)
+            results['best_params'] = X_sample_list[np.argmax(Y_sample_list)]
+
+        if self.maximize_objective is False:
+            results['objective_values'] = -1 * results['objective_values']
+            results['best_objective'] = -1 * results['best_objective']
 
         return results
 
@@ -267,5 +293,11 @@ class Tuner():
         # if result is a tuple, then there is possibility that partial values are evaluated
         if isinstance(results, tuple):
             X_list_evaluated, Y_list_evaluated = results
+
+        X_list_evaluated = np.array(X_list_evaluated)
+        if self.maximize_objective is False:
+            Y_list_evaluated = -1 * np.array(Y_list_evaluated)
+        else:
+            Y_list_evaluated = np.array(Y_list_evaluated)
 
         return X_list_evaluated, Y_list_evaluated

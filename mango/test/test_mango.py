@@ -7,9 +7,10 @@ Testing the capabilities of Mango
 """
 import math
 
-from mango.domain.domain_space import domain_space
 from scipy.stats import uniform
-from mango.tuner import Tuner
+
+from mango.domain.domain_space import domain_space
+from mango import Tuner, scheduler
 
 # Simple param_dict
 param_dict = {"a": uniform(0, 1),  # uniform distribution
@@ -123,18 +124,50 @@ def test_convex():
         for hyper_par in args_list:
             x = hyper_par['x']
             y = hyper_par['y']
-            result = -(x ** 2 + y ** 2) #/ (1e4 + 20*20)
+            result = (x ** 2 + y ** 2) / 1e4
             results.append(result)
         return results
 
     tuner = Tuner(param_dict, objfunc)
-    results = tuner.maximize()
+    results = tuner.minimize()
 
     print('best hyper parameters:', results['best_params'])
     print('best Accuracy:', results['best_objective'])
 
     assert abs(results['best_params']['x'] - x_opt) <= 3
     assert abs(results['best_params']['y'] - y_opt) <= 3
+
+def test_local_scheduler():
+    param_space = dict(x=range(-10, 10),
+                        y=range(-10, 10))
+
+    @scheduler.serial
+    def obj(x, y):
+        return x - y
+
+    results = Tuner(param_space, obj).maximize()
+
+    assert abs(results['best_params']['x'] - 10) <= 3
+    assert abs(results['best_params']['y'] + 10) <= 3
+
+    @scheduler.parallel(n_jobs=-1)
+    def obj(x, y):
+        return x - y
+
+    results = Tuner(param_space, obj).maximize()
+
+    assert abs(results['best_params']['x'] - 10) <= 3
+    assert abs(results['best_params']['y'] + 10) <= 3
+
+    @scheduler.parallel(n_jobs=2)
+    def obj(x, y):
+        return x - y
+
+    results = Tuner(param_space, obj).maximize()
+
+    assert abs(results['best_params']['x'] - 10) <= 3
+    assert abs(results['best_params']['y'] + 10) <= 3
+
 
 def test_six_hump():
     def camel(x,y):
@@ -167,3 +200,72 @@ def test_six_hump():
 
     assert abs(results['best_params']['x']) - abs(x_opt) <= 0.1
     assert abs(results['best_params']['y']) - abs(y_opt) <= 0.2
+
+
+def test_celery_scheduler():
+    import celery
+
+    # search space
+    param_space = dict(x=range(-10, 10))
+
+    class MockTask:
+
+        def __init__(self, x):
+            self.x = x
+
+        def objective(self):
+            return self.x * self.x
+
+        def get(self, timeout=None):
+            return self.objective()
+
+    @scheduler.celery(n_jobs=2)
+    def objective(x):
+        return MockTask(x)
+
+    tuner = Tuner(param_space, objective)
+    assert tuner.config.batch_size == 2
+
+    results = tuner.minimize()
+
+    assert abs(results['best_params']['x']) <= 0.1
+
+    class MockTask:
+
+        def __init__(self, x):
+            self.x = x
+
+        def objective(self):
+            return (self.x - 5) * (self.x - 5)
+
+        def get(self, timeout=None):
+            if self.x < -8:
+                raise celery.exceptions.TimeoutError("timeout")
+            return self.objective()
+
+    @scheduler.celery(n_jobs=1)
+    def objective(x):
+        return MockTask(x)
+
+    tuner = Tuner(param_space, objective)
+    results = tuner.minimize()
+
+    assert abs(results['best_params']['x'] - 5) <= 0.1
+
+
+def test_custom_scheduler():
+    # search space
+    param_space = dict(x=range(-10, 10))
+
+    @scheduler.custom(n_jobs=2)
+    def objective(params):
+        assert len(params) == 2
+        return [p['x'] * p['x'] for p in params]
+
+    tuner = Tuner(param_space, objective, dict(initial_random=2))
+    results = tuner.minimize()
+
+    assert abs(results['best_params']['x'] - 0) <= 0.1
+
+
+
