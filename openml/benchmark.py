@@ -310,7 +310,7 @@ class Benchmark:
                            parallel_strategy='clustering'))
         results = tuner.maximize()
 
-        print("mango parallel task: %s, best: %s, params: %s" %
+        print("mango parallel cluster task: %s, best: %s, params: %s" %
               (self.task.id,
                results['best_objective'],
                results['best_params']))

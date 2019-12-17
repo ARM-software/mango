@@ -14,8 +14,8 @@ Bayesian Learning optimizer
 - We will use the Gaussian Prior by default with the Matern Kernel
 """
 
-class BayesianLearning(BasePredictor):
 
+class BayesianLearning(BasePredictor):
 
     def __init__(self, surrogate=None):
         #initialzing some of the default values
@@ -24,7 +24,7 @@ class BayesianLearning(BasePredictor):
             self.surrogate = GaussianProcessRegressor(kernel=Matern(nu=2.5),
                 n_restarts_optimizer=5,
                 random_state =1,
-                normalize_y=True)
+                normalize_y=False)
         else:
             self.surrogate = surrogate
 
@@ -86,19 +86,21 @@ class BayesianLearning(BasePredictor):
 
         alpha_inter = self.domain_size*(self.iteration_count)*(self.iteration_count)*math.pi*math.pi/(6*0.1)
 
-        if alpha_inter ==0:
+        if alpha_inter == 0:
             print('Error: alpha_inter is zero in Upper_Confidence_Bound')
 
         alpha = 2*math.log(alpha_inter) # We have set delta = 0.1
         alpha = math.sqrt(alpha)
 
-        if batch_size == 1:
-            beta = alpha
-        else:
-            beta = np.exp(2*C)*alpha
-            beta = np.sqrt(beta)
+        beta = np.exp(2*C)*alpha
+        beta = np.sqrt(beta)
 
-        Value = mu + (beta)*sigma
+        if batch_size == 1:
+            exploration_factor = alpha
+        else:
+            exploration_factor = beta
+
+        Value = mu + exploration_factor * sigma
 
         return self.remove_duplicates(X,X_Sample,mu, Value)
 
@@ -213,7 +215,6 @@ class BayesianLearning(BasePredictor):
             self.surrogate.fit(X_temp, Y_temp)
 
             X_next,u_value = self.Upper_Confidence_Bound_Remove_Duplicates(X_tries,X_temp, batch_size)
-
             u_value = u_value.reshape(-1,1)
             Y_temp = np.vstack((Y_temp, u_value))
             X_temp = np.vstack((X_temp, X_next))
