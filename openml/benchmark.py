@@ -3,6 +3,7 @@ import warnings
 from collections import namedtuple
 import os
 import random
+import re
 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
@@ -40,7 +41,7 @@ _rf_taskids = [125923, 145804, 145836, 145839, 145855, 145862, 145878,
 _bad_tasks = [6566, 34536, 3950]  # no features (3950, 10101 takes too much time)
 
 _data_dir = "data"
-_results_dir = "results2"
+_results_dir = "results3"
 
 
 @scope.define
@@ -126,7 +127,7 @@ class XGB(XGBClassifier):
             'n_estimators': hp_range('n_estimators', 3, 5000),
             'max_depth': hp_range('max_depth', 1, 15),
             'reg_alpha': hp.loguniform('reg_alpha', np.log(10 ** -3), np.log(10 ** 3)),  # 10^-3 to 10^3
-            'booster': hp.choice('booster', ['gbtree', 'gblinear']),
+            # 'booster': hp.choice('booster', ['gbtree', 'gblinear']),
             'colsample_bylevel': hp.uniform('colsample_bylevel', 0.05, 0.99),
             'colsample_bytree': hp.uniform('colsample_bytree', 0.05, 0.99),
             'learning_rate': hp.loguniform('learning_rate', np.log(10 ** -3), np.log(1)),  # 0.001 to 1
@@ -158,7 +159,7 @@ def optimization_tasks(clf_id):
     return res
 
 
-def get_scorer(clf_id, task_id, cv=10, scoring='roc_auc'):
+def get_scorer(clf_id, task_id, cv=3, scoring='roc_auc'):
     X, y = load_data(task_id)
 
     def scorer(params):
@@ -245,7 +246,10 @@ class Benchmark:
         print("hp serial task: %s, best: %s, params: %s" %
               (self.task.id, max(scores), best_params))
 
-        return self.accumulate_max(scores, self.max_evals, batch_size)
+        search_path = trials.vals
+        search_path['score'] = list(np.array(trials.losses()) * -1)
+
+        return self.accumulate_max(scores, self.max_evals, batch_size), search_path
 
     def hp_parallel(self):
         trials = MongoTrials('mongo://localhost:27017/foo_db/jobs',
@@ -262,14 +266,18 @@ class Benchmark:
         print("hp parallel task: %s, best: %s, params: %s" %
               (self.task.id, max(scores), best_params))
 
-        return self.accumulate_max(scores, self.max_evals, batch_size)
+        search_path = trials.vals
+        search_path['score'] = list(np.array(trials.losses()) * -1)
+
+        return self.accumulate_max(scores, self.max_evals, batch_size), search_path
 
     def mango_serial(self):
         batch_size = 1
         tuner = Tuner(self.task.mango_space,
                       self.mango_objective,
                       dict(num_iteration=self.max_evals,
-                           batch_size=batch_size))
+                           batch_size=batch_size,
+                           domain_size=5000))
         results = tuner.maximize()
 
         print("mango serial task: %s, best: %s, params: %s" %
@@ -278,7 +286,12 @@ class Benchmark:
                results['best_params']))
 
         scores = results['objective_values']
-        return self.accumulate_max(scores[-self.max_evals * batch_size:], self.max_evals, batch_size)
+
+        search_path = list(results['params_tried'])
+        for idx, sp in enumerate(search_path):
+            sp['score'] = results['objective_values'][idx]
+
+        return self.accumulate_max(scores[-self.max_evals * batch_size:], self.max_evals, batch_size), search_path
 
     @staticmethod
     def accumulate_max(arr, n_iterations, batch_size):
@@ -299,7 +312,12 @@ class Benchmark:
                results['best_params']))
 
         scores = results['objective_values']
-        return self.accumulate_max(scores[-self.max_evals * batch_size:], self.max_evals, batch_size)
+
+        search_path = list(results['params_tried'])
+        for idx, sp in enumerate(search_path):
+            sp['score'] = results['objective_values'][idx]
+
+        return self.accumulate_max(scores[-self.max_evals * batch_size:], self.max_evals, batch_size), search_path
 
     def mango_parallel_cluster(self):
         batch_size = self.n_parallel
@@ -316,7 +334,11 @@ class Benchmark:
                results['best_params']))
 
         scores = results['objective_values']
-        return self.accumulate_max(scores[-self.max_evals * batch_size:], self.max_evals, batch_size)
+        search_path = list(results['params_tried'])
+        for idx, sp in enumerate(search_path):
+            sp['score'] = results['objective_values'][idx]
+
+        return self.accumulate_max(scores[-self.max_evals * batch_size:], self.max_evals, batch_size), search_path
 
     def random_serial(self):
         batch_size = 1
@@ -333,7 +355,11 @@ class Benchmark:
                results['best_params']))
 
         scores = results['objective_values']
-        return self.accumulate_max(scores[-self.max_evals * batch_size:], self.max_evals, batch_size)
+        search_path = list(results['params_tried'])
+        for idx, sp in enumerate(search_path):
+            sp['score'] = results['objective_values'][idx]
+
+        return self.accumulate_max(scores[-self.max_evals * batch_size:], self.max_evals, batch_size), search_path
 
     def run(self, optimization_task, optimizer, refresh=False):
         result_file = self.result_file(optimization_task.id, optimizer)
@@ -354,7 +380,15 @@ class Benchmark:
                    max_evals=self.max_evals,
                    batch_size=self.n_parallel,
                    n_repeat=self.n_repeat)
-        res['scores'] = list(np.mean([getattr(self, optimizer)() for _ in range(self.n_repeat)], axis=0))
+
+        res['experiments'] = []
+        scores = []
+        for i in range(self.n_repeat):
+            score, search_path = getattr(self, optimizer)()
+            scores.append(score)
+            res['experiments'].append(search_path)
+
+        res['scores'] = list(np.mean(scores, axis=0))
 
         if not os.path.exists(os.path.dirname(result_file)):
             os.makedirs(os.path.dirname(result_file))
@@ -370,10 +404,11 @@ class Benchmark:
 
 
 if __name__ == "__main__":
-    optimizers = ['mango_serial', 'random_serial', 'hp_serial', 'mango_parallel', 'mango_parallel_cluster']
+    avail_optimizers = ['mango_serial', 'random_serial', 'hp_serial', 'mango_parallel', 'mango_parallel_cluster']
     all_clf_ids = ['rf', 'xgb', 'svm']
-    optimizer = os.environ.get("OPTIMIZER", 'mango_serial')
-    assert optimizer in optimizers
+    optimizers = os.environ.get("OPTIMIZER", 'mango_serial,hp_serial,random_serial').split(',')
+    print(optimizers)
+    assert all(optimizer in avail_optimizers for optimizer in optimizers)
 
     clf_ids = os.environ.get("CLF_IDS")
     if clf_ids:
@@ -382,16 +417,17 @@ if __name__ == "__main__":
         clf_ids = all_clf_ids
     print(clf_ids)
 
+    task_filter = os.environ.get("TASK", 'xgb-146')
+
     # b = Benchmark(max_evals=5, n_parallel=4, n_repeat=1)
-    b = Benchmark(max_evals=50, n_parallel=5, n_repeat=3)
+    b = Benchmark(max_evals=50, n_parallel=2, n_repeat=3)
     for clf_id in clf_ids:
         for task in optimization_tasks(clf_id):
-            # if task.id not in ['xgb-146064',]:
-            #     continue
-            try:
-                b.run(task, optimizer, refresh=False)
-            except Exception as e:
-                print(str(e))
+
+            if task_filter and not re.match(task_filter, task.id):
+                continue
+            for optimizer in optimizers:
+                b.run(task, optimizer, refresh=True)
 
 
 

@@ -29,7 +29,7 @@ class Tuner:
         optimizer: str = 'Bayesian'
         parallel_strategy: str = 'penalty'
         surrogate: object = None # used to test different kernel functions
-        scale_y: bool = False
+        scale_y: bool = True
 
         valid_optimizers = ['Bayesian', 'Random']
         valid_parallel_strategies = ['penalty', 'clustering']
@@ -162,7 +162,7 @@ class Tuner:
         results['random_params'] = X_list
         results['random_params_objective'] = Y_list
 
-        Optimizer = BayesianLearning(surrogate=self.config.surrogate)
+        Optimizer = BayesianLearning(surrogate=self.config.surrogate, n_features=X_init.shape[1])
         Optimizer.domain_size = self.config.domain_size
 
         X_sample = X_init

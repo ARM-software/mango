@@ -21,4 +21,6 @@ def main():
 
 
 if __name__ == "__main__":
+    import sys
+    sys.path.extend(['/Users/mohagg01/OneDrive - Arm/workspace/mango'])
     main()
