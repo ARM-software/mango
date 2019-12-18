@@ -29,7 +29,7 @@ class Tuner:
         optimizer: str = 'Bayesian'
         parallel_strategy: str = 'penalty'
         surrogate: object = None # used to test different kernel functions
-        scale_y: bool = True
+        scale_y: bool = False
 
         valid_optimizers = ['Bayesian', 'Random']
         valid_parallel_strategies = ['penalty', 'clustering']

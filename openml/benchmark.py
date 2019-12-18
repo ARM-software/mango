@@ -112,7 +112,7 @@ class XGB(XGBClassifier):
             'n_estimators': range(3, 5000),
             'max_depth': range(1, 15),
             'reg_alpha': loguniform(-3, 6),  # 10^-3 to 10^3
-            'booster': ['gbtree', 'gblinear'],
+            # 'booster': ['gbtree', 'gblinear'],
             'colsample_bylevel': uniform(0.05, 0.95),
             'colsample_bytree': uniform(0.05, 0.95),
             'learning_rate': loguniform(-3, 3),  # 0.001 to 1
