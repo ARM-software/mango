@@ -8,161 +8,274 @@ Mango internally uses parallel implementation of a multi-armed bandit bayesian o
 - The ease of usage was kept in mind with the ability to plugin new distributions for search space and new optimizer algorithms.
 
 ## Index
-1. [ Mango Setup ](#setup)
-2. [ Simple Example ](#simpleexample)
-3. [ Tune Hyperparameters of KNeighborsClassifier ](#knnexample)
-4. [ Domain Space of Variables](#DomainSpace)
-5. [ More on Objective Function](#ObjectiveFunction)
-6. [ Controlling Mango Configurations](#MangoConfigurations)
-7. [ Schedule Objective Function on Celery](#Celery)
-8. [Parallel Algorithms](#mangoAlgorithms)
+1. [Installation](#setup)
+2. [Getting started ](#getting-started)
+3. [Hyperparameter tuning example ](#knnexample)
+4. [Search space definitions](#DomainSpace)
+5. [Scheduler](#scheduler)
+6. [Optional configurations](#MangoConfigurations)
+
+<!--
+7. [Schedule Objective Function on Celery](#Celery)
+8. [Algorithms](#mangoAlgorithms)
 9. [ Tune Hyperparameters of Facebook Prophet ](https://github.com/ARM-software/mango/blob/master/examples/Prophet_Classifier.ipynb)
 10. [ Tune Hyperparameters of xgboost XGBRegressor ](https://github.com/ARM-software/mango/blob/master/examples/Xgboost_Example.ipynb)
 11. [ Tune Hyperparameters of xgboost XGBClassifier ](https://github.com/ARM-software/mango/blob/master/examples/Xgboost_XGBClassifier.ipynb)
 12. [Tune Hyperparameters of SVM](https://github.com/ARM-software/mango/blob/master/examples/SVM_Example.ipynb)
 13. [ More Examples](https://github.com/ARM-software/mango/tree/master/examples)
 14. [ Contact & Questions ](#contactDetails)
+-->
 
 <a name="setup"></a>
-# 1. Mango Setup
+## 1. Installation
 ```
 Clone the Mango repository, and from the Mango directory.
-$ pip3 install -r requirements.txt
-$ python3 setup.py install
+$ git clone https://github.com/ARM-software/mango.git
+$ cd mango
+$ pip3 install .
 ```
 
 <!--
-- Mango requires scikit-learn and is develped for python 3, some other packages are installed which required to optimize xgboost classifiers and fbprophet.
+- Mango requires scikit-learn and is developed for python 3, some other packages are installed which required to optimize xgboost classifiers and fbprophet.
 !-->
 
-Testing the installation.
-```
-$ cd PATH/mango/mango/test
-$ pytest
-```
 
-
-<a name="simpleexample"></a>
-# 2. Simple Example
-Mango is straightforward to use. The current example finds an optimal value of the identity function whose input is a single variable between 1 and 1000.
-More examples are available in the directory *mango/examples*.
+<a name="getting-started"></a>
+## 2. Getting Started
+Mango is straightforward to use. Following example minimizes the quadratic function whose input is an integer between -10 and 10.
 
 ```python
-from mango.tuner import Tuner
+from mango import scheduler, Tuner
 
-param_dict = {"a": range(1,1000)} # Search space of variables
+# Search space
+param_space = dict(x=range(-10,10))
              
-def objectiveFunction(args_list): # Identity Objective Function
-    a = args_list[0]['a']
-    return [a]
+# Quadratic objective Function
+@scheduler.serial
+def objective(x): 
+    return x * x
 
-tuner_identity = Tuner(param_dict, objectiveFunction) # Initialize Tuner
+# Initialize and run Tuner
+tuner = Tuner(param_space, objective) 
+results = tuner.minimize()
 
-results = tuner_identity.maximize() # Run Tuner
-print('Optimal value of a:',results['best_params'],' and objective:',results['best_objective'])
+print(f'Optimal value of parameters: {results["best_params"]} and objective: {results["best_objective"]}')```
+# => Optimal value of parameters: {'x': 0}  and objective: 0
 ```
-
-Sample output of above example.
-
-```
-Optimal value of a: {'a': 999}  and objective: 999
-```
-More details about this simple example are available [here.](https://github.com/ARM-software/mango/blob/master/examples/Getting_Started.ipynb)
 
 <a name="knnexample"></a>
-# 3. Mango Example to Tune Hyperparameters of KNeighborsClassifier
+## 3. Hyperparameter Tuning Example
 
 ```python
-from mango.tuner import Tuner
-
-from scipy.stats import uniform
-
-# n_neighbors can vary between 1 and 50, with different choices of algorithm
-param_dict = {"n_neighbors": range(1, 50),
-              'algorithm' : ['auto', 'ball_tree', 'kd_tree', 'brute']
-             }
-             
-
-# Objective function for KNN
 from sklearn import datasets
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_val_score
 
-X, Y = datasets.load_breast_cancer(return_X_y=True)
+from mango import Tuner, scheduler
 
-def objectiveKNN(args_list): # arg_list is list of hyperpar values
-    global X,Y # Data is loaded only once
-    evaluations = []
-    for hyper_par in args_list:
-        clf = KNeighborsClassifier(**hyper_par)
-        accuracy  = cross_val_score(clf, X, Y, scoring='accuracy').mean()
-        evaluations.append(accuracy)
-    return evaluations
+# search space for KNN classifier's hyperparameters
+# n_neighbors can vary between 1 and 50, with different choices of algorithm
+param_space = dict(n_neighbors=range(1, 50),
+                   algorithm=['auto', 'ball_tree', 'kd_tree', 'brute'])
 
-tuner_knn = Tuner(param_dict, objectiveKNN)
-results = tuner_knn.maximize()
 
-print('best parameters:',results['best_params'])
-print('best accuracy:',results['best_objective'])
+@scheduler.serial
+def objective(**params):
+    X, y = datasets.load_breast_cancer(return_X_y=True)
+    clf = KNeighborsClassifier(**params)
+    score = cross_val_score(clf, X, y, scoring='accuracy').mean()
+    return score
+
+
+tuner = Tuner(param_space, objective)
+results = tuner.maximize()
+print('best parameters:', results['best_params'])
+print('best accuracy:', results['best_objective'])
+# => best parameters: {'algorithm': 'auto', 'n_neighbors': 11}
+# => best accuracy: 0.931486122714193
 ```
-Sample output of the above example. Note output may be different for machine.
+Note that best parameters may be different but accuracy should be ~ 0.9315. More examples are available 
+in the `examples` directory ([Facebook's Prophet](https://github.com/ARM-software/mango/blob/master/examples/Prophet_Classifier.ipynb), 
+[XGBoost](https://github.com/ARM-software/mango/blob/master/examples/Xgboost_XGBClassifier.ipynb), [SVM](https://github.com/ARM-software/mango/blob/master/examples/SVM_Example.ipynb)).
 
-```
-best parameters: {'algorithm': 'auto', 'n_neighbors': 11}
-best accuracy: 0.931486122714193
-```
 
 <a name="DomainSpace"></a>
-# 4. Domain Space of Variables
-The domain space defines the search space of variables from which optimal values are chosen. Mango allows definitions of domain space
-to define complex search spaces. Domain space definitions are compatible with the [RandomizedSearchCV](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.RandomizedSearchCV.html) of the
-scikit-learn. The parameter dictionary concept of scikit-learn is used. Dictionary with parameter names (string) as keys and distributions or 
-lists of parameters to try. Distributions must provide a rvs method for sampling (such as those from scipy.stats.distributions). 
-If a list is given, it is sampled uniformly. We have defined a new [loguniform](https://github.com/ARM-software/mango/blob/master/mango/domain/distribution.py) distribution by extending the scipy.stats.distributions constructs.
+## 4. Search Space
+The search space defines the range and distribution of input parameters to the objective function. 
+Mango search space is compatible with scikit-learn's parameter space definitions used in 
+[RandomizedSearchCV](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.RandomizedSearchCV.html)
+ or [GridSearchCV](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html). 
+The search space is defined as a dictionary with keys being the parameter names (string) and values being 
+list of discreet choices, range of integers or the distributions. Example of some common search spaces are:
 
-**loguniform** can be used in SVM classifiers where *C* parameter can have search space defined using loguniform distribution. In these definitions, categorical/discrete variables are defined using list of strings. A list of ints is considered
-as the variable having interger values. Some of the sample domain space definitions are shown.
+### Integer
+Following space defines `x` as an integer parameters with values in `range(-10, 11)` (11 is not included):
+```python
+param_space = dict(x=range(-10, 11)) #=> -10, -9, ..., 10
+# you can use steps for sparse ranges
+param_space = dict(x=range(0, 101, 10)) #=> 0, 10, 20, ..., 100
+```
+Integers are uniformly sampled from the given range and are assumed to be ordered and treated as continuous variables.
 
+### Categorical
+Discreet categories can be defined as lists. For example:
+```python
+# string 
+param_space = dict(color=['red', 'blue', 'green'])
+# float
+param_space = dict(v=[0.2, 0.1, 0.3])
+# mixed 
+param_space = dict(max_features=['auto', 0.2, 0.3])
+```
+Lists are uniformly sampled and are assumed to be unordered. They are one-hot encoded internally. 
+
+### Distributions
+All the distributions supported by [`scipy.stats`](https://docs.scipy.org/doc/scipy/reference/stats.html) are supported. 
+In general, distributions must provide a `rvs` method for sampling.
+
+#### Uniform distribution
+Using `uniform(loc, scale)` one obtains the uniform distribution on `[loc, loc + scale]`.
 ```python
 from scipy.stats import uniform
-param_dict = {"a": uniform(0, 1), # uniform distribution
-              "b": range(1,5), # Integer variable
-              "c":[1,2,3], # Integer variable
-              "d":["-1","1"] # Categorical variable
-             }
+
+# uniformly distributed between -1 and 1
+param_space = dict(a=uniform(-1, 2))
 ```
 
-```python
-from scipy.stats import uniform
-param_dict = {"learning_rate": uniform(0.01, 0.5),
-              "gamma": uniform(0.5, 0.5),
-              "max_depth": range(1,14),
-              "n_estimators": range(500,2000),
-              "subsample": uniform(0.7, 0.3),
-              "colsample_bytree":uniform(0.3, 0.7),
-              "colsample_bylevel":uniform(0.3, 0.7),
-              "min_child_weight": range(1,10)}
-              
-```
-
+#### Log uniform distribution
+We have added [loguniform](https://github.com/ARM-software/mango/blob/master/mango/domain/distribution.py) distribution by extending the `scipy.stats.distributions` constructs.
+Using `loguniform(loc, scale)` one obtains the loguniform distribution on <code>[10<sup>loc</sup>, 10<sup>loc + scale</sup>]</code>.
 ```python
 from mango.domain.distribution import loguniform
-param_dict = {"changepoint_prior_scale": loguniform(-3, 1),
-              'seasonality_prior_scale' : loguniform(1, 2)
-             }
+
+# log uniformly distributed between 10^-3 and 10^-1
+param_space = dict(learning_rate=loguniform(-3, 2))
 ```
 
+
+### Hyperparameter search space examples
+Example hyperparameter search space for [Random Forest Classifier](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html):
+```python
+param_space =  dict(
+    max_features=['sqrt', 'log2', .1, .3, .5, .7, .9],
+    n_estimators=range(10, 1000, 50), # 10 to 1000 in steps of 50
+    bootstrap=[True, False],
+    max_depth=range(1, 20),
+    min_samples_leaf=range(1, 10)
+)
+```
+
+
+Example search space for [XGBoost Classifier](https://xgboost.readthedocs.io/en/latest/python/python_api.html#xgboost.XGBClassifier):
 ```python
 from scipy.stats import uniform
-from distribution import loguniform
-param_dict = {"kernel": ['rbf'],
-              "gamma": uniform(0.1, 4),
-              "C": loguniform(-7, 8)}
+from mango.domain.distribution import loguniform
+
+param_space = {
+    'n_estimators': range(10, 2001, 100), # 10 to 2000 in steps of 100
+    'max_depth': range(1, 15), # 1 to 14
+    'reg_alpha': loguniform(-3, 6),  # 10^-3 to 10^3
+    'booster': ['gbtree', 'gblinear'],
+    'colsample_bylevel': uniform(0.05, 0.95), # 0.05 to 1.0
+    'colsample_bytree': uniform(0.05, 0.95), # 0.05 to 1.0
+    'learning_rate': loguniform(-3, 3),  # 0.001 to 1
+    'reg_lambda': loguniform(-3, 6),  # 10^-3 to 10^3
+    'min_child_weight': loguniform(0, 2), # 1 to 100
+    'subsample': uniform(0.1, 0.89) # 0.1 to 0.99
+}
 ```
 
+Example search space for [SVM](https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html):
+```python
+from scipy.stats import uniform
+from mango.domain.distribution import loguniform
 
+param_dict = {
+    'kernel': ['rbf', 'sigmoid'],
+    'gamma': uniform(0.1, 4), # 0.1 to 4.1
+    'C': loguniform(-7, 8) # 10^-7 to 10
+} 
+```
+
+<a name="scheduler"></a>
+## 5. Scheduler
+
+Mango is designed to take advantage of distributed computing. The objective function can be scheduled to 
+run locally or on a cluster with parallel evaluations. Mango is designed to allow the use of any distributed 
+computing framework (like Celery or Kubernetes). The `scheduler` module comes with some pre-defined 
+schedulers.
+
+### Serial scheduler
+Serial scheduler runs locally with one objective function evaluation at a time
+```python
+from mango import scheduler
+
+@scheduler.serial
+def objective(x): 
+    return x * x
+```
+
+### Parallel scheduler
+Parallel scheduler runs locally and uses `joblib` to evaluate the objective functions in parallel
+```python
+from mango import scheduler
+
+@scheduler.parallel(n_jobs=2)
+def objective(x): 
+    return x * x
+```
+`n_jobs` specifies the number of parallel evaluations. `n_jobs = -1` uses all the available cpu cores 
+on the machine. See [simple_parallel]([examples](https://github.com/ARM-software/mango/tree/master/example/simple_parallel.py)) 
+for full working example.
+
+### Custom distributed scheduler
+Users can define their own distribution strategies using `custom` scheduler. To do so, users need to define
+an objective function that takes a list of parameters and returns the list of results:
+```python
+from mango import scheduler
+
+@scheduler.custom(n_jobs=4)
+def objective(params_batch):
+    """ Template for custom distributed objective function
+    Args:
+        params_batch (list): Batch of parameter dictionaries to be evaluated in parallel 
+    
+    Returns:
+        list: Values of objective function at given parameters
+    """
+    # evaluate the objective on a distributed framework
+    ...
+    return results
+```
+
+For example the following snippet uses [Celery](http://www.celeryproject.org/): 
+```python
+import celery
+from mango import Tuner, scheduler
+
+# connect to celery backend
+app = celery.Celery('simple_celery', backend='rpc://')
+
+# remote celery task
+@app.task
+def remote_objective(x):
+    return x * x
+
+@scheduler.custom(n_jobs=4)
+def objective(params_batch):
+    jobs = celery.group(remote_objective.s(params['x']) for params in params_batch)()
+    return jobs.get()
+
+param_space = dict(x=range(-10, 10))
+
+tuner = Tuner(param_space, objective)
+results = tuner.minimize()
+```
+A working example to tune hyperparameters of KNN using Celery is [here](https://github.com/ARM-software/mango/tree/master/example/knn_celery.py).
+ 
+<!--
 <a name="ObjectiveFunction"></a>
-# 5. More on Objective Function
+## 5. More on Objective Function
 The serial objective function has the following structure.
 
 ```python
@@ -194,10 +307,10 @@ def objective_celery(params_list):
         params.append(par)
     return params, evals
 ```
-
+-->
 
 <a name="MangoConfigurations"></a>
-# 6. Controlling Mango Configurations
+## 6. Optional configurations
 
 The default configuration parameters used by the Mango as below:
 ```python
@@ -230,8 +343,9 @@ tuner_user = Tuner(param_dict, objective_Xgboost,conf_dict)
 # Now tuner_user can be used as shown in other examples.
 ```
 
+<!--
 <a name="Celery"></a>
-# 7. Schedule Objective Function on Celery
+## 7. Schedule Objective Function on Celery
 User-defined objective function can be scheduled on local, cluster or cloud infrastructure. The objective function scheduler
 is entirely independent of the Mango. This design was chosen to enable the scheduling of varied resource objective function according to developer needs. We have included examples using [Celery](http://www.celeryproject.org/). In the sample
 examples, celery workers are used to evaluate the objective function in parallel. These examples assume celery is installed, and workers
@@ -241,13 +355,16 @@ are running. Default celery configurations can be modified in the [file](https:/
 - [Prophet example using celery workers](https://github.com/ARM-software/mango/blob/master/examples/Prophet_Celery.ipynb)
 
 More examples will be included to show the scheduling of objective function using local threads/processes. By default examples schedule
-the objective function on the local machine itself.
+the objective function on the local machine itself. 
 
 <a name ="mangoAlgorithms"></a>
-# 8. Mango Algorithms
+## 8. Algorithms
 The optimization algorithms in Mango are based on widely used Bayesian optimization techniques, extended to sample a batch of configurations in parallel. Currently, Mango provides two parallel optimization algorithms that use the upper confidence bound as the acquisition function. The first algorithm uses hallucination combined with exponential rescaling of the surrogate function to select a batch. In the second algorithm, we create clusters of acquisition function in spatially distinct search spaces, and select the maximum value within each cluster to create the batch. 
 
 <a name="contactDetails"></a>
-# More Details
+## More Details
 Details about specifying parameter/variable domain space, user objective function, and internals of Mango will be added.
-Please stay tuned. For any questions feel free to reach out to Sandeep Singh Sandha (iotresearch@arm.com)
+Please stay tuned. 
+-->
+
+For any questions feel free to reach out by creating an issue [here](https://github.com/ARM-software/mango/issues/new)
