@@ -78,13 +78,14 @@ if __name__ == "__main__":
                            'mango_parallel_cluster']
 
     clf = 'xgb'
+    exp_id = 'scaled' # std scaling features fed to gpr with anistropic length scales
     print(clf)
 
     task_results = pp.task_results
     for task_id, res in task_results.items():
         for optimizer in res.keys():
             for idx, experiment in enumerate(res[optimizer]['experiments']):
-                pp.scatter_matrix("%s-%s-exp%s" % (task_id, optimizer, idx), experiment)
+                pp.scatter_matrix("%s-%s-%s%s" % (task_id, optimizer, exp_id, idx), experiment)
 
     normalized_scores = collections.defaultdict(dict)
     for task_id, res in task_results.items():

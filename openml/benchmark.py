@@ -277,7 +277,7 @@ class Benchmark:
                       self.mango_objective,
                       dict(num_iteration=self.max_evals,
                            batch_size=batch_size,
-                           domain_size=5000))
+                           domain_size=50000))
         results = tuner.maximize()
 
         print("mango serial task: %s, best: %s, params: %s" %
@@ -337,6 +337,7 @@ class Benchmark:
         search_path = list(results['params_tried'])
         for idx, sp in enumerate(search_path):
             sp['score'] = results['objective_values'][idx]
+            sp['surrogate'] = results['surrogate_values'][idx]
 
         return self.accumulate_max(scores[-self.max_evals * batch_size:], self.max_evals, batch_size), search_path
 

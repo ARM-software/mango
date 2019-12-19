@@ -170,6 +170,7 @@ class Tuner:
 
         hyper_parameters_tried = random_hyper_parameters
         objective_function_values = Y_list
+        surrogate_values = Y_list
 
         x_failed_evaluations = np.array([])
 
@@ -229,6 +230,7 @@ class Tuner:
             # update the bookeeping of values tried
             hyper_parameters_tried = np.append(hyper_parameters_tried, X_next_list)
             objective_function_values = np.append(objective_function_values, Y_next_list)
+            surrogate_values = np.append(surrogate_values, Optimizer.surrogate.predict(X_next_batch))
 
             # Appending to the current samples
             X_sample = np.vstack((X_sample, X_next_batch))
@@ -237,6 +239,7 @@ class Tuner:
 
         results['params_tried'] = hyper_parameters_tried
         results['objective_values'] = objective_function_values
+        results['surrogate_values'] = surrogate_values
 
         results['best_objective'] = np.max(Y_sample)
         results['best_params'] = hyper_parameters_tried[np.argmax(Y_sample)]

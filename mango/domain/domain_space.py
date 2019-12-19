@@ -7,6 +7,7 @@ Define the domain space abstractions for the Optimizer
 from scipy.stats._distn_infrastructure import rv_frozen
 import numpy as np
 from sklearn.model_selection import ParameterSampler
+from sklearn.preprocessing import StandardScaler
 from collections.abc import Iterable
 
 class domain_space():
@@ -22,17 +23,26 @@ class domain_space():
                  domain_size):
         self.param_dict = param_dict
 
+        # the domain size to explore using the parameter sampler
+        self.domain_size = domain_size
+
         # creating a mapping of categorical variables
         self.create_mappings()
 
-        # print('mapping_categorical')
-        # print(self.mapping_categorical)
+        # create scaler for GP features
+        self.scaler = self.create_scaler()
 
-        # print('mapping_int')
-        # print(self.mapping_int)
+    def create_scaler(self):
+        """
+        create scaler for features that go into GPR
+        using a fixed set of initial domain samples
+        """
+        domain_list = self.get_domain()
+        x_gp = self.convert_GP_space(domain_list)
+        scaler = StandardScaler()
+        scaler.fit(x_gp)
+        return scaler
 
-        # the domain size to explore using the parameter sampler
-        self.domain_size = domain_size
 
     """
     returns the list of domain values using the parameter sampler
@@ -100,8 +110,7 @@ class domain_space():
     input is the domain_list generated using the Parameter Sampler.
     """
 
-    def convert_GP_space(self,
-                         domain_list):
+    def convert_GP_space(self, domain_list):
         mapping_categorical = self.mapping_categorical
 
         X = []
@@ -132,6 +141,8 @@ class domain_space():
             X.append(curr_x)
 
         X = np.array(X)
+        if hasattr(self, 'scaler'):
+            X = self.scaler.transform(X)
 
         return X
 
@@ -142,9 +153,11 @@ class domain_space():
     We have to reverse the one-hotencoded transformation of the categories to the category name
     """
 
-    def convert_PS_space(self,
-                         X_gp):
+    def convert_PS_space(self, X_gp):
         X_ps = []
+
+        if hasattr(self, 'scaler'):
+            X_gp = self.scaler.inverse_transform(X_gp)
 
         mapping_categorical = self.mapping_categorical
         mapping_int = self.mapping_int
@@ -166,7 +179,7 @@ class domain_space():
 
                 # this has to have integer values
                 if par in mapping_int:
-                    curr_x_ps[par] = int(curr_x_gp[index])
+                    curr_x_ps[par] = int(round(curr_x_gp[index]))
                     index = index + 1
 
                 # this par is a categorical variable and we need to handle it carefully
