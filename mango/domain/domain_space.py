@@ -74,15 +74,18 @@ class domain_space():
     def create_mappings(self):
         mapping_categorical = dict()
         mapping_int = dict()
+        intervals = dict()
 
         param_dict = self.param_dict
         for par in param_dict:
             if isinstance(param_dict[par], rv_frozen):
                 # FIXME: what if the distribution generators ints , GP would convert it to float
+                intervals[par] = param_dict[par].interval(1.)
                 pass  # we are not doing anything at present, and will directly use its value for GP.
 
             elif isinstance(param_dict[par], range):
                 mapping_int[par] = param_dict[par]
+                intervals[par] = (min(param_dict[par]), max(param_dict[par]))
 
             elif isinstance(param_dict[par], Iterable):
 
@@ -95,13 +98,16 @@ class domain_space():
 
                 if all_int:
                     mapping_int[par] = param_dict[par]
+                    intervals[par] = (min(param_dict[par]), max(param_dict[par]))
 
                 # For lists with mixed type, floats or strings we consider them categorical or discrete
                 else:
                     mapping_categorical[par] = param_dict[par]
+                    intervals[par] = (0, len(param_dict[par])-1)
 
         self.mapping_categorical = mapping_categorical
         self.mapping_int = mapping_int
+        self.intervals = intervals
 
     """
     convert the hyperparameters from the param_dict space to the GP space, by converting the
