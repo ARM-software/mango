@@ -439,7 +439,7 @@ if __name__ == "__main__":
         clf_ids = all_clf_ids
     print(clf_ids)
 
-    task_filter = os.environ.get("TASK", 'xgb-146')
+    task_filter = os.environ.get("TASK", None)
 
     # b = Benchmark(max_evals=5, n_parallel=4, n_repeat=1)
     b = Benchmark(max_evals=50, n_parallel=5, n_repeat=3)
