@@ -449,4 +449,4 @@ if __name__ == "__main__":
             if task_filter and not re.match(task_filter, task.id):
                 continue
             for optimizer in optimizers:
-                b.run(task, optimizer, refresh=True)
+                b.run(task, optimizer, refresh=False)
