@@ -41,7 +41,7 @@ _rf_taskids = [125923, 145804, 145836, 145839, 145855, 145862, 145878,
 _bad_tasks = [6566, 34536, 3950]  # no features (3950, 10101 takes too much time)
 
 _data_dir = "data"
-_results_dir = "results3"
+_results_dir = "results4"
 
 
 @scope.define
@@ -442,7 +442,7 @@ if __name__ == "__main__":
     task_filter = os.environ.get("TASK", 'xgb-146')
 
     # b = Benchmark(max_evals=5, n_parallel=4, n_repeat=1)
-    b = Benchmark(max_evals=10, n_parallel=5, n_repeat=3)
+    b = Benchmark(max_evals=50, n_parallel=5, n_repeat=3)
     for clf_id in clf_ids:
         for task in optimization_tasks(clf_id):
 
