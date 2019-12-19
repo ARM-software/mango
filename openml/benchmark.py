@@ -17,7 +17,6 @@ from hyperopt import fmin, tpe, hp, STATUS_OK, Trials, STATUS_FAIL
 from hyperopt.pyll import scope
 from hyperopt.mongoexp import MongoTrials
 
-
 from mango.domain.distribution import loguniform
 from mango.tuner import Tuner
 
@@ -136,10 +135,10 @@ class XGB(XGBClassifier):
             'colsample_bylevel': hp.uniform('colsample_bylevel', 0.05, 0.99),
             'colsample_bytree': hp.uniform('colsample_bytree', 0.05, 0.99),
             # 'learning_rate': hp.loguniform('learning_rate', np.log(10 ** -3), np.log(1)),  # 0.001 to 1
-            'learning_rate': hp.uniform('learning_rate',  -3, 1),  # 0.001 to 1
+            'learning_rate': hp.uniform('learning_rate', -3, 1),  # 0.001 to 1
             # 'reg_lambda': hp.loguniform('reg_lambda', np.log(10 ** -3), np.log(10 ** 3)),  # 10^-3 to 10^3
             'reg_lambda': hp.uniform('reg_lambda', -3, 3),  # 10^-3 to 10^3
-            #'min_child_weight': hp.loguniform('min_child_weight', 0, np.log(10 ** 2)),
+            # 'min_child_weight': hp.loguniform('min_child_weight', 0, np.log(10 ** 2)),
             'min_child_weight': hp.uniform('min_child_weight', 0, 2),
             'subsample': hp.uniform('subsample', 0.1, 0.99),
         }
@@ -189,6 +188,9 @@ def get_scorer(clf_id, task_id, cv=10, scoring='roc_auc'):
     return scorer
 
 
+regex = re.compile(r"\[|\]|<", re.IGNORECASE)
+
+
 def load_data(task_id):
     df = pd.read_csv(f'{_data_dir}/{task_id}.csv')
     with open(f'{_data_dir}/{task_id}.json', 'r') as f:
@@ -199,6 +201,10 @@ def load_data(task_id):
 
     X = df[x_cols]
     X = pd.get_dummies(X)
+
+    # for xgboost column name error
+    X.columns = [regex.sub("_", col) if any(x in str(col) for x in set(('[', ']', '<'))) else col for col in
+                 X.columns.values]
 
     y = df[y_col]
     classes = list(y.unique())
@@ -389,8 +395,8 @@ class Benchmark:
             with open(result_file, 'r') as f:
                 res = json.load(f)
             if res['max_evals'] == self.max_evals and \
-                    res['batch_size'] == self.n_parallel: # and \
-                    # res['n_repeat'] == self.n_repeat:
+                    res['batch_size'] == self.n_parallel:  # and \
+                # res['n_repeat'] == self.n_repeat:
                 print("%s already exists" % optimization_task.id)
                 return res
 
@@ -428,7 +434,7 @@ class Benchmark:
 if __name__ == "__main__":
     avail_optimizers = ['mango_serial', 'random_serial', 'hp_serial', 'mango_parallel', 'mango_parallel_cluster']
     all_clf_ids = ['rf', 'xgb', 'svm']
-    optimizers = os.environ.get("OPTIMIZER", 'mango_parallel').split(',')
+    optimizers = os.environ.get("OPTIMIZER", 'mango_serial').split(',')
     print(optimizers)
     assert all(optimizer in avail_optimizers for optimizer in optimizers)
 
@@ -439,7 +445,7 @@ if __name__ == "__main__":
         clf_ids = all_clf_ids
     print(clf_ids)
 
-    task_filter = os.environ.get("TASK", None)
+    task_filter = os.environ.get("TASK", 'xgb')
 
     # b = Benchmark(max_evals=5, n_parallel=4, n_repeat=1)
     b = Benchmark(max_evals=50, n_parallel=5, n_repeat=3)
@@ -449,4 +455,7 @@ if __name__ == "__main__":
             if task_filter and not re.match(task_filter, task.id):
                 continue
             for optimizer in optimizers:
-                b.run(task, optimizer, refresh=False)
+                try:
+                    b.run(task, optimizer, refresh=False)
+                except Exception as e:
+                    print(str(e))
