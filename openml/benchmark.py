@@ -445,18 +445,18 @@ if __name__ == "__main__":
         n_parallel=5,
         n_repeat=1,
         cv=3,
-        results_dir='results3'
+        results_dir='results_local'
     )
 
-    config = AttrDict(
-        task_filter=None,
-        optimizers='mango_serial',
-        max_evals=50,
-        n_parallel=5,
-        n_repeat=3,
-        cv=10,
-        results_dir='results4'
-    )
+    # config = AttrDict(
+    #     task_filter=None,
+    #     optimizers='mango_serial',
+    #     max_evals=50,
+    #     n_parallel=5,
+    #     n_repeat=3,
+    #     cv=10,
+    #     results_dir='results4'
+    # )
 
     optimizers = os.environ.get("OPTIMIZER", config.optimizers).split(',')
     print(optimizers)
