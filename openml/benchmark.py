@@ -40,7 +40,6 @@ _rf_taskids = [125923, 145804, 145836, 145839, 145855, 145862, 145878,
 _bad_tasks = [6566, 34536, 3950]  # no features (3950, 10101 takes too much time)
 
 _data_dir = "data"
-_results_dir = "results4"
 
 
 @scope.define
@@ -145,20 +144,23 @@ class XGB(XGBClassifier):
 
 
 _constructors = dict(rf=RandomForest, svm=SVM, xgb=XGB)
-_task_ids = dict(rf=_rf_taskids, svm=_svm_taskids, xgb=_xgb_taskids)
+_task_nums = dict(rf=_rf_taskids, svm=_svm_taskids, xgb=_xgb_taskids)
 
 OptimizationTask = namedtuple('OptimizationTask', 'id scorer mango_space hp_space')
 
 
-def optimization_tasks(clf_id):
+def optimization_tasks(clf_id, cv, task_filter=None):
     res = []
 
-    for task_id in _task_ids[clf_id]:
-        if task_id in _bad_tasks:
+    for task_num in _task_nums[clf_id]:
+        if task_num in _bad_tasks:
+            continue
+        task_id = f'{clf_id}-{task_num}'
+        if task_filter and not re.match(task_filter, task_id):
             continue
         res.append(OptimizationTask(
-            id=f'{clf_id}-{task_id}',
-            scorer=get_scorer(clf_id, task_id),
+            id=task_id,
+            scorer=get_scorer(clf_id, task_num, cv=cv),
             mango_space=_constructors[clf_id].mango_space(),
             hp_space=_constructors[clf_id].hp_space())
         )
@@ -177,8 +179,8 @@ def convert(params):
     return res
 
 
-def get_scorer(clf_id, task_id, cv=10, scoring='roc_auc'):
-    X, y = load_data(task_id)
+def get_scorer(clf_id, task_num, cv, scoring='roc_auc'):
+    X, y = load_data(task_num)
 
     def scorer(params):
         log_params = convert(params)
@@ -191,9 +193,9 @@ def get_scorer(clf_id, task_id, cv=10, scoring='roc_auc'):
 regex = re.compile(r"\[|\]|<", re.IGNORECASE)
 
 
-def load_data(task_id):
-    df = pd.read_csv(f'{_data_dir}/{task_id}.csv')
-    with open(f'{_data_dir}/{task_id}.json', 'r') as f:
+def load_data(task_num):
+    df = pd.read_csv(f'{_data_dir}/{task_num}.csv')
+    with open(f'{_data_dir}/{task_num}.json', 'r') as f:
         meta = json.load(f)
 
     y_col = next(x['name'] for x in meta['features'] if x['target'] == '1')
@@ -215,11 +217,12 @@ def load_data(task_id):
 
 class Benchmark:
 
-    def __init__(self, max_evals, n_parallel, n_repeat):
+    def __init__(self, max_evals, n_parallel, n_repeat, results_dir):
         self.max_evals = max_evals
         self.task = None
         self.n_parallel = n_parallel
         self.n_repeat = n_repeat
+        self.results_dir = results_dir
 
     @property
     def hp_objective(self):
@@ -426,34 +429,45 @@ class Benchmark:
 
         return res
 
-    @staticmethod
-    def result_file(task_id, optimizer):
-        return os.path.join(_results_dir, optimizer, task_id + '.json')
+    def result_file(self, task_id, optimizer):
+        return os.path.join(self.results_dir, optimizer, task_id + '.json')
 
 
 if __name__ == "__main__":
+    from attrdict import AttrDict
     avail_optimizers = ['mango_serial', 'random_serial', 'hp_serial', 'mango_parallel', 'mango_parallel_cluster']
-    all_clf_ids = ['rf', 'xgb', 'svm']
-    optimizers = os.environ.get("OPTIMIZER", 'mango_serial').split(',')
+    clf_ids = ['rf', 'xgb', 'svm']
+
+    config = AttrDict(
+        task_filter='xgb-146064',
+        optimizers='mango_parallel_cluster',
+        max_evals=30,
+        n_parallel=5,
+        n_repeat=1,
+        cv=3,
+        results_dir='results3'
+    )
+
+    config = AttrDict(
+        task_filter=None,
+        optimizers='mango_serial',
+        max_evals=50,
+        n_parallel=5,
+        n_repeat=3,
+        cv=10,
+        results_dir='results4'
+    )
+
+    optimizers = os.environ.get("OPTIMIZER", config.optimizers).split(',')
     print(optimizers)
     assert all(optimizer in avail_optimizers for optimizer in optimizers)
 
-    clf_ids = os.environ.get("CLF_IDS")
-    if clf_ids:
-        clf_ids = clf_ids.split(',')
-    else:
-        clf_ids = all_clf_ids
-    print(clf_ids)
+    task_filter = os.environ.get("TASK", config.task_filter)
+    print(task_filter)
 
-    task_filter = os.environ.get("TASK", 'xgb')
-
-    # b = Benchmark(max_evals=5, n_parallel=4, n_repeat=1)
-    b = Benchmark(max_evals=50, n_parallel=5, n_repeat=3)
+    b = Benchmark(max_evals=config.max_evals, n_parallel=config.n_parallel, n_repeat=config.n_repeat, results_dir=config.results_dir)
     for clf_id in clf_ids:
-        for task in optimization_tasks(clf_id):
-
-            if task_filter and not re.match(task_filter, task.id):
-                continue
+        for task in optimization_tasks(clf_id, cv=config.cv, task_filter=task_filter):
             for optimizer in optimizers:
                 try:
                     b.run(task, optimizer, refresh=False)
