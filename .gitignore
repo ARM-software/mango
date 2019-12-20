@@ -110,6 +110,7 @@ venv.bak/
 lab/
 TODO.md
 openml/results_local
+openml/plots_local
 
 #pycharm
 .idea/
