@@ -85,7 +85,7 @@ class Tuner:
         """
         # Minimum and maximum domain size
         domain_min = 5000
-        domain_max = 50000
+        domain_max = 500000
 
         domain_size = 1
 
@@ -155,7 +155,7 @@ class Tuner:
             raise ValueError("No valid configuration found to initiate the Bayesian Optimizer")
 
         # evaluated hyper parameters are used
-        X_init = ds.convert_GP_space(X_list)
+        X_init = ds.convert_to_gp(X_list)
         Y_init = Y_list.reshape(len(Y_list), 1)
 
         # setting the initial random hyper parameters tried
@@ -178,8 +178,7 @@ class Tuner:
         pbar = tqdm(range(self.config.num_iteration))
         for i in pbar:
             # Domain Space
-            domain_list = ds.get_domain()
-            X_domain_np = ds.convert_GP_space(domain_list)
+            X_domain_np = ds.sample_gp_space()
 
             # Black-Box Optimizer
             if self.config.scale_y:
@@ -203,7 +202,7 @@ class Tuner:
 
 
             # Scheduler
-            X_next_PS = ds.convert_PS_space(X_next_batch)
+            X_next_PS = ds.convert_to_params(X_next_batch)
 
             # if all the xs have failed before, replace them with random sample
             # as we will not get any new information otherwise
@@ -225,7 +224,7 @@ class Tuner:
 
             Y_next_batch = Y_next_list.reshape(len(Y_next_list), 1)
             # update X_next_batch to successfully evaluated values
-            X_next_batch = ds.convert_GP_space(X_next_list)
+            X_next_batch = ds.convert_to_gp(X_next_list)
 
             # update the bookeeping of values tried
             hyper_parameters_tried = np.append(hyper_parameters_tried, X_next_list)

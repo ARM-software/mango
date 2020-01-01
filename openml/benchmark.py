@@ -109,17 +109,17 @@ class XGB(XGBClassifier):
         return {
             'n_estimators': range(3, 5000),
             'max_depth': range(1, 15),
-            # 'reg_alpha': loguniform(-3, 6),  # 10^-3 to 10^3
-            'reg_alpha': uniform(-3, 6),  # 10^-3 to 10^3
+            'reg_alpha': loguniform(0.001, 1000),  # 10^-3 to 10^3
+            # 'reg_alpha': uniform(-3, 6),  # 10^-3 to 10^3
             'booster': ['gbtree', 'gblinear'],
             'colsample_bylevel': uniform(0.05, 0.95),
             'colsample_bytree': uniform(0.05, 0.95),
-            # 'learning_rate': loguniform(-3, 3),  # 0.001 to 1
-            'learning_rate': uniform(-3, 3),  # 0.001 to 1
-            # 'reg_lambda': loguniform(-3, 6),  # 10^-3 to 10^3
-            'reg_lambda': uniform(-3, 6),  # 10^-3 to 10^3
-            # 'min_child_weight': loguniform(0, 2),
-            'min_child_weight': uniform(0, 2),
+            'learning_rate': loguniform(0.001, 1),  # 0.001 to 1
+            # 'learning_rate': uniform(-3, 3),  # 0.001 to 1
+            'reg_lambda': loguniform(0.001, 1000),  # 10^-3 to 10^3
+            # 'reg_lambda': uniform(-3, 6),  # 10^-3 to 10^3
+            'min_child_weight': loguniform(1, 100),
+            # 'min_child_weight': uniform(0, 2),
             'subsample': uniform(0.1, 0.89),
         }
 
@@ -128,17 +128,17 @@ class XGB(XGBClassifier):
         return {
             'n_estimators': hp_range('n_estimators', 3, 5000),
             'max_depth': hp_range('max_depth', 1, 15),
-            # 'reg_alpha': hp.loguniform('reg_alpha', np.log(10 ** -3), np.log(10 ** 3)),  # 10^-3 to 10^3
-            'reg_alpha': hp.uniform('reg_alpha', -3, 3),  # 10^-3 to 10^3
+            'reg_alpha': hp.loguniform('reg_alpha', np.log(10 ** -3), np.log(10 ** 3)),  # 10^-3 to 10^3
+            # 'reg_alpha': hp.uniform('reg_alpha', -3, 3),  # 10^-3 to 10^3
             'booster': hp.choice('booster', ['gbtree', 'gblinear']),
             'colsample_bylevel': hp.uniform('colsample_bylevel', 0.05, 0.99),
             'colsample_bytree': hp.uniform('colsample_bytree', 0.05, 0.99),
-            # 'learning_rate': hp.loguniform('learning_rate', np.log(10 ** -3), np.log(1)),  # 0.001 to 1
-            'learning_rate': hp.uniform('learning_rate', -3, 1),  # 0.001 to 1
-            # 'reg_lambda': hp.loguniform('reg_lambda', np.log(10 ** -3), np.log(10 ** 3)),  # 10^-3 to 10^3
-            'reg_lambda': hp.uniform('reg_lambda', -3, 3),  # 10^-3 to 10^3
-            # 'min_child_weight': hp.loguniform('min_child_weight', 0, np.log(10 ** 2)),
-            'min_child_weight': hp.uniform('min_child_weight', 0, 2),
+            'learning_rate': hp.loguniform('learning_rate', np.log(10 ** -3), np.log(1)),  # 0.001 to 1
+            # 'learning_rate': hp.uniform('learning_rate', -3, 1),  # 0.001 to 1
+            'reg_lambda': hp.loguniform('reg_lambda', np.log(10 ** -3), np.log(10 ** 3)),  # 10^-3 to 10^3
+            # 'reg_lambda': hp.uniform('reg_lambda', -3, 3),  # 10^-3 to 10^3
+            'min_child_weight': hp.loguniform('min_child_weight', 0, np.log(10 ** 2)),
+            # 'min_child_weight': hp.uniform('min_child_weight', 0, 2),
             'subsample': hp.uniform('subsample', 0.1, 0.99),
         }
 
@@ -183,8 +183,8 @@ def get_scorer(clf_id, task_num, cv, scoring='roc_auc'):
     X, y = load_data(task_num)
 
     def scorer(params):
-        log_params = convert(params)
-        clf = _constructors[clf_id](**log_params)
+        # log_params = convert(params)
+        clf = _constructors[clf_id](**params)
         return np.mean(cross_val_score(clf, X, y, cv=cv, scoring=scoring))
 
     return scorer
@@ -425,6 +425,7 @@ class Benchmark:
             os.makedirs(os.path.dirname(result_file))
 
         with open(result_file, 'w') as f:
+
             json.dump(res, f)
 
         return res
@@ -440,13 +441,15 @@ if __name__ == "__main__":
 
     if os.environ.get("LOCAL_RUN"):
         config = AttrDict(
-            task_filter='xgb-146064',
+            task_filter='xgb-146',
             optimizers='mango_serial',
             max_evals=20,
             n_parallel=5,
             n_repeat=1,
-            cv=3,
-            results_dir='results_local'
+            cv=10,
+            results_dir='results_local',
+            raise_error=True,
+            refresh=True,
         )
     else:
         config = AttrDict(
@@ -456,7 +459,9 @@ if __name__ == "__main__":
             n_parallel=5,
             n_repeat=3,
             cv=10,
-            results_dir='results4'
+            results_dir='results5',
+            raise_error=False,
+            refresh=False,
         )
 
     optimizers = os.environ.get("OPTIMIZER", config.optimizers).split(',')
@@ -471,6 +476,9 @@ if __name__ == "__main__":
         for task in optimization_tasks(clf_id, cv=config.cv, task_filter=task_filter):
             for optimizer in optimizers:
                 try:
-                    b.run(task, optimizer, refresh=False)
+                    b.run(task, optimizer, refresh=config.refresh)
                 except Exception as e:
-                    print(str(e))
+                    if config.raise_error:
+                        raise  e
+                    else:
+                        print(str(e))
