@@ -19,6 +19,7 @@ setuptools.setup(
         'scipy==1.4.1',
         'scikit_learn==0.21.3',
         'tqdm==4.36.1',
+        'attrdict==2.0.1',
     ],
     zip_safe=False,
     classifiers=[
