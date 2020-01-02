@@ -72,7 +72,7 @@ class PostProcess:
 
 if __name__ == "__main__":
     # collect results
-    pp = PostProcess('results_local', 'plots_local')
+    pp = PostProcess('results5', 'plots5')
 
     optimizers_required = ['random_serial', 'hp_serial', 'mango_serial'] #, 'mango_parallel_cluster'] # 'mango_parallel', 'mango_parallel_cluster'
 
@@ -81,35 +81,35 @@ if __name__ == "__main__":
 
     task_results = pp.task_results
 
-    optimizers_pairplot = ['mango_serial']
-    exp_id = 'copula'  # std scaling features fed to gpr with anistropic length scales
-    for task_id, res in task_results.items():
-        for optimizer in res.keys():
-            if optimizer not in optimizers_pairplot:
-                continue
-            for idx, experiment in enumerate(res[optimizer]['experiments']):
-                pp.scatter_matrix("%s-%s-%s%s" % (task_id, optimizer, exp_id, idx), experiment)
-
-    # normalized_scores = collections.defaultdict(dict)
+    # optimizers_pairplot = ['mango_serial']
+    # exp_id = 'copula'  # std scaling features fed to gpr with anistropic length scales
     # for task_id, res in task_results.items():
-    #     if not all(optimizer in res.keys()
-    #                for optimizer in optimizers_required):
-    #         print("Not all optimizers for %s; %s" % (task_id, res.keys()))
-    #         continue
-    #     max_random = max(res['random_serial']['scores'])
-    #     for optimizer in optimizers_required:
-    #         normalized_scores[task_id][optimizer] = res[optimizer]['scores'] / max_random
-    #
-    # print(len(list(i for i in normalized_scores if re.match("^%s" % clf, i))))
-    #
-    # for task_id, scores in normalized_scores.items():
-    #     pp.plot(task_id, scores)
-    #
-    # mean_scores = {}
-    # for optimizer in optimizers_required:
-    #     mean_scores[optimizer] = np.array([scores[optimizer] for task_id, scores in normalized_scores.items()
-    #                                        if re.match("^%s.*" % clf, task_id)])
-    #     mean_scores[optimizer] = np.mean(mean_scores[optimizer], axis=0)
-    #
-    # # print(mean_scores)
-    # pp.plot("mean_scores_%s" % clf, mean_scores)
+    #     for optimizer in res.keys():
+    #         if optimizer not in optimizers_pairplot:
+    #             continue
+    #         for idx, experiment in enumerate(res[optimizer]['experiments']):
+    #             pp.scatter_matrix("%s-%s-%s%s" % (task_id, optimizer, exp_id, idx), experiment)
+
+    normalized_scores = collections.defaultdict(dict)
+    for task_id, res in task_results.items():
+        if not all(optimizer in res.keys()
+                   for optimizer in optimizers_required):
+            print("Not all optimizers for %s; %s" % (task_id, res.keys()))
+            continue
+        max_random = max(res['random_serial']['scores'])
+        for optimizer in optimizers_required:
+            normalized_scores[task_id][optimizer] = res[optimizer]['scores'] / max_random
+
+    print(len(list(i for i in normalized_scores if re.match("^%s" % clf, i))))
+
+    for task_id, scores in normalized_scores.items():
+        pp.plot(task_id, scores)
+
+    mean_scores = {}
+    for optimizer in optimizers_required:
+        mean_scores[optimizer] = np.array([scores[optimizer] for task_id, scores in normalized_scores.items()
+                                           if re.match("^%s.*" % clf, task_id)])
+        mean_scores[optimizer] = np.mean(mean_scores[optimizer], axis=0)
+
+    # print(mean_scores)
+    pp.plot("mean_scores_%s" % clf, mean_scores)
