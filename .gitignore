@@ -109,6 +109,9 @@ venv.bak/
 # local experiments
 lab/
 TODO.md
+openml/results_local
+openml/plots_local
+**outcmaes
 
 #pycharm
 .idea/

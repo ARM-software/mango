@@ -7,10 +7,13 @@ Testing the capabilities of Mango
 """
 import math
 
-from scipy.stats import uniform
+from pytest import approx
+import numpy as np
 
 from mango.domain.domain_space import domain_space
 from mango import Tuner, scheduler
+from scipy.stats import uniform
+from mango.domain.distribution import loguniform
 
 # Simple param_dict
 param_dict = {"a": uniform(0, 1),  # uniform distribution
@@ -70,6 +73,26 @@ def test_domain():
 
         for key in l1.keys():
             assert key in param_dict.keys()
+
+    ps = dict(x=range(1, 100), y=['a', 'b'], z=uniform(-10, 20))
+    ds = domain_space(ps, 100)
+
+    x = ds.get_domain()
+    x_gp = ds.convert_GP_space(x)
+    x_rebuilt = ds.convert_PS_space(x_gp)
+    for x1, x2 in zip(x, x_rebuilt):
+        for k in x1.keys():
+            v1 = x1[k]
+            v2 = x2[k]
+            if isinstance(v1, np.float64):
+                assert v1 == approx(v2, abs=1e-5)
+            else:
+                if not v1 == v2:
+                    print(k)
+                    print(x)
+                    print(x_gp)
+                    print(x_rebuilt)
+                assert v1 == v2
 
 
 # test the functionality of the tuner

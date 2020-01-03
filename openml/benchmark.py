@@ -3,6 +3,7 @@ import warnings
 from collections import namedtuple
 import os
 import random
+import re
 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
@@ -15,7 +16,6 @@ import pandas as pd
 from hyperopt import fmin, tpe, hp, STATUS_OK, Trials, STATUS_FAIL
 from hyperopt.pyll import scope
 from hyperopt.mongoexp import MongoTrials
-
 
 from mango.domain.distribution import loguniform
 from mango.tuner import Tuner
@@ -40,7 +40,6 @@ _rf_taskids = [125923, 145804, 145836, 145839, 145855, 145862, 145878,
 _bad_tasks = [6566, 34536, 3950]  # no features (3950, 10101 takes too much time)
 
 _data_dir = "data"
-_results_dir = "results2"
 
 
 @scope.define
@@ -110,13 +109,17 @@ class XGB(XGBClassifier):
         return {
             'n_estimators': range(3, 5000),
             'max_depth': range(1, 15),
-            'reg_alpha': loguniform(-3, 6),  # 10^-3 to 10^3
+            'reg_alpha': loguniform(0.001, 1000),  # 10^-3 to 10^3
+            # 'reg_alpha': uniform(-3, 6),  # 10^-3 to 10^3
             'booster': ['gbtree', 'gblinear'],
             'colsample_bylevel': uniform(0.05, 0.95),
             'colsample_bytree': uniform(0.05, 0.95),
-            'learning_rate': loguniform(-3, 3),  # 0.001 to 1
-            'reg_lambda': loguniform(-3, 6),  # 10^-3 to 10^3
-            'min_child_weight': loguniform(0, 2),
+            'learning_rate': loguniform(0.001, 1),  # 0.001 to 1
+            # 'learning_rate': uniform(-3, 3),  # 0.001 to 1
+            'reg_lambda': loguniform(0.001, 1000),  # 10^-3 to 10^3
+            # 'reg_lambda': uniform(-3, 6),  # 10^-3 to 10^3
+            'min_child_weight': loguniform(1, 100),
+            # 'min_child_weight': uniform(0, 2),
             'subsample': uniform(0.1, 0.89),
         }
 
@@ -126,31 +129,38 @@ class XGB(XGBClassifier):
             'n_estimators': hp_range('n_estimators', 3, 5000),
             'max_depth': hp_range('max_depth', 1, 15),
             'reg_alpha': hp.loguniform('reg_alpha', np.log(10 ** -3), np.log(10 ** 3)),  # 10^-3 to 10^3
+            # 'reg_alpha': hp.uniform('reg_alpha', -3, 3),  # 10^-3 to 10^3
             'booster': hp.choice('booster', ['gbtree', 'gblinear']),
             'colsample_bylevel': hp.uniform('colsample_bylevel', 0.05, 0.99),
             'colsample_bytree': hp.uniform('colsample_bytree', 0.05, 0.99),
             'learning_rate': hp.loguniform('learning_rate', np.log(10 ** -3), np.log(1)),  # 0.001 to 1
+            # 'learning_rate': hp.uniform('learning_rate', -3, 1),  # 0.001 to 1
             'reg_lambda': hp.loguniform('reg_lambda', np.log(10 ** -3), np.log(10 ** 3)),  # 10^-3 to 10^3
+            # 'reg_lambda': hp.uniform('reg_lambda', -3, 3),  # 10^-3 to 10^3
             'min_child_weight': hp.loguniform('min_child_weight', 0, np.log(10 ** 2)),
+            # 'min_child_weight': hp.uniform('min_child_weight', 0, 2),
             'subsample': hp.uniform('subsample', 0.1, 0.99),
         }
 
 
 _constructors = dict(rf=RandomForest, svm=SVM, xgb=XGB)
-_task_ids = dict(rf=_rf_taskids, svm=_svm_taskids, xgb=_xgb_taskids)
+_task_nums = dict(rf=_rf_taskids, svm=_svm_taskids, xgb=_xgb_taskids)
 
 OptimizationTask = namedtuple('OptimizationTask', 'id scorer mango_space hp_space')
 
 
-def optimization_tasks(clf_id):
+def optimization_tasks(clf_id, cv, task_filter=None):
     res = []
 
-    for task_id in _task_ids[clf_id]:
-        if task_id in _bad_tasks:
+    for task_num in _task_nums[clf_id]:
+        if task_num in _bad_tasks:
+            continue
+        task_id = f'{clf_id}-{task_num}'
+        if task_filter and not re.match(task_filter, task_id):
             continue
         res.append(OptimizationTask(
-            id=f'{clf_id}-{task_id}',
-            scorer=get_scorer(clf_id, task_id),
+            id=task_id,
+            scorer=get_scorer(clf_id, task_num, cv=cv),
             mango_space=_constructors[clf_id].mango_space(),
             hp_space=_constructors[clf_id].hp_space())
         )
@@ -158,19 +168,34 @@ def optimization_tasks(clf_id):
     return res
 
 
-def get_scorer(clf_id, task_id, cv=10, scoring='roc_auc'):
-    X, y = load_data(task_id)
+def convert(params):
+    res = dict()
+    log_params = ['reg_alpha', 'learning_rate', 'reg_lambda', 'min_child_weight']
+    for p in params:
+        if p in log_params:
+            res[p] = 10 ** params[p]
+        else:
+            res[p] = params[p]
+    return res
+
+
+def get_scorer(clf_id, task_num, cv, scoring='roc_auc'):
+    X, y = load_data(task_num)
 
     def scorer(params):
+        # log_params = convert(params)
         clf = _constructors[clf_id](**params)
         return np.mean(cross_val_score(clf, X, y, cv=cv, scoring=scoring))
 
     return scorer
 
 
-def load_data(task_id):
-    df = pd.read_csv(f'{_data_dir}/{task_id}.csv')
-    with open(f'{_data_dir}/{task_id}.json', 'r') as f:
+regex = re.compile(r"\[|\]|<", re.IGNORECASE)
+
+
+def load_data(task_num):
+    df = pd.read_csv(f'{_data_dir}/{task_num}.csv')
+    with open(f'{_data_dir}/{task_num}.json', 'r') as f:
         meta = json.load(f)
 
     y_col = next(x['name'] for x in meta['features'] if x['target'] == '1')
@@ -178,6 +203,10 @@ def load_data(task_id):
 
     X = df[x_cols]
     X = pd.get_dummies(X)
+
+    # for xgboost column name error
+    X.columns = [regex.sub("_", col) if any(x in str(col) for x in set(('[', ']', '<'))) else col for col in
+                 X.columns.values]
 
     y = df[y_col]
     classes = list(y.unique())
@@ -188,11 +217,12 @@ def load_data(task_id):
 
 class Benchmark:
 
-    def __init__(self, max_evals, n_parallel, n_repeat):
+    def __init__(self, max_evals, n_parallel, n_repeat, results_dir):
         self.max_evals = max_evals
         self.task = None
         self.n_parallel = n_parallel
         self.n_repeat = n_repeat
+        self.results_dir = results_dir
 
     @property
     def hp_objective(self):
@@ -245,7 +275,10 @@ class Benchmark:
         print("hp serial task: %s, best: %s, params: %s" %
               (self.task.id, max(scores), best_params))
 
-        return self.accumulate_max(scores, self.max_evals, batch_size)
+        search_path = trials.vals
+        search_path['score'] = list(np.array(trials.losses()) * -1)
+
+        return self.accumulate_max(scores, self.max_evals, batch_size), search_path
 
     def hp_parallel(self):
         trials = MongoTrials('mongo://localhost:27017/foo_db/jobs',
@@ -262,7 +295,10 @@ class Benchmark:
         print("hp parallel task: %s, best: %s, params: %s" %
               (self.task.id, max(scores), best_params))
 
-        return self.accumulate_max(scores, self.max_evals, batch_size)
+        search_path = trials.vals
+        search_path['score'] = list(np.array(trials.losses()) * -1)
+
+        return self.accumulate_max(scores, self.max_evals, batch_size), search_path
 
     def mango_serial(self):
         batch_size = 1
@@ -278,7 +314,13 @@ class Benchmark:
                results['best_params']))
 
         scores = results['objective_values']
-        return self.accumulate_max(scores[-self.max_evals * batch_size:], self.max_evals, batch_size)
+
+        search_path = list(results['params_tried'])
+        for idx, sp in enumerate(search_path):
+            sp['score'] = results['objective_values'][idx]
+            sp['surrogate'] = results['surrogate_values'][idx]
+
+        return self.accumulate_max(scores[-self.max_evals * batch_size:], self.max_evals, batch_size), search_path
 
     @staticmethod
     def accumulate_max(arr, n_iterations, batch_size):
@@ -299,7 +341,13 @@ class Benchmark:
                results['best_params']))
 
         scores = results['objective_values']
-        return self.accumulate_max(scores[-self.max_evals * batch_size:], self.max_evals, batch_size)
+
+        search_path = list(results['params_tried'])
+        for idx, sp in enumerate(search_path):
+            sp['score'] = results['objective_values'][idx]
+            sp['surrogate'] = results['surrogate_values'][idx]
+
+        return self.accumulate_max(scores[-self.max_evals * batch_size:], self.max_evals, batch_size), search_path
 
     def mango_parallel_cluster(self):
         batch_size = self.n_parallel
@@ -316,7 +364,12 @@ class Benchmark:
                results['best_params']))
 
         scores = results['objective_values']
-        return self.accumulate_max(scores[-self.max_evals * batch_size:], self.max_evals, batch_size)
+        search_path = list(results['params_tried'])
+        for idx, sp in enumerate(search_path):
+            sp['score'] = results['objective_values'][idx]
+            sp['surrogate'] = results['surrogate_values'][idx]
+
+        return self.accumulate_max(scores[-self.max_evals * batch_size:], self.max_evals, batch_size), search_path
 
     def random_serial(self):
         batch_size = 1
@@ -333,7 +386,11 @@ class Benchmark:
                results['best_params']))
 
         scores = results['objective_values']
-        return self.accumulate_max(scores[-self.max_evals * batch_size:], self.max_evals, batch_size)
+        search_path = list(results['params_tried'])
+        for idx, sp in enumerate(search_path):
+            sp['score'] = results['objective_values'][idx]
+
+        return self.accumulate_max(scores[-self.max_evals * batch_size:], self.max_evals, batch_size), search_path
 
     def run(self, optimization_task, optimizer, refresh=False):
         result_file = self.result_file(optimization_task.id, optimizer)
@@ -341,8 +398,8 @@ class Benchmark:
             with open(result_file, 'r') as f:
                 res = json.load(f)
             if res['max_evals'] == self.max_evals and \
-                    res['batch_size'] == self.n_parallel: # and \
-                    # res['n_repeat'] == self.n_repeat:
+                    res['batch_size'] == self.n_parallel:  # and \
+                # res['n_repeat'] == self.n_repeat:
                 print("%s already exists" % optimization_task.id)
                 return res
 
@@ -354,67 +411,74 @@ class Benchmark:
                    max_evals=self.max_evals,
                    batch_size=self.n_parallel,
                    n_repeat=self.n_repeat)
-        res['scores'] = list(np.mean([getattr(self, optimizer)() for _ in range(self.n_repeat)], axis=0))
+
+        res['experiments'] = []
+        scores = []
+        for i in range(self.n_repeat):
+            score, search_path = getattr(self, optimizer)()
+            scores.append(score)
+            res['experiments'].append(search_path)
+
+        res['scores'] = list(np.mean(scores, axis=0))
 
         if not os.path.exists(os.path.dirname(result_file)):
             os.makedirs(os.path.dirname(result_file))
 
         with open(result_file, 'w') as f:
+
             json.dump(res, f)
 
         return res
 
-    @staticmethod
-    def result_file(task_id, optimizer):
-        return os.path.join(_results_dir, optimizer, task_id + '.json')
+    def result_file(self, task_id, optimizer):
+        return os.path.join(self.results_dir, optimizer, task_id + '.json')
 
 
 if __name__ == "__main__":
-    optimizers = ['mango_serial', 'random_serial', 'hp_serial', 'mango_parallel', 'mango_parallel_cluster']
-    all_clf_ids = ['rf', 'xgb', 'svm']
-    optimizer = os.environ.get("OPTIMIZER", 'mango_serial')
-    assert optimizer in optimizers
+    from attrdict import AttrDict
+    avail_optimizers = ['mango_serial', 'random_serial', 'hp_serial', 'mango_parallel', 'mango_parallel_cluster']
+    clf_ids = ['rf', 'xgb', 'svm']
 
-    clf_ids = os.environ.get("CLF_IDS")
-    if clf_ids:
-        clf_ids = clf_ids.split(',')
+    if os.environ.get("LOCAL_RUN"):
+        config = AttrDict(
+            task_filter='xgb-146',
+            optimizers='mango_serial',
+            max_evals=20,
+            n_parallel=5,
+            n_repeat=1,
+            cv=10,
+            results_dir='results_local',
+            raise_error=True,
+            refresh=True,
+        )
     else:
-        clf_ids = all_clf_ids
-    print(clf_ids)
+        config = AttrDict(
+            task_filter=None,
+            optimizers='mango_serial',
+            max_evals=50,
+            n_parallel=5,
+            n_repeat=3,
+            cv=10,
+            results_dir='results5',
+            raise_error=False,
+            refresh=False,
+        )
 
-    # b = Benchmark(max_evals=5, n_parallel=4, n_repeat=1)
-    b = Benchmark(max_evals=50, n_parallel=5, n_repeat=3)
+    optimizers = os.environ.get("OPTIMIZER", config.optimizers).split(',')
+    print(optimizers)
+    assert all(optimizer in avail_optimizers for optimizer in optimizers)
+
+    task_filter = os.environ.get("TASK", config.task_filter)
+    print(task_filter)
+
+    b = Benchmark(max_evals=config.max_evals, n_parallel=config.n_parallel, n_repeat=config.n_repeat, results_dir=config.results_dir)
     for clf_id in clf_ids:
-        for task in optimization_tasks(clf_id):
-            # if task.id not in ['xgb-146064',]:
-            #     continue
-            try:
-                b.run(task, optimizer, refresh=False)
-            except Exception as e:
-                print(str(e))
-
-
-
-"""
-
-            'n_estimators': range(3, 5000),
-            'max_depth': range(1, 15),
-            'reg_alpha': loguniform(-3, 6),  # 10^-3 to 10^3
-            'booster': ['gbtree', 'gblinear'],
-            'colsample_bylevel': uniform(0.05, 0.95),
-            'colsample_bytree': uniform(0.05, 0.95),
-            'learning_rate': loguniform(-3, 3),  # 0.001 to 1
-            'reg_lambda': loguniform(-3, 6),  # 10^-3 to 10^3
-            'min_child_weight': loguniform(0, 2),
-            'subsample': uniform(0.1, 0.89),
-            
-Benchmark hp_serial on xgb-146064, max evals: 50, batch_size: 5, n_repeat: 1
-hp serial task: xgb-146064, best: 0.9865662211165457, params: {'booster': 0, 'colsample_bylevel': 0.16659793323235653, 'colsample_bytree': 0.6639739912492748, 'learning_rate': 0.20055675364463627, 'max_depth': 2.0, 'min_child_weight': 1.8790966841235113, 'n_estimators': 3180.0, 'reg_alpha': 0.0012038936899647617, 'reg_lambda': 0.0018377165958774174, 'subsample': 0.6613420064261579}
-
-Benchmark random_serial on xgb-146064, max evals: 50, batch_size: 5, n_repeat: 1
-random task: xgb-146064, best: 0.7311772853769607, params: {'booster': 'gbtree', 'colsample_bylevel': 0.959399345514509, 'colsample_bytree': 0.9498495624669465, 'learning_rate': 0.0014002953931664818, 'max_depth': 13, 'min_child_weight': 8.963225235753109, 'n_estimators': 3016, 'reg_alpha': 0.004629184070684072, 'reg_lambda': 0.634735819701405, 'subsample': 0.7993237016254977}
-random task: xgb-146064, best: 0.8389869497385731, params: {'booster': 'gbtree', 'colsample_bylevel': 0.27132408394037894, 'colsample_bytree': 0.6201623160391286, 'learning_rate': 0.07129365629279757, 'max_depth': 6, 'min_child_weight': 1.8360956352383773, 'n_estimators': 566, 'reg_alpha': 0.0025974628039601906, 'reg_lambda': 1.9431125528549607, 'subsample': 0.7776543717690461}
-
-mango serial task: xgb-146064, best: 0.7854548616967449, params: {'booster': 'gbtree', 'colsample_bylevel': 0.5177913190802533, 'colsample_bytree': 0.7134898210079639, 'learning_rate': 0.45782989090666154, 'max_depth': 14, 'min_child_weight': 1.0386523391167433, 'n_estimators': 494, 'reg_alpha': 2.2436052149354104, 'reg_lambda': 110.91369625161579, 'subsample': 0.6860898048969027}
-
-"""
+        for task in optimization_tasks(clf_id, cv=config.cv, task_filter=task_filter):
+            for optimizer in optimizers:
+                try:
+                    b.run(task, optimizer, refresh=config.refresh)
+                except Exception as e:
+                    if config.raise_error:
+                        raise  e
+                    else:
+                        print(str(e))

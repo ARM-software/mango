@@ -4,12 +4,14 @@ import collections
 import matplotlib.pyplot as plt
 import numpy as np
 import re
-
+import seaborn as sns
+import pandas as pd
 
 class PostProcess:
 
-    def __init__(self, results_dir):
+    def __init__(self, results_dir, plots_dir):
         self.results_dir = results_dir
+        self.plots_dir = plots_dir
 
     @property
     def optimizers(self):
@@ -21,22 +23,41 @@ class PostProcess:
         for optimizer in self.optimizers:
             for result_file in list(os.walk(os.path.join(self.results_dir, optimizer)))[0][2]:
                 result_file = os.path.join(self.results_dir, optimizer, result_file)
+                if not re.match("^.*json$", result_file):
+                    continue
+
                 with open(result_file, 'r') as f:
                     result = json.load(f)
-                if result['max_evals'] == 50 and result['batch_size'] == 5:
-                    results[result['task_id']][optimizer] = np.array(result['scores'])
+                if 1: # result['max_evals'] == 50 and result['batch_size'] == 5:
+                    results[result['task_id']][optimizer] = dict(scores=np.array(result['scores']), experiments=result.get('experiments', []))
                 else:
                     print("Not valid result %s" % result)
 
         return results
 
-    def plot(self, file_name, scores, plots_dir):
+    def scatter_matrix(self, file_name, search_path):
+        plots_dir = self.plots_dir
+        sns.set(style="ticks")
+
+        # df = sns.load_dataset("iris")
+        # sns.pairplot(df, hue="species")
+        df = pd.DataFrame(search_path)
+        df = pd.get_dummies(df)
+        sns.pairplot(df, hue='score')
+
+        fig_file = os.path.join(plots_dir, file_name + '.svg')
+        plt.savefig(fig_file)
+        plt.close()
+
+    def plot(self, file_name, scores):
+        plots_dir = self.plots_dir
         plt.figure(figsize=(8, 8))
         optimizer_format = {
             'random_serial': dict(color='blue', linestyle=':'),
             'hp_serial': dict(color='green', linestyle='-.'),
             'mango_serial': dict(color='orange', linestyle='-'),
             'mango_parallel': dict(color='red', linestyle='-'),
+            'mango_parallel_cluster': dict(color='cyan', linestyle='-'),
         }
         for optimizer, score in scores.items():
             fmt = optimizer_format[optimizer]
@@ -51,28 +72,38 @@ class PostProcess:
 
 if __name__ == "__main__":
     # collect results
-    pp = PostProcess('results/')
-    # for task_id, scores in pp.task_results.items():
-    #     pp.plot(task_id, scores, 'plots')
+    pp = PostProcess('results5', 'plots5')
+
+    optimizers_required = ['random_serial', 'hp_serial', 'mango_serial'] #, 'mango_parallel_cluster'] # 'mango_parallel', 'mango_parallel_cluster'
+
+    clf = 'xgb'
+    print(clf)
+
     task_results = pp.task_results
-    optimizers_required = ['random_serial', 'hp_serial',
-                           'mango_serial', 'mango_parallel']
+
+    # optimizers_pairplot = ['mango_serial']
+    # exp_id = 'copula'  # std scaling features fed to gpr with anistropic length scales
+    # for task_id, res in task_results.items():
+    #     for optimizer in res.keys():
+    #         if optimizer not in optimizers_pairplot:
+    #             continue
+    #         for idx, experiment in enumerate(res[optimizer]['experiments']):
+    #             pp.scatter_matrix("%s-%s-%s%s" % (task_id, optimizer, exp_id, idx), experiment)
 
     normalized_scores = collections.defaultdict(dict)
-    for task_id, scores in task_results.items():
-        if not all(optimizer in scores.keys()
+    for task_id, res in task_results.items():
+        if not all(optimizer in res.keys()
                    for optimizer in optimizers_required):
-            print("Not all optimizers for %s; %s" % (task_id, scores.keys()))
+            print("Not all optimizers for %s; %s" % (task_id, res.keys()))
             continue
-        max_random = max(scores['random_serial'])
+        max_random = max(res['random_serial']['scores'])
         for optimizer in optimizers_required:
-            normalized_scores[task_id][optimizer] = scores[optimizer] / max_random
+            normalized_scores[task_id][optimizer] = res[optimizer]['scores'] / max_random
 
-    clf = 'svm'
-    print(clf)
     print(len(list(i for i in normalized_scores if re.match("^%s" % clf, i))))
-    # for task_id, scores in normalized_scores.items():
-    #     pp.plot(task_id, scores, 'plots_normalized')
+
+    for task_id, scores in normalized_scores.items():
+        pp.plot(task_id, scores)
 
     mean_scores = {}
     for optimizer in optimizers_required:
@@ -80,4 +111,5 @@ if __name__ == "__main__":
                                            if re.match("^%s.*" % clf, task_id)])
         mean_scores[optimizer] = np.mean(mean_scores[optimizer], axis=0)
 
-    pp.plot("mean_scores_%s" % clf, mean_scores, 'plots')
+    # print(mean_scores)
+    pp.plot("mean_scores_%s" % clf, mean_scores)
