@@ -200,7 +200,6 @@ class Tuner:
                 X_next_batch = Optimizer.get_next_batch(X_sample, Y_scaled, X_domain_np,
                                                         batch_size=self.config.batch_size)
 
-
             # Scheduler
             X_next_PS = ds.convert_to_params(X_next_batch)
 

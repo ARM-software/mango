@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import Matern
 import math
+import scipy
 
 # used for clustering implementation
 from sklearn.cluster import KMeans
@@ -15,6 +16,22 @@ Bayesian Learning optimizer
 """
 
 
+def cmaes_optimization(obj_func, initial_theta, bounds):
+    import cma
+    initial_sigma = 0.3
+    # assuming bounds are same for all dimensions
+    cmaes_bounds = [[b[0] for b in bounds], [b[1] for b in bounds]]
+    opts = cma.CMAOptions()
+    opts.set("bounds", cmaes_bounds)
+    opts.set("verbose", -1)
+    opts.set("verb_log", 0)
+    opts.set("verb_disp", 0)
+    opts.set('tolfun', 1e-2)
+    es = cma.CMAEvolutionStrategy(initial_theta, initial_sigma, opts)
+    es.optimize(obj_func)
+    return es.result.xbest, es.result.fbest
+
+
 class BayesianLearning(BasePredictor):
 
     def __init__(self, surrogate=None, n_features=None):
@@ -23,15 +40,16 @@ class BayesianLearning(BasePredictor):
         if surrogate is None:
             if n_features is not None:
                 # anisotropic kernel
-                length_scale = [1.] * n_features
+                length_scale = [2.] * n_features
             else:
-                length_scale = 1.
+                length_scale = 2.
 
             self.surrogate = GaussianProcessRegressor(kernel=Matern(nu=2.5,
                                                                     length_scale=length_scale,
-                                                                    length_scale_bounds=(0.1, 100)),
-                                                      n_restarts_optimizer=5,
-                                                      random_state=1,
+                                                                    length_scale_bounds=(0.1, 1024)),
+                                                      n_restarts_optimizer=3,
+                                                      # random_state=1,
+                                                      # optimizer=None,
                                                       normalize_y=False)
         else:
             self.surrogate = surrogate
