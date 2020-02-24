@@ -9,7 +9,7 @@ attrs=19.1.0=py37_1
 backcall=0.1.0=py37_0
 billiard=3.6.0.0=py37h01d97ff_0
 blas=1.0=mkl
-bleach=3.1.0=py37_0
+bleach=3.1.1=py37_0
 ca-certificates=2019.5.15=0
 celery=4.4.0rc1=py_0
 certifi=2019.6.16=py37_1

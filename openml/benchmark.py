@@ -445,7 +445,7 @@ if __name__ == "__main__":
             optimizers='mango_serial',
             max_evals=20,
             n_parallel=5,
-            n_repeat=1,
+            n_repeat=3,
             cv=10,
             results_dir='results_local',
             raise_error=True,
@@ -479,6 +479,6 @@ if __name__ == "__main__":
                     b.run(task, optimizer, refresh=config.refresh)
                 except Exception as e:
                     if config.raise_error:
-                        raise  e
+                        raise e
                     else:
                         print(str(e))
