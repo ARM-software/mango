@@ -359,4 +359,25 @@ Details about specifying parameter/variable domain space, user objective functio
 Please stay tuned. 
 -->
 
+## Participate
+
+### Paper
+
+More technical details are available in the [Mango paper (ICASSP 2020 Conference)](https://arxiv.org/pdf/2005.11394.pdf). Please cite this as:
+```
+@inproceedings{sandha2020mango,
+  title={Mango: A Python Library for Parallel Hyperparameter Tuning},
+  author={Sandha, Sandeep Singh and Aggarwal, Mohit and Fedorov, Igor and Srivastava, Mani},
+  booktitle={ICASSP 2020-2020 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)},
+  pages={3987--3991},
+  year={2020},
+  organization={IEEE}
+}
+```
+### Contribute
+
+Please take a look at [open issues](https://github.com/ARM-software/mango/issues) if you are looking for areas to contribute to.
+
+### Questions
+
 For any questions feel free to reach out by creating an issue [here](https://github.com/ARM-software/mango/issues/new).
