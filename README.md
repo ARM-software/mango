@@ -374,6 +374,10 @@ More technical details are available in the [Mango paper (ICASSP 2020 Conference
   organization={IEEE}
 }
 ```
+### Slides
+
+Slides explaining Mango abstractions and design choices are available. [Mango Slides](https://github.com/ARM-software/mango/blob/master/documents/Mango_github_slides.pdf).
+
 ### Contribute
 
 Please take a look at [open issues](https://github.com/ARM-software/mango/issues) if you are looking for areas to contribute to.
