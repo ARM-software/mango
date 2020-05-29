@@ -4,6 +4,7 @@ Testing the capabilities of Mango
 - Test the sampling capabilities
 - Test the bayesian learning optimizer iterations
 - Test the results of tuner for simple objective function
+$  python -m pytest mango/tests/ --disable-warnings
 """
 import math
 
@@ -206,6 +207,7 @@ def test_six_hump():
 
     x_opt = 0.0898 # or -0;0898
     y_opt = -0.7126  # or 0.7126
+
     def objfunc(args_list):
         results = []
         for hyper_par in args_list:

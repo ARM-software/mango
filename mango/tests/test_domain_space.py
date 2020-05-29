@@ -10,11 +10,23 @@ def test_domain():
         'b': np.random.randint(0, 1e6, size=50),
         'd': [1, 0.1, 2.0],
         'e': ['a', 1, 'b', 'c', None],
-        'f': ['1', '-1']
+        'f': ['1', '-1'],
+        'h': [True, False]
     }
     ds = domain_space(params, domain_size=1000)
     assert all(k in ds.mapping_int for k in ['a', 'b'])
-    assert all(k in ds.mapping_categorical for k in ['d', 'e', 'f'])
+    assert all(k in ds.mapping_categorical for k in ['d', 'e', 'f', 'h'])
+    samples = ds.get_domain()
+
+    for sample in samples:
+        for param in params.keys():
+            assert (sample[param] in params[param])
+
+    params = {
+        'a': [1],
+    }
+    ds = domain_space(params, domain_size=1000)
+    assert all(k in ds.mapping_int for k in ['a'])
     samples = ds.get_domain()
 
     for sample in samples:
@@ -69,6 +81,7 @@ def test_gp_space():
         'g': loguniform(0.001, 100),
         'b': [10],
         'd': uniform(0, 1),
+        'i': [True, False]
     }
 
     ds = domain_space(space, domain_size=10000)
@@ -80,7 +93,7 @@ def test_gp_space():
     assert (X[:, 1] == 0.).all()  # b
     assert np.isin(X[:, 2], [0.0, 0.5, 1.0]).all() # c
     assert np.isin(X[:, 4:7], np.eye(3)).all()  # e
-    assert X.shape == (ds.domain_size, 10)
+    assert X.shape == (ds.domain_size, 12)
 
     params = ds.convert_to_params(X)
 
@@ -93,6 +106,7 @@ def test_gp_space():
         assert param['f'] in space['f']
         assert 0.001 <= param['g'] <= 100
         assert -10 <= param['h'] <= 10
+        assert param['i'] in space['i']
 
     X2 = ds.convert_to_gp(params)
     assert np.isclose(X2, X).all()

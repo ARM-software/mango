@@ -95,7 +95,8 @@ class domain_space():
                 # for list with all int we are considering it as non-categorical
                 try:
                     # this check takes care of numpy ints as well
-                    all_int = all(x == int(x) for x in param_dict[par])
+                    all_int = all(x == int(x) and type(x) != bool
+                                  for x in param_dict[par])
                 except (ValueError, TypeError):
                     all_int = False
 
