@@ -1,0 +1,328 @@
+      {
+    "data_id": "1471",
+    "name": "eeg-eye-state",
+    "exact_name": "eeg-eye-state",
+    "version": 1,
+    "version_label": null,
+    "description": "**Author**: Oliver Roesler  \r\n**Source**: [UCI](https:\/\/archive.ics.uci.edu\/ml\/datasets\/EEG+Eye+State), Baden-Wuerttemberg, Cooperative State University (DHBW), Stuttgart, Germany  \r\n**Please cite**: [UCI](https:\/\/archive.ics.uci.edu\/ml\/citation_policy.html)  \r\n\r\nAll data is from one continuous EEG measurement with the Emotiv EEG Neuroheadset. The duration of the measurement was 117 seconds. The eye state was detected via a camera during the EEG measurement and added later manually to the file after analyzing the video frames. '1' indicates the eye-closed and '0' the eye-open state. All values are in chronological order with the first measured value at the top of the data.\r\n\r\nThe features correspond to 14 EEG measurements from the headset, originally labeled AF3, F7, F3, FC5, T7, P, O1, O2, P8, T8, FC6, F4, F8, AF4, in that order.",
+    "format": "ARFF",
+    "uploader": "Rafael G. Mantovani",
+    "uploader_id": 64,
+    "visibility": "public",
+    "creator": null,
+    "contributor": null,
+    "date": "2015-05-22 16:40:04",
+    "update_comment": null,
+    "last_update": "2015-11-09 20:42:10",
+    "licence": "Public",
+    "status": "active",
+    "error_message": null,
+    "url": "https:\/\/www.openml.org\/data\/download\/1587924\/phplE7q6h",
+    "default_target_attribute": "Class",
+    "row_id_attribute": null,
+    "ignore_attribute": null,
+    "runs": 165221,
+    "suggest": {
+        "input": [
+            "eeg-eye-state",
+            "All data is from one continuous EEG measurement with the Emotiv EEG Neuroheadset. The duration of the measurement was 117 seconds. The eye state was detected via a camera during the EEG measurement and added later manually to the file after analyzing the video frames. '1' indicates the eye-closed and '0' the eye-open state. All values are in chronological order with the first measured value at the top of the data. The features correspond to 14 EEG measurements from the headset, originally labele "
+        ],
+        "weight": 5
+    },
+    "qualities": {
+        "NumberOfInstances": 14980,
+        "NumberOfFeatures": 15,
+        "NumberOfClasses": 2,
+        "NumberOfMissingValues": 0,
+        "NumberOfInstancesWithMissingValues": 0,
+        "NumberOfNumericFeatures": 14,
+        "NumberOfSymbolicFeatures": 1,
+        "MinorityClassPercentage": 44.879839786381844,
+        "Quartile1KurtosisOfNumericAtts": 2713.5598368066608,
+        "Quartile3StdDevOfNumericAtts": 3343.823788627256,
+        "MaxStdDevOfNumericAtts": 5891.2850425236575,
+        "MinorityClassSize": 6723,
+        "Quartile1MeansOfNumericAtts": 4193.079256508679,
+        "StdvNominalAttDistinctValues": 0,
+        "MeanAttributeEntropy": null,
+        "NumberOfBinaryFeatures": 1,
+        "Quartile1MutualInformation": null,
+        "MeanKurtosisOfNumericAtts": 8904.72190163755,
+        "Quartile1SkewnessOfNumericAtts": 22.475026893669664,
+        "MeanMeansOfNumericAtts": 4316.882028546157,
+        "MeanMutualInformation": null,
+        "Quartile1StdDevOfNumericAtts": 37.98467230942155,
+        "AutoCorrelation": 0.9984645169904534,
+        "MeanNoiseToSignalRatio": null,
+        "Quartile2AttributeEntropy": null,
+        "ClassEntropy": 0.992422373387609,
+        "MeanNominalAttDistinctValues": 2,
+        "Quartile2KurtosisOfNumericAtts": 9352.695219763142,
+        "Dimensionality": 0.0010013351134846463,
+        "MeanSkewnessOfNumericAtts": 71.73726620900297,
+        "Quartile2MeansOfNumericAtts": 4271.6276034712955,
+        "EquivalentNumberOfAtts": null,
+        "MeanStdDevOfNumericAtts": 1767.2884824189532,
+        "Quartile2MutualInformation": null,
+        "MajorityClassPercentage": 55.12016021361815,
+        "MinAttributeEntropy": null,
+        "Quartile2SkewnessOfNumericAtts": 84.61113200877784,
+        "MajorityClassSize": 8257,
+        "MinKurtosisOfNumericAtts": 2056.5210594418404,
+        "PercentageOfBinaryFeatures": 6.666666666666667,
+        "Quartile2StdDevOfNumericAtts": 627.1558153704191,
+        "MaxAttributeEntropy": null,
+        "MinMeansOfNumericAtts": 4009.767693591455,
+        "PercentageOfInstancesWithMissingValues": 0,
+        "Quartile3AttributeEntropy": null,
+        "MaxKurtosisOfNumericAtts": 14979.178735371073,
+        "MinMutualInformation": null,
+        "PercentageOfMissingValues": 0,
+        "Quartile3KurtosisOfNumericAtts": 14971.654606997874,
+        "MaxMeansOfNumericAtts": 4644.02237917223,
+        "MinNominalAttDistinctValues": 2,
+        "PercentageOfNumericFeatures": 93.33333333333333,
+        "Quartile3MeansOfNumericAtts": 4466.12820822263,
+        "MaxMutualInformation": null,
+        "MinSkewnessOfNumericAtts": -13.615160740498586,
+        "PercentageOfSymbolicFeatures": 6.666666666666667,
+        "Quartile3MutualInformation": null,
+        "MaxNominalAttDistinctValues": 2,
+        "MinStdDevOfNumericAtts": 29.292603201776053,
+        "Quartile1AttributeEntropy": null,
+        "Quartile3SkewnessOfNumericAtts": 122.34170603745707,
+        "MaxSkewnessOfNumericAtts": 122.38777688436316
+    },
+    "tags": [
+        {
+            "tag": "brain",
+            "uploader": "2"
+        },
+        {
+            "tag": "EEG",
+            "uploader": "2"
+        },
+        {
+            "tag": "OpenML100",
+            "uploader": "348"
+        },
+        {
+            "tag": "study_123",
+            "uploader": "3886"
+        },
+        {
+            "tag": "study_14",
+            "uploader": "64"
+        },
+        {
+            "tag": "study_34",
+            "uploader": "1"
+        },
+        {
+            "tag": "study_7",
+            "uploader": "64"
+        },
+        {
+            "tag": "time_series",
+            "uploader": "2"
+        },
+        {
+            "tag": "uci",
+            "uploader": "2"
+        },
+        {
+            "tag": "study_225",
+            "uploader": "0"
+        }
+    ],
+    "features": [
+        {
+            "name": "Class",
+            "index": "14",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "target": "1",
+            "distr": [
+                [
+                    "1",
+                    "2"
+                ],
+                [
+                    [
+                        "8257",
+                        "0"
+                    ],
+                    [
+                        "0",
+                        "6723"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "V1",
+            "index": "0",
+            "type": "numeric",
+            "distinct": "548",
+            "missing": "0",
+            "min": "1031",
+            "max": "309231",
+            "mean": "4322",
+            "stdev": "2492"
+        },
+        {
+            "name": "V2",
+            "index": "1",
+            "type": "numeric",
+            "distinct": "452",
+            "missing": "0",
+            "min": "2831",
+            "max": "7805",
+            "mean": "4010",
+            "stdev": "46"
+        },
+        {
+            "name": "V3",
+            "index": "2",
+            "type": "numeric",
+            "distinct": "345",
+            "missing": "0",
+            "min": "1040",
+            "max": "6881",
+            "mean": "4264",
+            "stdev": "44"
+        },
+        {
+            "name": "V4",
+            "index": "3",
+            "type": "numeric",
+            "distinct": "312",
+            "missing": "0",
+            "min": "2453",
+            "max": "642564",
+            "mean": "4165",
+            "stdev": "5216"
+        },
+        {
+            "name": "V5",
+            "index": "4",
+            "type": "numeric",
+            "distinct": "285",
+            "missing": "0",
+            "min": "2090",
+            "max": "6474",
+            "mean": "4342",
+            "stdev": "35"
+        },
+        {
+            "name": "V6",
+            "index": "5",
+            "type": "numeric",
+            "distinct": "330",
+            "missing": "0",
+            "min": "2768",
+            "max": "362564",
+            "mean": "4644",
+            "stdev": "2925"
+        },
+        {
+            "name": "V7",
+            "index": "6",
+            "type": "numeric",
+            "distinct": "290",
+            "missing": "0",
+            "min": "2086",
+            "max": "567179",
+            "mean": "4110",
+            "stdev": "4601"
+        },
+        {
+            "name": "V8",
+            "index": "7",
+            "type": "numeric",
+            "distinct": "294",
+            "missing": "0",
+            "min": "4567",
+            "max": "7264",
+            "mean": "4616",
+            "stdev": "29"
+        },
+        {
+            "name": "V9",
+            "index": "8",
+            "type": "numeric",
+            "distinct": "304",
+            "missing": "0",
+            "min": "1358",
+            "max": "265641",
+            "mean": "4219",
+            "stdev": "2136"
+        },
+        {
+            "name": "V10",
+            "index": "9",
+            "type": "numeric",
+            "distinct": "346",
+            "missing": "0",
+            "min": "1816",
+            "max": "6674",
+            "mean": "4231",
+            "stdev": "38"
+        },
+        {
+            "name": "V11",
+            "index": "10",
+            "type": "numeric",
+            "distinct": "419",
+            "missing": "0",
+            "min": "3273",
+            "max": "6823",
+            "mean": "4202",
+            "stdev": "38"
+        },
+        {
+            "name": "V12",
+            "index": "11",
+            "type": "numeric",
+            "distinct": "343",
+            "missing": "0",
+            "min": "2258",
+            "max": "7003",
+            "mean": "4279",
+            "stdev": "42"
+        },
+        {
+            "name": "V13",
+            "index": "12",
+            "type": "numeric",
+            "distinct": "558",
+            "missing": "0",
+            "min": "87",
+            "max": "152308",
+            "mean": "4615",
+            "stdev": "1208"
+        },
+        {
+            "name": "V14",
+            "index": "13",
+            "type": "numeric",
+            "distinct": "592",
+            "missing": "0",
+            "min": "1366",
+            "max": "715897",
+            "mean": "4416",
+            "stdev": "5891"
+        }
+    ],
+    "nr_of_issues": 0,
+    "nr_of_downvotes": 0,
+    "nr_of_likes": 2,
+    "nr_of_downloads": 90,
+    "total_downloads": 154,
+    "reach": 92,
+    "reuse": 16,
+    "impact_of_reuse": 0,
+    "reach_of_reuse": 5,
+    "impact": 18
+}

@@ -1,0 +1,406 @@
+      {
+    "data_id": "335",
+    "name": "monks-problems-3",
+    "exact_name": "monks-problems-3",
+    "version": 1,
+    "version_label": null,
+    "description": "**Author**: Sebastian Thrun (Carnegie Mellon University)  \r\n**Source**: [UCI](https:\/\/archive.ics.uci.edu\/ml\/datasets\/MONK's+Problems) - October 1992  \r\n**Please cite**: [UCI](https:\/\/archive.ics.uci.edu\/ml\/citation_policy.html)   \r\n\r\n**The Monk's Problems: Problem 3**  \r\nOnce upon a time, in July 1991, the monks of Corsendonk Priory were faced with a school held in their priory, namely the 2nd European Summer School on Machine Learning. After listening more than one week to a wide variety of learning algorithms, they felt rather confused: Which algorithm would be optimal? And which one to avoid? As a consequence of this dilemma, they created a simple task on which all learning algorithms ought to be compared: the three MONK's problems.\r\n\r\nThe target concept associated with the 3rd Monk's problem is the binary outcome of the logical formula:  \r\nMONK-3: (a5 = 3 and a4 = 1) or (a5 \/= 4 and a2 \/= 3)  \r\nIn addition, 5% class noise was added to the training set\r\n\r\nIn this dataset, the original train and test sets were merged to allow other sampling procedures. However, the original train-test splits can be found as one of the OpenML tasks. \r\n\r\n### Attribute information: \r\n* attr1: 1, 2, 3 \r\n* attr2: 1, 2, 3 \r\n* attr3: 1, 2 \r\n* attr4: 1, 2, 3 \r\n* attr5: 1, 2, 3, 4 \r\n* attr6: 1, 2 \r\n\r\n### Relevant papers  \r\nThe MONK's Problems - A Performance Comparison of Different Learning Algorithms, by S.B. Thrun, J. Bala, E. Bloedorn, I. Bratko, B. Cestnik, J. Cheng, K. De Jong, S. Dzeroski, S.E. Fahlman, D. Fisher, R. Hamann, K. Kaufman, S. Keller, I. Kononenko, J. Kreuziger, R.S. Michalski, T. Mitchell, P. Pachowicz, Y. Reich H. Vafaie, W. Van de Welde, W. Wenzel, J. Wnek, and J. Zhang. Technical Report CS-CMU-91-197, Carnegie Mellon University, Dec. 1991.  ",
+    "format": "ARFF",
+    "uploader": "Joaquin Vanschoren",
+    "uploader_id": 2,
+    "visibility": "public",
+    "creator": "\"Sebastian Thrun\"",
+    "contributor": null,
+    "date": "2014-08-26 17:41:07",
+    "update_comment": null,
+    "last_update": "2014-08-26 17:41:07",
+    "licence": "Public",
+    "status": "active",
+    "error_message": null,
+    "url": "https:\/\/www.openml.org\/data\/download\/52238\/phphZierv",
+    "default_target_attribute": "class",
+    "row_id_attribute": null,
+    "ignore_attribute": null,
+    "runs": 108666,
+    "suggest": {
+        "input": [
+            "monks-problems-3",
+            "Once upon a time, in July 1991, the monks of Corsendonk Priory were faced with a school held in their priory, namely the 2nd European Summer School on Machine Learning. After listening more than one week to a wide variety of learning algorithms, they felt rather confused: Which algorithm would be optimal? And which one to avoid? As a consequence of this dilemma, they created a simple task on which all learning algorithms ought to be compared: the three MONK's problems. The target concept associa "
+        ],
+        "weight": 5
+    },
+    "qualities": {
+        "NumberOfInstances": 554,
+        "NumberOfFeatures": 7,
+        "NumberOfClasses": 2,
+        "NumberOfMissingValues": 0,
+        "NumberOfInstancesWithMissingValues": 0,
+        "NumberOfNumericFeatures": 0,
+        "NumberOfSymbolicFeatures": 7,
+        "NaiveBayesKappa": 0.9277874814254804,
+        "Quartile1MeansOfNumericAtts": null,
+        "REPTreeDepth1AUC": 0.9850472535505431,
+        "CfsSubsetEval_NaiveBayesErrRate": 0.02527075812274368,
+        "RandomTreeDepth3ErrRate": 0.05595667870036101,
+        "J48.0001.Kappa": 0.9782926701844208,
+        "MeanMutualInformation": 0.10586367329048667,
+        "NumberOfBinaryFeatures": 3,
+        "Quartile1MutualInformation": 0.0002555595928825,
+        "REPTreeDepth1ErrRate": 0.02527075812274368,
+        "CfsSubsetEval_NaiveBayesKappa": 0.949407712779836,
+        "RandomTreeDepth3Kappa": 0.887925971364805,
+        "J48.001.AUC": 0.9865418755221388,
+        "MeanNoiseToSignalRatio": 12.781491121921238,
+        "Quartile1SkewnessOfNumericAtts": null,
+        "REPTreeDepth1Kappa": 0.949407712779836,
+        "CfsSubsetEval_kNN1NAUC": 0.9820906432748538,
+        "StdvNominalAttDistinctValues": 0.7559289460184545,
+        "J48.001.ErrRate": 0.010830324909747292,
+        "MeanNominalAttDistinctValues": 2.7142857142857144,
+        "Quartile1StdDevOfNumericAtts": null,
+        "REPTreeDepth2AUC": 0.9850472535505431,
+        "CfsSubsetEval_kNN1NErrRate": 0.02527075812274368,
+        "kNN1NAUC": 0.9763536445279868,
+        "J48.001.Kappa": 0.9782926701844208,
+        "MeanSkewnessOfNumericAtts": null,
+        "Quartile2AttributeEntropy": 1.5845494951908672,
+        "REPTreeDepth2ErrRate": 0.02527075812274368,
+        "CfsSubsetEval_kNN1NKappa": 0.949407712779836,
+        "kNN1NErrRate": 0.04151624548736462,
+        "MajorityClassPercentage": 51.985559566786996,
+        "MeanStdDevOfNumericAtts": null,
+        "Quartile2KurtosisOfNumericAtts": null,
+        "REPTreeDepth2Kappa": 0.949407712779836,
+        "ClassEntropy": 0.9988621511417833,
+        "kNN1NKappa": 0.9169198669883288,
+        "MajorityClassSize": 288,
+        "MinAttributeEntropy": 0.9998495749784304,
+        "Quartile2MeansOfNumericAtts": null,
+        "REPTreeDepth3AUC": 0.9850472535505431,
+        "DecisionStumpAUC": 0.7810868316624896,
+        "MaxAttributeEntropy": 1.9999151137035627,
+        "MinKurtosisOfNumericAtts": null,
+        "Quartile2MutualInformation": 0.002056169463995,
+        "REPTreeDepth3ErrRate": 0.02527075812274368,
+        "DecisionStumpErrRate": 0.22202166064981949,
+        "MaxKurtosisOfNumericAtts": null,
+        "MinMeansOfNumericAtts": null,
+        "Quartile2SkewnessOfNumericAtts": null,
+        "REPTreeDepth3Kappa": 0.949407712779836,
+        "DecisionStumpKappa": 0.5481839037780635,
+        "MaxMeansOfNumericAtts": null,
+        "MinMutualInformation": 3.192587578e-5,
+        "PercentageOfBinaryFeatures": 42.857142857142854,
+        "Quartile2StdDevOfNumericAtts": null,
+        "RandomTreeDepth1AUC": 0.9532098475355054,
+        "Dimensionality": 0.01263537906137184,
+        "MaxMutualInformation": 0.31810389936073,
+        "MinNominalAttDistinctValues": 2,
+        "PercentageOfInstancesWithMissingValues": 0,
+        "Quartile3AttributeEntropy": 1.6886759542250682,
+        "RandomTreeDepth1ErrRate": 0.05595667870036101,
+        "EquivalentNumberOfAtts": 9.435362670639023,
+        "MaxNominalAttDistinctValues": 4,
+        "MinSkewnessOfNumericAtts": null,
+        "PercentageOfMissingValues": 0,
+        "Quartile3KurtosisOfNumericAtts": null,
+        "AutoCorrelation": 0.7703435804701627,
+        "RandomTreeDepth1Kappa": 0.887925971364805,
+        "J48.00001.AUC": 0.9865418755221388,
+        "MaxSkewnessOfNumericAtts": null,
+        "MinStdDevOfNumericAtts": null,
+        "MinorityClassPercentage": 48.014440433213,
+        "PercentageOfNumericFeatures": 0,
+        "Quartile3MeansOfNumericAtts": null,
+        "CfsSubsetEval_DecisionStumpAUC": 0.9820906432748538,
+        "RandomTreeDepth2AUC": 0.9532098475355054,
+        "J48.00001.ErrRate": 0.010830324909747292,
+        "MaxStdDevOfNumericAtts": null,
+        "MinorityClassSize": 266,
+        "PercentageOfSymbolicFeatures": 100,
+        "Quartile3MutualInformation": 0.31397880340006,
+        "CfsSubsetEval_DecisionStumpErrRate": 0.02527075812274368,
+        "RandomTreeDepth2ErrRate": 0.05595667870036101,
+        "J48.00001.Kappa": 0.9782926701844208,
+        "MeanAttributeEntropy": 1.4589592735868127,
+        "NaiveBayesAUC": 0.981078999582289,
+        "Quartile1AttributeEntropy": 0.9999341897882912,
+        "Quartile3SkewnessOfNumericAtts": null,
+        "CfsSubsetEval_DecisionStumpKappa": 0.949407712779836,
+        "RandomTreeDepth2Kappa": 0.887925971364805,
+        "J48.0001.AUC": 0.9865418755221388,
+        "MeanKurtosisOfNumericAtts": null,
+        "NaiveBayesErrRate": 0.036101083032490974,
+        "Quartile1KurtosisOfNumericAtts": null,
+        "Quartile3StdDevOfNumericAtts": null,
+        "CfsSubsetEval_NaiveBayesAUC": 0.9820906432748538,
+        "RandomTreeDepth3AUC": 0.9532098475355054,
+        "J48.0001.ErrRate": 0.010830324909747292,
+        "MeanMeansOfNumericAtts": null
+    },
+    "tags": [
+        {
+            "tag": "artificial",
+            "uploader": "2"
+        },
+        {
+            "tag": "mythbusting_1",
+            "uploader": "1"
+        },
+        {
+            "tag": "OpenML100",
+            "uploader": "348"
+        },
+        {
+            "tag": "study_1",
+            "uploader": "2"
+        },
+        {
+            "tag": "study_123",
+            "uploader": "3886"
+        },
+        {
+            "tag": "study_135",
+            "uploader": "5824"
+        },
+        {
+            "tag": "study_14",
+            "uploader": "64"
+        },
+        {
+            "tag": "study_144",
+            "uploader": "5824"
+        },
+        {
+            "tag": "study_15",
+            "uploader": "939"
+        },
+        {
+            "tag": "study_20",
+            "uploader": "939"
+        },
+        {
+            "tag": "study_34",
+            "uploader": "1"
+        },
+        {
+            "tag": "study_41",
+            "uploader": "1"
+        },
+        {
+            "tag": "study_50",
+            "uploader": "64"
+        },
+        {
+            "tag": "study_52",
+            "uploader": "64"
+        },
+        {
+            "tag": "study_7",
+            "uploader": "64"
+        },
+        {
+            "tag": "uci",
+            "uploader": "2"
+        }
+    ],
+    "features": [
+        {
+            "name": "class",
+            "index": "0",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "target": "1",
+            "distr": [
+                [
+                    "0",
+                    "1"
+                ],
+                [
+                    [
+                        "266",
+                        "0"
+                    ],
+                    [
+                        "0",
+                        "288"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "attr1",
+            "index": "1",
+            "type": "nominal",
+            "distinct": "3",
+            "missing": "0",
+            "distr": [
+                [
+                    "1",
+                    "2",
+                    "3"
+                ],
+                [
+                    [
+                        "90",
+                        "102"
+                    ],
+                    [
+                        "91",
+                        "93"
+                    ],
+                    [
+                        "85",
+                        "93"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "attr2",
+            "index": "2",
+            "type": "nominal",
+            "distinct": "3",
+            "missing": "0",
+            "distr": [
+                [
+                    "1",
+                    "2",
+                    "3"
+                ],
+                [
+                    [
+                        "49",
+                        "134"
+                    ],
+                    [
+                        "47",
+                        "139"
+                    ],
+                    [
+                        "170",
+                        "15"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "attr3",
+            "index": "3",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "1",
+                    "2"
+                ],
+                [
+                    [
+                        "134",
+                        "147"
+                    ],
+                    [
+                        "132",
+                        "141"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "attr4",
+            "index": "4",
+            "type": "nominal",
+            "distinct": "3",
+            "missing": "0",
+            "distr": [
+                [
+                    "1",
+                    "2",
+                    "3"
+                ],
+                [
+                    [
+                        "79",
+                        "105"
+                    ],
+                    [
+                        "93",
+                        "89"
+                    ],
+                    [
+                        "94",
+                        "94"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "attr5",
+            "index": "5",
+            "type": "nominal",
+            "distinct": "4",
+            "missing": "0",
+            "distr": [
+                [
+                    "1",
+                    "2",
+                    "3",
+                    "4"
+                ],
+                [
+                    [
+                        "46",
+                        "94"
+                    ],
+                    [
+                        "46",
+                        "93"
+                    ],
+                    [
+                        "36",
+                        "100"
+                    ],
+                    [
+                        "138",
+                        "1"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "attr6",
+            "index": "6",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "distr": [
+                [
+                    "1",
+                    "2"
+                ],
+                [
+                    [
+                        "135",
+                        "140"
+                    ],
+                    [
+                        "131",
+                        "148"
+                    ]
+                ]
+            ]
+        }
+    ],
+    "nr_of_issues": 0,
+    "nr_of_downvotes": 0,
+    "nr_of_likes": 0,
+    "nr_of_downloads": 14,
+    "total_downloads": 16,
+    "reach": 14,
+    "reuse": 25,
+    "impact_of_reuse": 0,
+    "reach_of_reuse": 0,
+    "impact": 25
+}

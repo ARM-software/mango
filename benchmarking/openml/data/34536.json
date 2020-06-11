@@ -1,0 +1,62 @@
+      {
+    "data_id": "1176",
+    "name": "Internet-Advertisements",
+    "exact_name": "Internet-Advertisements",
+    "version": 1,
+    "version_label": null,
+    "description": "**Author**: Nicholas Kushmerick  \r\n**Source**: [UCI](http:\/\/archive.ics.uci.edu\/ml\/datasets\/Internet+Advertisements) - 1998  \r\n**Please cite**:   \r\n\r\n### Description\r\n\r\nThis dataset represents a set of possible advertisements on Internet pages\r\n\r\n### Sources\r\n\r\n(a) Creator and donor:\r\n\r\nNicholas Kushmerick - nick@ucd.ie\r\n\r\n### Dataset Information\r\n\r\nThe features encode the geometry of the image (if available) as well as phrases occurring in the URL, the image's URL and alt text, the anchor text, and words occurring near the anchor text. The task is to predict whether an image is an advertisement (\"ad\") or not (\"nonad\").\r\n\r\n### Atributtes Information\r\n\r\nThere are : 3 continuous attributes. The others are binary.\r\nThis is the \"STANDARD encoding\" mentioned in the [Kushmerick, 99] (see below). \r\nOne or more of the three continuous features are missing in 28% of the instances.\r\nMissing values should be interpreted as \"unknown\".\r\n\r\n### Relevant Papers  \r\n\r\nN. Kushmerick (1999). \"Learning to remove Internet advertisements\", 3rd Int Conf Autonomous Agents.  \r\nAvailable at: http:\/\/rexa.info\/paper\/2fdc1cee89b7f4f2c9227d6f5d9b05d22c5ab3e9",
+    "format": "ARFF",
+    "uploader": "Joaquin Vanschoren",
+    "uploader_id": 2,
+    "visibility": "public",
+    "creator": "\"Nicholas Kushmerick\"",
+    "contributor": null,
+    "date": "2014-10-30 11:15:44",
+    "update_comment": null,
+    "last_update": "2014-10-30 11:15:44",
+    "licence": "Public",
+    "status": "deactivated",
+    "error_message": "Problem validating uploaded description file: XML does not correspond to XSD schema. ,Problem validating uploaded description file: XML does not correspond to XSD schema. ,Problem validating uploaded description file: XML does not correspond to XSD schema. ,Problem validating uploaded description file: XML does not correspond to XSD schema. ,Problem validating uploaded description file: XML does not correspond to XSD schema. ,Problem validating uploaded description file: XML does not correspond to XSD schema. ,Problem validating uploaded description file: XML does not correspond to XSD schema. ,Problem validating uploaded description file: XML does not correspond to XSD schema. ,Problem validating uploaded description file: XML does not correspond to XSD schema. ,Problem validating uploaded description file: XML does not correspond to XSD schema. ,Problem validating uploaded description file: XML does not correspond to XSD schema. ,Problem validating uploaded description file: XML does not correspond to XSD s",
+    "url": "https:\/\/www.openml.org\/data\/download\/116567\/phpCzcrGG",
+    "default_target_attribute": "class",
+    "row_id_attribute": null,
+    "ignore_attribute": null,
+    "runs": 98414,
+    "suggest": {
+        "input": [
+            "Internet-Advertisements",
+            "### Description This dataset represents a set of possible advertisements on Internet pages ### Sources (a) Creator and donor: Nicholas Kushmerick - nick@ucd.ie ### Dataset Information The features encode the geometry of the image (if available) as well as phrases occurring in the URL, the image's URL and alt text, the anchor text, and words occurring near the anchor text. The task is to predict whether an image is an advertisement (\"ad\") or not (\"nonad\"). ### Atributtes Information There are : 3 "
+        ],
+        "weight": 5
+    },
+    "qualities": [],
+    "tags": [
+        {
+            "tag": "OpenML100",
+            "uploader": "348"
+        },
+        {
+            "tag": "study_123",
+            "uploader": "3886"
+        },
+        {
+            "tag": "study_14",
+            "uploader": "64"
+        },
+        {
+            "tag": "study_34",
+            "uploader": "1"
+        }
+    ],
+    "features": [],
+    "nr_of_issues": 0,
+    "nr_of_downvotes": 0,
+    "nr_of_likes": 2,
+    "nr_of_downloads": 28,
+    "total_downloads": 37,
+    "reach": 30,
+    "reuse": 22,
+    "impact_of_reuse": 0,
+    "reach_of_reuse": 3,
+    "impact": 23
+}

@@ -1,0 +1,234 @@
+      {
+    "data_id": "1464",
+    "name": "blood-transfusion-service-center",
+    "exact_name": "blood-transfusion-service-center",
+    "version": 1,
+    "version_label": null,
+    "description": "**Author**: Prof. I-Cheng Yeh  \r\n**Source**: [UCI](https:\/\/archive.ics.uci.edu\/ml\/datasets\/Blood+Transfusion+Service+Center)  \r\n**Please cite**: Yeh, I-Cheng, Yang, King-Jang, and Ting, Tao-Ming, \"Knowledge discovery on RFM model using Bernoulli sequence\", Expert Systems with Applications, 2008.   \r\n\r\n**Blood Transfusion Service Center Data Set**  \r\nData taken from the Blood Transfusion Service Center in Hsin-Chu City in Taiwan -- this is a classification problem.\r\n\r\nTo demonstrate the RFMTC marketing model (a modified version of RFM), this study adopted the donor database of Blood Transfusion Service Center in Hsin-Chu City in Taiwan. The center passes their blood transfusion service bus to one university in Hsin-Chu City to gather blood donated about every three months. To build an FRMTC model, we selected 748 donors at random from the donor database. \r\n\r\n### Attribute Information  \r\n* V1: Recency - months since last donation\r\n* V2: Frequency - total number of donation\r\n* V3: Monetary - total blood donated in c.c.\r\n* V4: Time - months since first donation), and a binary variable representing whether he\/she donated blood in March 2007 (1 stand for donating blood; 0 stands for not donating blood).\r\n\r\nThe target attribute is a binary variable representing whether he\/she donated blood in March 2007 (2 stands for donating blood; 1 stands for not donating blood).",
+    "format": "ARFF",
+    "uploader": "Rafael G. Mantovani",
+    "uploader_id": 64,
+    "visibility": "public",
+    "creator": null,
+    "contributor": null,
+    "date": "2015-05-21 22:49:48",
+    "update_comment": null,
+    "last_update": "2015-11-09 21:02:59",
+    "licence": "Public",
+    "status": "active",
+    "error_message": null,
+    "url": "https:\/\/www.openml.org\/data\/download\/1586225\/php0iVrYT",
+    "default_target_attribute": "Class",
+    "row_id_attribute": null,
+    "ignore_attribute": null,
+    "runs": 464428,
+    "suggest": {
+        "input": [
+            "blood-transfusion-service-center",
+            "Data taken from the Blood Transfusion Service Center in Hsin-Chu City in Taiwan -- this is a classification problem. To demonstrate the RFMTC marketing model (a modified version of RFM), this study adopted the donor database of Blood Transfusion Service Center in Hsin-Chu City in Taiwan. The center passes their blood transfusion service bus to one university in Hsin-Chu City to gather blood donated about every three months. To build an FRMTC model, we selected 748 donors at random from the donor "
+        ],
+        "weight": 5
+    },
+    "qualities": {
+        "NumberOfInstances": 748,
+        "NumberOfFeatures": 5,
+        "NumberOfClasses": 2,
+        "NumberOfMissingValues": 0,
+        "NumberOfInstancesWithMissingValues": 0,
+        "NumberOfNumericFeatures": 4,
+        "NumberOfSymbolicFeatures": 1,
+        "MeanMeansOfNumericAtts": 356.99498663101565,
+        "Quartile1SkewnessOfNumericAtts": 1.0322036011463176,
+        "AutoCorrelation": 0.7309236947791165,
+        "MeanMutualInformation": null,
+        "Quartile1StdDevOfNumericAtts": 6.403329251142325,
+        "ClassEntropy": 0.7916446298452329,
+        "MeanNoiseToSignalRatio": null,
+        "Quartile2AttributeEntropy": null,
+        "Dimensionality": 0.0066844919786096255,
+        "MeanNominalAttDistinctValues": 2,
+        "Quartile2KurtosisOfNumericAtts": 12.633750101130904,
+        "EquivalentNumberOfAtts": null,
+        "MeanSkewnessOfNumericAtts": 2.263111192925173,
+        "Quartile2MeansOfNumericAtts": 21.89438502673798,
+        "MajorityClassPercentage": 76.20320855614973,
+        "MeanStdDevOfNumericAtts": 374.5345494748768,
+        "Quartile2MutualInformation": null,
+        "MajorityClassSize": 570,
+        "MinAttributeEntropy": null,
+        "Quartile2SkewnessOfNumericAtts": 2.5458645034443492,
+        "MaxAttributeEntropy": null,
+        "MinKurtosisOfNumericAtts": -0.24563117940242574,
+        "PercentageOfBinaryFeatures": 20,
+        "Quartile2StdDevOfNumericAtts": 16.23605500195668,
+        "MaxKurtosisOfNumericAtts": 15.876151978542005,
+        "MinMeansOfNumericAtts": 5.514705882352952,
+        "PercentageOfInstancesWithMissingValues": 0,
+        "Quartile3AttributeEntropy": null,
+        "MaxMeansOfNumericAtts": 1378.6764705882335,
+        "MinMutualInformation": null,
+        "PercentageOfMissingValues": 0,
+        "Quartile3KurtosisOfNumericAtts": 15.876151978541927,
+        "MaxMutualInformation": null,
+        "MinNominalAttDistinctValues": 2,
+        "PercentageOfNumericFeatures": 80,
+        "Quartile3MeansOfNumericAtts": 1042.5778743315495,
+        "MaxNominalAttDistinctValues": 2,
+        "MinSkewnessOfNumericAtts": 0.7494502906271294,
+        "PercentageOfSymbolicFeatures": 20,
+        "Quartile3MutualInformation": null,
+        "MaxSkewnessOfNumericAtts": 3.2112654741848643,
+        "MinStdDevOfNumericAtts": 5.8393071230900295,
+        "Quartile1AttributeEntropy": null,
+        "Quartile3SkewnessOfNumericAtts": 3.2112654741848523,
+        "MaxStdDevOfNumericAtts": 1459.826780772504,
+        "MinorityClassPercentage": 23.796791443850267,
+        "Quartile1KurtosisOfNumericAtts": 2.1636136713782106,
+        "Quartile3StdDevOfNumericAtts": 1100.9642641715316,
+        "MeanAttributeEntropy": null,
+        "MinorityClassSize": 178,
+        "Quartile1MeansOfNumericAtts": 6.512700534759367,
+        "StdvNominalAttDistinctValues": 0,
+        "MeanKurtosisOfNumericAtts": 10.224505250350347,
+        "NumberOfBinaryFeatures": 1,
+        "Quartile1MutualInformation": null
+    },
+    "tags": [
+        {
+            "tag": "OpenML-CC18",
+            "uploader": "1"
+        },
+        {
+            "tag": "OpenML100",
+            "uploader": "348"
+        },
+        {
+            "tag": "study_123",
+            "uploader": "3886"
+        },
+        {
+            "tag": "study_135",
+            "uploader": "5824"
+        },
+        {
+            "tag": "study_14",
+            "uploader": "64"
+        },
+        {
+            "tag": "study_218",
+            "uploader": "869"
+        },
+        {
+            "tag": "study_34",
+            "uploader": "1"
+        },
+        {
+            "tag": "study_50",
+            "uploader": "64"
+        },
+        {
+            "tag": "study_52",
+            "uploader": "64"
+        },
+        {
+            "tag": "study_7",
+            "uploader": "64"
+        },
+        {
+            "tag": "study_98",
+            "uploader": "1935"
+        },
+        {
+            "tag": "study_99",
+            "uploader": "1"
+        },
+        {
+            "tag": "uci",
+            "uploader": "2"
+        },
+        {
+            "tag": "study_225",
+            "uploader": "0"
+        }
+    ],
+    "features": [
+        {
+            "name": "Class",
+            "index": "4",
+            "type": "nominal",
+            "distinct": "2",
+            "missing": "0",
+            "target": "1",
+            "distr": [
+                [
+                    "1",
+                    "2"
+                ],
+                [
+                    [
+                        "570",
+                        "0"
+                    ],
+                    [
+                        "0",
+                        "178"
+                    ]
+                ]
+            ]
+        },
+        {
+            "name": "V1",
+            "index": "0",
+            "type": "numeric",
+            "distinct": "31",
+            "missing": "0",
+            "min": "0",
+            "max": "74",
+            "mean": "10",
+            "stdev": "8"
+        },
+        {
+            "name": "V2",
+            "index": "1",
+            "type": "numeric",
+            "distinct": "33",
+            "missing": "0",
+            "min": "1",
+            "max": "50",
+            "mean": "6",
+            "stdev": "6"
+        },
+        {
+            "name": "V3",
+            "index": "2",
+            "type": "numeric",
+            "distinct": "33",
+            "missing": "0",
+            "min": "250",
+            "max": "12500",
+            "mean": "1379",
+            "stdev": "1460"
+        },
+        {
+            "name": "V4",
+            "index": "3",
+            "type": "numeric",
+            "distinct": "78",
+            "missing": "0",
+            "min": "2",
+            "max": "98",
+            "mean": "34",
+            "stdev": "24"
+        }
+    ],
+    "nr_of_issues": 0,
+    "nr_of_downvotes": 0,
+    "nr_of_likes": 4,
+    "nr_of_downloads": 63,
+    "total_downloads": 82,
+    "reach": 67,
+    "reuse": 21,
+    "impact_of_reuse": 0,
+    "reach_of_reuse": 14,
+    "impact": 28
+}
