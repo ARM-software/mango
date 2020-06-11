@@ -2,6 +2,7 @@ import numpy as np
 from scipy.stats import uniform, loguniform
 
 from mango.domain.domain_space import domain_space
+from mango.domain.distribution import loguniform as mango_loguniform
 
 
 def test_domain():
@@ -32,6 +33,15 @@ def test_domain():
     for sample in samples:
         for param in params.keys():
             assert (sample[param] in params[param])
+
+
+def test_mango_loguniform():
+    space = {
+        'a': mango_loguniform(-3, 6)
+    }
+    ds = domain_space(space, domain_size=1000)
+    samples = ds.get_domain()
+    assert all(1e-3 < sample['a'] < 1e3 for sample in samples)
 
 
 def test_gp_samples_to_params():
@@ -91,7 +101,7 @@ def test_gp_space():
     assert (X >= 0.0).all()
     assert (X[:, 0] == 1.).all()  # a
     assert (X[:, 1] == 0.).all()  # b
-    assert np.isin(X[:, 2], [0.0, 0.5, 1.0]).all() # c
+    assert np.isin(X[:, 2], [0.0, 0.5, 1.0]).all()  # c
     assert np.isin(X[:, 4:7], np.eye(3)).all()  # e
     assert X.shape == (ds.domain_size, 12)
 
@@ -110,5 +120,3 @@ def test_gp_space():
 
     X2 = ds.convert_to_gp(params)
     assert np.isclose(X2, X).all()
-
-
