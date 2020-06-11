@@ -1,9 +1,15 @@
 # Mango: A parallel black-box optimization library
 
 **Mango** is a python library for parallel optimization over complex search spaces. Currently, Mango is intended to find the optimal hyperparameters for machine learning algorithms.
-Mango internally uses parallel implementation of a multi-armed bandit bayesian optimizer based on the gaussian process. Some of the salient features of Mango are:
+
+**Check out the quick 12 seconds demo** of Mango approximating a complex decision boundary of SVM
+
+[![AirSim Drone Demo Video](documents/demo_video.png)](https://youtu.be/hFmSdDLLUfY)
+
+
+Mango internally uses a parallel implementation of a multi-armed bandit bayesian optimizer based on the gaussian process. Some of the salient features of Mango are:
 - Ability to easily define complex search spaces that are compatible with the scikit-learn random search and gridsearch functions.
-- Internally uses state of the art optimizer which allows sampling a batch of values in parallel for evaluation.
+- Internally uses state of the art optimizer, which allows sampling a batch of values in parallel for evaluation.
 - The objective function can be arbitrarily complex, which can be scheduled on local, cluster,  or cloud infrastructure.
 - The ease of usage was kept in mind with the ability to plugin new distributions for search space and new optimizer algorithms.
 
