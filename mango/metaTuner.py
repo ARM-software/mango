@@ -24,9 +24,6 @@ warnings.filterwarnings('ignore')
 import numpy as np
 import random
 
-np.random.seed(0)
-random.seed(0)
-
 class MetaTuner:
 
     def __init__(self,param_dict_list, objective_list):
@@ -53,6 +50,10 @@ class MetaTuner:
         #stores the index of evaluated objectives
         self.objectives_evaluated = []
 
+        #fixing random seeds to reproduce the results for debugging
+        np.random.seed(0)
+        random.seed(0)
+
     def run(self):
         #run the metaTuner
         self.results = self.runExponentialTuner()
@@ -70,7 +71,7 @@ class MetaTuner:
         5- Exponentially scale the surrogate exploration factor for non-selected functions.
         """
 
-        num_of_random = 2
+        num_of_random = 3
 
 
         ds = []
