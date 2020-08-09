@@ -1,3 +1,6 @@
+# Branch: MetaTuner
+Brach purpose: Adding the new capability to Mango to optimize jointly over a group of models intelligently. The functionality of original Mango optimizing single function is not modified, and new classes and abstractions are added to support new functionality via MetaTuner abstraction. 
+
 # Mango: A parallel black-box optimization library
 
 **Mango** is a python library for parallel optimization over complex search spaces. Currently, Mango is intended to find the optimal hyperparameters for machine learning algorithms.
