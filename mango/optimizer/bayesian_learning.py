@@ -51,7 +51,7 @@ class BayesianLearning(BasePredictor):
             self.surrogate = GaussianProcessRegressor(kernel=Matern(nu=2.5,
                                                                     length_scale=length_scale,
                                                                     length_scale_bounds=(0.1, 1024)),
-                                                      n_restarts_optimizer=3,
+                                                      n_restarts_optimizer=10,
                                                       random_state=1,
                                                       # optimizer=None,
                                                       normalize_y=False)
@@ -155,14 +155,9 @@ class BayesianLearning(BasePredictor):
 
         C = 8 / (np.log(1 + sigma_inv_sq))
 
-        #alpha_inter = self.domain_size * (self.iteration_count) * (self.iteration_count) * math.pi * math.pi / (6 * 0.1)
 
+        #Optimizer_iteration: Number of times this function has been selected
         alpha_inter = self.domain_size * (Optimizer_iteration) * (Optimizer_iteration) * math.pi * math.pi / (6 * 0.1)
-
-
-        #alpha_inter =  (exploration_factor_tuner) * (exploration_factor_tuner) * math.pi * math.pi / (6 * 0.1)
-
-
 
         if alpha_inter == 0:
             print('Error: alpha_inter is zero in Upper_Confidence_Bound')
@@ -178,16 +173,15 @@ class BayesianLearning(BasePredictor):
         else:
             exploration_factor = beta
 
-        #Value = (mu*(1+ exploration_factor_tuner/10.0)) + (exploration_factor * sigma * exploration_factor_tuner)
 
+        #used for internal exploration
         Value = mu + (exploration_factor * sigma)
 
-        #Value = mu + (exploration_factor * sigma)
+        #used for exploration among functions
+        Value_ext = mu + (exploration_factor_tuner * sigma)
 
-        mu = mu + (exploration_factor_tuner * sigma)
 
-
-        return self.remove_duplicates_MetaTuner(X, X_Sample, mu, Value)
+        return self.remove_duplicates_MetaTuner(X, X_Sample, mu, Value, Value_ext)
 
     """
     Returns the acqutition function
@@ -242,7 +236,7 @@ class BayesianLearning(BasePredictor):
         return X[v_sorting_index[index]], mu[v_sorting_index[index]]
 
     #used by tuner which also returns the surrogate function values
-    def remove_duplicates_MetaTuner(self, X, X_Sample, mu, Value):
+    def remove_duplicates_MetaTuner(self, X, X_Sample, mu, Value, Value_ext):
         # print('*'*200)
         v_sorting_index = np.argsort(-Value, axis=0)
         index = 0
@@ -266,7 +260,7 @@ class BayesianLearning(BasePredictor):
         if (index == v_sorting_index.shape[0]):
             index = 0
 
-        return X[v_sorting_index[index]], Value[v_sorting_index[index]], mu[v_sorting_index[index]]
+        return X[v_sorting_index[index]], Value[v_sorting_index[index]], Value_ext[v_sorting_index[index]], mu[v_sorting_index[index]]
 
     """
     Returns the most optmal x only from the domain of x and making sure it is not a Duplicate (depending on closeness)
@@ -424,20 +418,24 @@ class BayesianLearning(BasePredictor):
 
         #value of the surrogate function
         s_values = []
+
+
+        #value of the external surrogate functio
+        s_values_ext = []
+
+
+        #value used to do external exploration among functions
         u_values = []
 
+
         for i in range(batch_size):
-            self.iteration_count = self.iteration_count + 1
             self.surrogate.fit(X_temp, Y_temp)
+            X_next, s_value, s_value_ext, u_value = self.Upper_Confidence_Bound_Remove_Duplicates_MetaTuner(X_tries, X_temp, batch_size, exploration_factor, Optimizer_iteration)
 
-            X_next, s_value, u_value = self.Upper_Confidence_Bound_Remove_Duplicates_MetaTuner(X_tries, X_temp, batch_size, exploration_factor, Optimizer_iteration)
-
-#             print(Y_temp)
-#             print('s:',s_value[0][0])
-#             print('u:',u_value[0][0])
-#             print('*'*10)
+            Optimizer_iteration = Optimizer_iteration + 1
 
             s_values.append(s_value[0][0])
+            s_values_ext.append(s_value_ext[0][0])
             u_values.append(u_value[0][0])
 
             u_value = u_value.reshape(-1, 1)
@@ -451,7 +449,7 @@ class BayesianLearning(BasePredictor):
         #batch = batch.reshape(-1, X.shape[1])
         #s_value = s_value.reshape(-1, s_value.shape[0])
 
-        return batch, s_values, u_values
+        return batch, s_values, s_values_ext, u_values
 
 
 

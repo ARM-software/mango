@@ -46,7 +46,7 @@ class MetaTuner:
 
         self.num_of_iterations = 20
 
-        #use to see the info when metaTuner is running
+        #use to see the info and fix the seeds metaTuner is running
         self.debug = False
 
         self.surrogate = None # used to test different kernel functions
@@ -56,10 +56,17 @@ class MetaTuner:
         #stores the values of objectives in the order they are evaluated
         self.objective_values_list = []
 
-        seed = 0
-        #fixing random seeds to reproduce the results for debugging
-        np.random.seed(seed)
-        random.seed(seed)
+        self.seed = 0
+
+        #rate of decay of exploration probability
+        self.decay_rate = 0.9
+
+
+        #The initial exploration probability
+        self.exploration_rate = 1.0
+
+        self.exploration_min = 0.10 # Minimum exploration
+
 
     def run(self):
         #run the metaTuner
@@ -103,6 +110,16 @@ class MetaTuner:
 
         return domain_size
 
+    #return the max value of Y from current evaluations
+    def get_max_y_value(self, Y_dict_array):
+        values = Y_dict_array[0]
+
+        for k in range(len(self.objective_list) - 1):
+            values = np.vstack((values,Y_dict_array[k+1]))
+
+        max_val = np.max(values)
+
+        return max_val
 
     def runExponentialTuner(self):
         """
@@ -110,23 +127,26 @@ class MetaTuner:
         1-Create DS obj for each obj of param_dict_list
         2-Sample randomly from the DS objects and evaluate the objective functions.
         3- Now use the GPR for each objective to select next batch
-        4- Select the best values based on surrogate from GPR.
-        5- Exponentially scale the surrogate exploration factor for non-selected functions.
+        4- Select the best values based on fxn(surrogate) from GPR.
+        5- Modify the surrogate selections so as to avoid getting struck.
         """
 
         num_of_random = self.initial_random
 
+        #sampled from each objective
+        self.obj_batch_size = self.batch_size
 
         ds = []
         for i in self.param_dict_list:
             domain_size = self.calculateDomainSize(i)
-            #print('domain_size is:',domain_size)
             ds.append(domain_space(i,domain_size))
 
 
+        #dict of list for each obj function
         X_dict_list = {}
         Y_dict_list = {}
 
+        #dict of array for each obj function
         X_dict_array = {}
         Y_dict_array = {}
 
@@ -136,6 +156,13 @@ class MetaTuner:
 
         #randomly evaluate the initial points for objectives
         for i in range(len(self.param_dict_list)):
+
+            # if self.debug:
+            #     #fixing random seeds to reproduce the results for debugging
+            #     np.random.seed(self.seed)
+            #     random.seed(self.seed)
+
+
             ds_i = ds[i]
             random_hyper_parameters = ds_i.get_random_sample(num_of_random)
 
@@ -169,10 +196,10 @@ class MetaTuner:
             Y_dict_array_max[i] = y_array
 
 
-        print('self.objective_values_list:',self.objective_values_list)
+        #print('self.objective_values_list:',self.objective_values_list)
         #print("Debug")
-        #print('Random Values Tried X_dict_array')
-        #print(X_dict_array)
+        #print('Random Values x_list')
+        #print(x_list)
         #print('*'*10, "Y_dict_array")
         #print('*')
         #print(Y_dict_array)
@@ -190,7 +217,7 @@ class MetaTuner:
             Optimizer_list.append(Optimizer_i)
 
 
-        # Storing exponential exploration factors of optimizers
+        # Storing optimizers attributes: iteration count and modified exploration of external surrogate
         Optimizer_exploration = []
         Optimizer_iteration = []
         for i in range(len(self.objective_list)):
@@ -200,59 +227,64 @@ class MetaTuner:
 
         #print(Optimizer_exploration)
 
-
         #Now run the optimization iterations
         pbar = tqdm(range(self.num_of_iterations))
 
         for itr in pbar:
-
-
             #next values of x returned from individual function
-            #dimensions of x are dependent on types of param dict, so using a list
+            #Values in x are dependent on types of param dict, so using a list
             x_values_list = []
 
-            #Next promising regions surrogate values
+            #Next promising surrogate values for each objective: used to select functions
             s_values_array = np.empty((0,1), float)
 
-
-            #keeping track of objective indices
+            #keeping track of objective indices: Maps the x values to its objective function
             x_obj_indices = []
 
+            #Next promising surrogate values for each objective in list form
             s_values_list = []
 
             #sample individual domains and evaluate surrogate functions.
             #we get the next promising samples along with the surrogate function values
+            max_val_y = self.get_max_y_value(Y_dict_array)
+
+            #In GPs this value is used to scale the Y values
+            max_val_y_scaled = max_val_y
+            #In this setting the default GP performs reasonably well
+            if max_val_y_scaled<1.0:
+                max_val_y_scaled = 1.0
+
+
             for j in range(len(ds)):
-                #domain_list = ds[j].get_domain()
-                #X_domain_np = ds[j].convert_GP_space(domain_list)
+                # if self.debug:
+                #     #fixing random seeds to reproduce the results for debugging
+                #     np.random.seed(self.seed)
+                #     random.seed(self.seed)
+
 
                 X_domain_np = ds[j].sample_gp_space()
 
-                #print("X_domain_np:",X_domain_np.shape)
-                #print(X_domain_np)
 
                 #next batch of x for this objective along with its surrogate value
-                X_next_batch, s_value, u_value = Optimizer_list[j].get_next_batch_MetaTuner(X_dict_array[j],Y_dict_array[j],X_domain_np, self.obj_batch_size, Optimizer_exploration[j], Optimizer_iteration[j])
+                X_next_batch, surr_value, surr_value_ext, u_values = Optimizer_list[j].get_next_batch_MetaTuner(X_dict_array[j],Y_dict_array[j]/max_val_y_scaled,X_domain_np, self.obj_batch_size, Optimizer_exploration[j], Optimizer_iteration[j])
 
-                s_value = u_value
-                s_values_list.append(int(s_value[0]*100.0))
+                #used for displaying and debugging
+                s_values_list_item = [round(x*100.0) for x in surr_value]
+                s_values_list.append(s_values_list_item)
 
 
-                #print(s_value)
-
-                s_value = np.array(s_value)
+                #this is used to sort the objective values
+                s_value = np.array(surr_value_ext)
                 s_value = s_value.reshape(-1, s_value.shape[0])
 
-                s_values_array = np.append(s_values_array, s_value)
 
+                s_values_array = np.append(s_values_array, s_value)
                 x_values_list = x_values_list + X_next_batch
+
 
                 #keep track of objective function for corresponding surrogate and x values
                 for k in range(self.obj_batch_size):
                     x_obj_indices.append(j)
-
-
-            #print(x_values_list, s_values_list, x_obj_indices )
 
             #sort the surrogate values in descending order, to select the best value from them
             v_sorting_index = np.argsort(-s_values_array, axis=0)
@@ -260,88 +292,88 @@ class MetaTuner:
             #now select the self.batch_size values from x_values_list based on v_sorting_index
             v_sorting_index = v_sorting_index[:self.batch_size]
 
-
-            #print(itr, x_obj_indices, s_values_list)
-
-            #we select the value based on random probabilities
-            #selected_obj = random.choices(x_obj_indices, weights=s_values_list, k=1)
-
-            selected_obj = v_sorting_index[0]#selected_obj[0]
-            #print(itr, x_obj_indices, s_values_list, selected_obj)
-
+            #print('v_sorting_index:',v_sorting_index, x_obj_indices)
+            #select randomly with exploration rate else select the max surrogate
 
             #keep track of objective indices selected in current iteration
             loc_indices = []
 
+            for i in range(v_sorting_index.shape[0]):
 
 
+                prob_selection = random.random()
 
-            curr_x_next_np = x_values_list[selected_obj]
+                random_selected = False
 
-            #convert this into the parameter space for scheduling
-            #see the function index for this x value
-            index = selected_obj
+                #do the random evaluation of the functions
+                if prob_selection < self.exploration_rate:
+                    selected_obj = random.randint(0,(len(x_obj_indices)-1)) #0 and len(x_obj_indices) included)
+                    self.exploration_rate = self.exploration_rate*self.decay_rate
 
-            #keep track of local indices
-            loc_indices.append(index)
+                    if self.exploration_rate<self.exploration_min:
+                        self.exploration_rate = self.exploration_min
 
-            #keep track of indices in a global datastr for visualization of function selection
-            self.objectives_evaluated.append(index)
+                    random_selected = True
 
-            #In parameter space
-            #curr_x_next = ds[index].convert_PS_space(curr_x_next_np)
-
-            curr_x_next = ds[index].convert_to_params(curr_x_next_np)
-
-            #print(itr,curr_x_next)
+                else:
+                    selected_obj = v_sorting_index[i]
 
 
-            #print(curr_x_next_np, curr_x_next, curr_x_next_np.shape)
+                curr_x_next_np = x_values_list[selected_obj]
 
-            #run the next curr_x_next value for the objective function
-            y_list = self.objective_list[index](curr_x_next)
+                #convert this into the parameter space for scheduling
+                #see the function index for this x value
+                index = x_obj_indices[selected_obj]
+
+                #keep track of local indices
+                loc_indices.append(index)
+
+                #keep track of indices in a global datastr for visualization of function selection
+                self.objectives_evaluated.append(index)
+
+                curr_x_next = ds[index].convert_to_params(curr_x_next_np)
+
+                #run the next curr_x_next value for the objective function
+                y_list = self.objective_list[index](curr_x_next)
 
 
-            self.objective_values_list += y_list
+                self.objective_values_list += y_list
 
+                curr_y_array = np.array(y_list).reshape(len(y_list), 1)
+                #append the curr_x_next_np, curr_x_next, y_list to appropriate datastructures for book keeping
 
-            curr_y_array = np.array(y_list).reshape(len(y_list), 1)
-            #append the curr_x_next_np, curr_x_next, y_list to appropriate datastructures for book keeping
+                X_dict_array[index] = np.vstack((X_dict_array[index], curr_x_next_np))
+                Y_dict_array[index] = np.vstack((Y_dict_array[index], curr_y_array))
 
-            X_dict_array[index] = np.vstack((X_dict_array[index], curr_x_next_np))
-            Y_dict_array[index] = np.vstack((Y_dict_array[index], curr_y_array))
-
-            Y_dict_array_max[index] = np.vstack((Y_dict_array_max[index], np.max(Y_dict_array[index])))
+                Y_dict_array_max[index] = np.vstack((Y_dict_array_max[index], np.max(Y_dict_array[index])))
 
 
             #scale the exploration of objectives that are not selected for others make their exploration to 1
             for i in range(len(self.objective_list)):
-                if i in loc_indices:
-                    #Optimizer_exploration[i] = 1.0
-                    Optimizer_exploration[i] = 1.0
-                    Optimizer_iteration[i] += 1.0
-                else:
-                    #Optimizer_exploration[i] = Optimizer_exploration[i]*2.0
-                    Optimizer_exploration[i] = Optimizer_exploration[i]*1.5
-                    #Optimizer_exploration[i] = 1.0
+                obj_evaluated = False
+                for j in loc_indices:
+                    if i==j:
+                        Optimizer_exploration[i] = 1.0
+                        Optimizer_iteration[i] += 1.0
+                        obj_evaluated = True
 
-            values = Y_dict_array[0]
-
-            for k in range(len(self.objective_list) - 1):
-                values = np.vstack((values,Y_dict_array[k+1]))
+                if not obj_evaluated:
+                    Optimizer_exploration[i] = Optimizer_exploration[i]*1.1
 
 
-            max_val = np.max(values)
+            pbar.set_description(": Best score: %s" % max_val_y)
 
-            pbar.set_description(": Best score: %s" % max_val)
+            #print(itr, s_values_list, Optimizer_iteration, Optimizer_exploration, max_val_y)#, Y_dict_array[selected_obj])
 
-            print(itr, s_values_list, selected_obj)#, Y_dict_array[selected_obj])
+            #print(itr, s_values_list, random_selected, self.exploration_rate, prob_selection, loc_indices, Optimizer_iteration , max_val_y)
+            if self.debug:
+                print(itr, random_selected, self.exploration_rate, prob_selection, loc_indices, Optimizer_iteration , max_val_y)
 
-            #print(itr)
-            #print('*'*100)
 
-            #print(itr, loc_indices,  Optimizer_exploration, s_values_array)
-            #print(itr, loc_indices, y_list)
+            self.X_dict_array = X_dict_array
+            self.Y_dict_array = Y_dict_array
+            self.Y_dict_array_max = Y_dict_array_max
+            self.ds = ds
 
         self.X_dict_array = X_dict_array
         self.Y_dict_array = Y_dict_array
