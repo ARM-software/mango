@@ -5,12 +5,13 @@ from sklearn.model_selection import cross_val_score
 
 from mango import Tuner
 
+X, y = datasets.load_breast_cancer(return_X_y=True)
+
 
 def cv_scorer(params):
     '''
     Returns the cross val score for a given parameter
     '''
-    X, y = datasets.load_breast_cancer(return_X_y=True)
     clf = KNeighborsClassifier(**params)
     score = cross_val_score(clf, X, y, scoring='accuracy').mean()
     return score
