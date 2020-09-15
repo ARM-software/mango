@@ -39,13 +39,15 @@ if __name__ == "__main__":
                        algorithm=['auto', 'ball_tree', 'kd_tree', 'brute'])
 
     # scoring function to calculate the cross val score for a given parameters
+    X, y = datasets.load_breast_cancer(return_X_y=True)
+    client = Client()
+
     def cv_scorer(params):
-        X, y = datasets.load_breast_cancer(return_X_y=True)
         clf = KNeighborsClassifier(**params)
         score = cross_val_score(clf, X, y, scoring='accuracy').mean()
         return score
 
-    client = Client()
+
     objective_function = partial(dask_scheduler, client, cv_scorer, timeout=600)
 
     config = dict(num_iteration=10, batch_size=4)

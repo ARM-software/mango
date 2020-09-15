@@ -5,9 +5,6 @@ from sklearn.model_selection import cross_val_score
 
 from mango import Tuner
 
-X, y = datasets.load_breast_cancer(return_X_y=True)
-
-
 def cv_scorer(params):
     '''
     Returns the cross val score for a given parameter
@@ -27,7 +24,7 @@ if __name__ == "__main__":
     param_space = dict(n_neighbors=range(1, 50),
                        algorithm=['auto', 'ball_tree', 'kd_tree', 'brute'])
 
-    global client
+    X, y = datasets.load_breast_cancer(return_X_y=True)
     client = Client()
 
     config = dict(num_iteration=5, batch_size=2)
