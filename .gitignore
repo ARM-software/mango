@@ -114,3 +114,6 @@ benchmarking/openml
 
 #pycharm
 .idea/
+
+# locks
+*.lock
