@@ -6,7 +6,9 @@ Used the other abstractions.
 
 Current implementation: Bare Metal functionality for testing.
 
-ToDo: Improve code with better config management and remove hardcoded parameters
+ToDo:  working on:
+1- Improve code with better config management.
+2- Removing duplicates when batch is evaluated.
 """
 
 from dataclasses import dataclass
