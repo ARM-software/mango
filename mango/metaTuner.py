@@ -2,13 +2,7 @@
 Meta Tuner Class: Used to optimize across a set of models:
 - selecting intelligently the order of functions to optimize
 
-Used the other abstractions.
-
-Current implementation: Bare Metal functionality for testing.
-
-ToDo:  working on:
-1- Improve code with better config management.
-2- Removing duplicates when batch is evaluated.
+ToDo: Improve code with better config management.
 """
 
 from dataclasses import dataclass
@@ -170,6 +164,7 @@ class MetaTuner:
 
             #print('random_hyper_parameters:',random_hyper_parameters)
 
+            # Evaluating the random hyperparameters
             y_list = self.objective_list[i](random_hyper_parameters)
 
             x_list = random_hyper_parameters
@@ -292,7 +287,7 @@ class MetaTuner:
             v_sorting_index = np.argsort(-s_values_array, axis=0)
 
             #now select the self.batch_size values from x_values_list based on v_sorting_index
-            v_sorting_index = v_sorting_index[:self.batch_size]
+            #v_sorting_index = v_sorting_index[:self.batch_size]
 
             #print('v_sorting_index:',v_sorting_index, x_obj_indices)
             #select randomly with exploration rate else select the max surrogate
@@ -300,8 +295,16 @@ class MetaTuner:
             #keep track of objective indices selected in current iteration
             loc_indices = []
 
-            for i in range(v_sorting_index.shape[0]):
+            #keep track if current choice was random or not
+            random_choices = []
 
+            #keep track of the index selected in v_sorting_index
+            v_sorting_index_selected = []
+
+            i_selection_index = 0
+
+            #for i in range(v_sorting_index.shape[0]):
+            for i in range(self.batch_size):
 
                 prob_selection = random.random()
 
@@ -310,6 +313,13 @@ class MetaTuner:
                 #do the random evaluation of the functions
                 if prob_selection < self.exploration_rate:
                     selected_obj = random.randint(0,(len(x_obj_indices)-1)) #0 and len(x_obj_indices) included)
+
+                    #handle the duplicate of selected indices in batches
+                    while selected_obj in v_sorting_index_selected:
+                        #print("*** Handling duplicate here ***")
+                        selected_obj = random.randint(0,(len(x_obj_indices)-1))
+
+
                     self.exploration_rate = self.exploration_rate*self.decay_rate
 
                     if self.exploration_rate<self.exploration_min:
@@ -318,10 +328,31 @@ class MetaTuner:
                     random_selected = True
 
                 else:
-                    selected_obj = v_sorting_index[i]
+                    selected_obj = v_sorting_index[i_selection_index]
+                    #make sure the current v_sorting_index[i_selection_index] is not already selected
+                    #this is duplicate, we need to handle it.
+                    while selected_obj in v_sorting_index_selected:
+                        #print("*** Handling duplicate here ***")
+                        i_selection_index = i_selection_index + 1
+                        selected_obj = v_sorting_index[i_selection_index]
 
+                    i_selection_index = i_selection_index + 1
+
+
+
+
+
+
+
+                random_choices.append(random_selected)
 
                 curr_x_next_np = x_values_list[selected_obj]
+
+                #check if duplicate selection of index
+                if selected_obj in v_sorting_index_selected:
+                    print("** Duplicated happened in Batch **")
+
+                v_sorting_index_selected.append(selected_obj)
 
                 #convert this into the parameter space for scheduling
                 #see the function index for this x value
@@ -361,6 +392,8 @@ class MetaTuner:
 
                 if not obj_evaluated:
                     Optimizer_exploration[i] = Optimizer_exploration[i]*1.1
+
+            #print(itr, 'v_sorting_index:',v_sorting_index, v_sorting_index_selected)
 
 
             pbar.set_description(": Best score: %s" % max_val_y)
