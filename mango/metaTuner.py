@@ -69,6 +69,15 @@ class MetaTuner:
         self.results = self.runExponentialTuner()
         return self.results
 
+    def runUserObjective(self, func, x):
+        y = func(x)
+        # if result is a tuple, then there is possibility that partial values are evaluated
+        if isinstance(y, tuple):
+            x, y = y
+
+        return np.array(x), np.array(y)
+
+
     @staticmethod
     def calculateDomainSize(param_dict):
         """
@@ -165,9 +174,8 @@ class MetaTuner:
             #print('random_hyper_parameters:',random_hyper_parameters)
 
             # Evaluating the random hyperparameters
-            y_list = self.objective_list[i](random_hyper_parameters)
 
-            x_list = random_hyper_parameters
+            x_list, y_list = self.runUserObjective(self.objective_list[i], random_hyper_parameters)
 
             #print(i, random_hyper_parameters, x_list, y_list)
 
@@ -177,14 +185,12 @@ class MetaTuner:
             Y_dict_list[i] =[]
             Y_dict_list[i].append(y_list)
 
-            self.objective_values_list += y_list
+            self.objective_values_list += list(y_list)
+            self.objectives_evaluated += [i] * len(y_list)
 
             #x_array2 = ds_i.convert_GP_space(random_hyper_parameters)
-            x_array = ds_i.convert_to_gp(random_hyper_parameters)
+            x_array = ds_i.convert_to_gp(x_list)
             X_dict_array[i] = x_array
-
-            #print(x_array2)
-            #print(x_array)
 
             y_array = np.array(y_list).reshape(len(y_list),1)
             Y_dict_array[i] = y_array
@@ -192,15 +198,6 @@ class MetaTuner:
             #the random ones are added as it is
             Y_dict_array_max[i] = y_array
 
-
-        #print('self.objective_values_list:',self.objective_values_list)
-        #print("Debug")
-        #print('Random Values x_list')
-        #print(x_list)
-        #print('*'*10, "Y_dict_array")
-        #print('*')
-        #print(Y_dict_array)
-        #print('*'*100)
 
         #Initialize the number of Optimizers
         Optimizer_list = []
@@ -367,15 +364,16 @@ class MetaTuner:
                 curr_x_next = ds[index].convert_to_params(curr_x_next_np)
 
                 #run the next curr_x_next value for the objective function
-                y_list = self.objective_list[index](curr_x_next)
+                # y_list = self.objective_list[index](curr_x_next)
+                x_evaluated, y_list = self.runUserObjective(self.objective_list[index], curr_x_next)
 
-
-                self.objective_values_list += y_list
+                self.objective_values_list += list(y_list)
+                x_evaluated_gp = ds[index].convert_to_gp(x_evaluated)
 
                 curr_y_array = np.array(y_list).reshape(len(y_list), 1)
                 #append the curr_x_next_np, curr_x_next, y_list to appropriate datastructures for book keeping
 
-                X_dict_array[index] = np.vstack((X_dict_array[index], curr_x_next_np))
+                X_dict_array[index] = np.vstack((X_dict_array[index], x_evaluated_gp))
                 Y_dict_array[index] = np.vstack((Y_dict_array[index], curr_y_array))
 
                 Y_dict_array_max[index] = np.vstack((Y_dict_array_max[index], np.max(Y_dict_array[index])))
