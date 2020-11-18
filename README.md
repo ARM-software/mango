@@ -34,8 +34,12 @@ Mango internally uses a parallel implementation of a multi-armed bandit bayesian
 
 <a name="setup"></a>
 ## 1. Installation
+Using `pip`:
 ```
-Clone the Mango repository, and from the Mango directory.
+pip install arm-mango
+```
+From source:
+```
 $ git clone https://github.com/ARM-software/mango.git
 $ cd mango
 $ pip3 install .
