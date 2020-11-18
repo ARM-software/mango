@@ -25,13 +25,5 @@ setuptools.setup(
     zip_safe=False,
     classifiers=[
         'Programming Language :: Python :: 3',
-        'Operating System :: Posix :: Linux',
-        'Development Status :: 3 - Alpha',
-        'Intended Audience :: Science/Research',
-        'Intended Audience :: Data Analytics',
-        'Intended Audience :: Developers',
-        'Intended Audience :: Data Science',
-        'Intended Audience :: Machine Learning',
-        'Intended Audience :: Information Technology',
     ],
 )
