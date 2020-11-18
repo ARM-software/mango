@@ -1,15 +1,15 @@
 import setuptools
 
 setuptools.setup(
-    name='mango',
+    name='arm-mango',
     version='1.0.0',
-    author='IoT Services Research',
-    author_email='iotresearch@arm.com',
-    description='parallel optimization over complex search spaces',
+    author='Arm Research',
+    author_email='mohit.aggarwalh@arm.com',
+    description='parallel Bayesian optimization over complex search spaces',
     long_description=open('README.md', 'r').read(),
     long_description_content_type='text/markdown',
-    url='https://gitlab.com/arm-research/isr/mango',
-    packages=setuptools.find_packages(),
+    url='https://github.com/ARM-software/mango',
+    packages=['mango', 'mango.optimizer', 'mango.domain'],
     include_package_data=True,
     package_data={
         '': ['*.cfg'],
@@ -20,6 +20,7 @@ setuptools.setup(
         'scikit_learn>=0.21.3',
         'tqdm>=4.36.1',
         'attrdict>=2.0.1',
+        'dataclasses'
     ],
     zip_safe=False,
     classifiers=[
