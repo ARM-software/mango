@@ -3,6 +3,7 @@ Main Tuner Class which uses other abstractions.
 General usage is to find the optimal hyper-parameters of the classifier
 """
 
+import time
 from dataclasses import dataclass
 
 from mango.domain.domain_space import domain_space
@@ -30,6 +31,7 @@ class Tuner:
         parallel_strategy: str = 'clustering'
         surrogate: object = None # used to test different kernel functions
         scale_y: bool = False
+        min_improvement_secs: int = 0
 
         valid_optimizers = ['Bayesian', 'Random']
         valid_parallel_strategies = ['penalty', 'clustering']
@@ -176,6 +178,8 @@ class Tuner:
 
         # running the iterations
         pbar = tqdm(range(self.config.num_iteration))
+        previous_best = None
+        last_time = time.time()
         for i in pbar:
             # Domain Space
             X_domain_np = ds.sample_gp_space()
@@ -210,6 +214,7 @@ class Tuner:
 
             # Evaluate the Objective function
             # Y_next_batch, Y_next_list = self.runUserObjective(X_next_PS)
+            results['num_iterations_run'] = i+1
             X_next_list, Y_next_list = self.runUserObjective(X_next_PS)
 
             # keep track of all parameters that failed
@@ -233,7 +238,24 @@ class Tuner:
             # Appending to the current samples
             X_sample = np.vstack((X_sample, X_next_batch))
             Y_sample = np.vstack((Y_sample, Y_next_batch))
-            pbar.set_description("Best score: %s" % np.max(Y_sample))
+            current_best = np.max(Y_sample)
+            current_time = time.time()
+            if previous_best is None:
+                previous_best = current_best
+                previous_best_time = current_time
+            elif current_best == previous_best:
+                # normally, bad juju to compare floats but we're checking for *any* improvement
+                if (self.config.min_improvement_secs > 0 and
+                    current_time - previous_best_time > self.config.min_improvement_secs):
+                    print("no improvement in %d seconds: stopping early." %
+                          self.config.min_improvement_secs)
+                    break
+            else:
+                # note improvement and reset clock
+                previous_best = current_best
+                previous_best_time = current_time
+            pbar.set_description("Best score: %s (prev=%s)" % (current_best, previous_best))
+
 
         results['params_tried'] = hyper_parameters_tried
         results['objective_values'] = objective_function_values

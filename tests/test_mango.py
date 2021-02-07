@@ -104,6 +104,12 @@ def test_tuner():
     assert results['best_objective'] > 1
 
 
+def test_early_stopping():
+    tuner_user = Tuner(param_dict, objectiveFunction, { 'num_iteration': 100, 'min_improvement_secs': 3 })
+    results = tuner_user.run()
+    assert results['num_iterations_run'] < 100
+
+
 # test on Rosenbrock's Valley
 # Rosenbrock's valley (a.k.k the banana function) has a global optimimum lying inside a long, narrow parabolic valley with a flat floor
 def test_rosenbrock():

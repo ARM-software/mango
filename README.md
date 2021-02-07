@@ -329,13 +329,15 @@ The default configuration parameters used by the Mango as below:
  'domain_size': 5000,
  'initial_random': 1,
  'num_iteration': 20,
- 'batch_size': 1}
+ 'batch_size': 1,
+ 'min_improvement_secs': 0}
 ```
 The configuration parameters are explained:
 - domain_size: The size which is explored in each iteration by the gaussian process. Generally, a larger size is preferred if higher dimensional functions are optimized. More on this will be added with details about the internals of bayesian optimization.
 - initial_random: The number of random samples tried.
 - num_iteration: The total number of iterations used by Mango to find the optimal value.
 - batch_size: The size of args_list passed to the objective function for parallel evaluation. For larger batch sizes, Mango internally uses intelligent sampling to decide the optimal samples to evaluate.
+- min_improvement_secs: Terminate early if no improvement in N seconds. Note that time was chosen (versus differences in objection function value) because the goal of early termination is to improve execution time at the expense of exhaustive search. In the future, we could consider terminating early based on total elapsed time, (slow) rate of improvement, etc.
 
 The default configuration parameters can be modified, as shown below. Only the parameters whose values need to adjusted can be passed as the dictionary.
 
