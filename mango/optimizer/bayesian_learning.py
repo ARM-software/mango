@@ -271,22 +271,9 @@ class BayesianLearning(BasePredictor):
         Acquition = self.Get_Upper_Confidence_Bound(X_tries)
 
         if batch_size > 1:
-            kmeans = KMeans(n_clusters=4, random_state=0).fit(Acquition)
-            cluster_pred = kmeans.labels_.reshape(kmeans.labels_.shape[0])
-            # select the best cluster in the acquition function, and now cluster in the domain space itself
-            acq_cluster_max_index = np.argmax(kmeans.cluster_centers_)
-
-            # select the points in acq_cluster_max_index
-            x_best_acq_domain = []
-            x_best_acq_value = []
-
-            for i in range(X_tries.shape[0]):
-                if cluster_pred[i] == acq_cluster_max_index:
-                    x_best_acq_domain.append(X_tries[i])
-                    x_best_acq_value.append(Acquition[i])
-
-            x_best_acq_domain = np.array(x_best_acq_domain)
-            x_best_acq_value = np.array(x_best_acq_value)
+            gen = sorted(zip(Acquition, X_tries), key=lambda x: -x[0])
+            x_best_acq_value, x_best_acq_domain = (np.array(t)[:len(Acquition) // 4]
+                                                   for t in zip(*gen))
 
             # Do the domain space based clustering on the best points
             kmeans = KMeans(n_clusters=batch_size, random_state=0).fit(x_best_acq_domain)
