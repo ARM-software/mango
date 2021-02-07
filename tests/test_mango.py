@@ -291,6 +291,3 @@ def test_custom_scheduler():
     results = tuner.minimize()
 
     assert abs(results['best_params']['x'] - 0) <= 0.1
-
-
-

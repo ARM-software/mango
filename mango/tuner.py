@@ -27,7 +27,7 @@ class Tuner:
         num_iteration: int = 20
         batch_size: int = 1
         optimizer: str = 'Bayesian'
-        parallel_strategy: str = 'penalty'
+        parallel_strategy: str = 'clustering'
         surrogate: object = None # used to test different kernel functions
         scale_y: bool = False
 
