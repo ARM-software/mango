@@ -199,6 +199,14 @@ def test_local_scheduler():
     assert abs(results['best_params']['y'] + 10) <= 3
 
 
+    @scheduler.parallel(n_jobs=2)
+    def obj(x, y):
+        return x - y
+
+    results = Tuner(param_space, obj, { 'num_iteration': 100, 'min_improvement_secs': 3 }).maximize()
+
+    assert results['num_iterations_run'] < 100
+
 def test_six_hump():
     def camel(x,y):
         x2 = math.pow(x,2)
