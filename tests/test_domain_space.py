@@ -56,11 +56,11 @@ def test_gp_samples_to_params():
     }
     X = np.array([
         # 4, -8, 'cat2', 1, 'const', 1 , 10
-        [0.4444, 0.1, 0, 0, 1, 0, 1, 0.6, 0],
+        [4, -8, 0, 0, 1, 1, 1, 1, 10],
         # 0, -10.0, 'cat1', 3, 'const', 0.001 , 10
-        [0.0, 0.0, 1, 0, 0, 1, 1, 0.0, 0],
+        [0, -10, 1, 0, 0, 3, 1, 0.001, 10],
         # 9, 10.0, 1, 2, 'const', 100 , 10
-        [1.0, 1.0, 0, 1, 0, 0.5, 1, 1.0, 0],
+        [9, 10.0, 0, 1, 0, 2, 1, 100.0, 10],
     ])
 
     expected = [
@@ -71,7 +71,7 @@ def test_gp_samples_to_params():
 
     ds = domain_space(space, domain_size=1000)
 
-    params = ds.convert_to_params(X)
+    params = ds.convert_PS_space(X)
 
     for act, exp in zip(params, expected):
         for k, v in act.items():
@@ -95,17 +95,16 @@ def test_gp_space():
     }
 
     ds = domain_space(space, domain_size=10000)
-    X = ds.sample_gp_space()
+    domain_list = ds.get_domain()
+    X = ds.convert_GP_space(domain_list)
 
-    assert (X <= 1.0).all()
-    assert (X >= 0.0).all()
     assert (X[:, 0] == 1.).all()  # a
-    assert (X[:, 1] == 0.).all()  # b
-    assert np.isin(X[:, 2], [0.0, 0.5, 1.0]).all()  # c
+    assert (X[:, 1] == 10.).all()  # b
+    assert np.isin(X[:, 2], [1, 2, 3]).all()  # c
     assert np.isin(X[:, 4:7], np.eye(3)).all()  # e
     assert X.shape == (ds.domain_size, 12)
 
-    params = ds.convert_to_params(X)
+    params = ds.convert_PS_space(X)
 
     for param in params:
         assert param['a'] == 'const'
@@ -118,5 +117,5 @@ def test_gp_space():
         assert -10 <= param['h'] <= 10
         assert param['i'] in space['i']
 
-    X2 = ds.convert_to_gp(params)
+    X2 = ds.convert_GP_space(params)
     assert np.isclose(X2, X).all()
