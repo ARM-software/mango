@@ -330,10 +330,9 @@ def test_early_stopping_simple():
     def objfunc(p_list):
         return [p['x'] ** 2 for p in p_list]
 
-    def early_stop(results, context=None):
+    def early_stop(results):
         if len(results['params_tried']) >= 5:
-            return True, context
-        return False, context
+            return True
 
     config = dict(num_iteration=20, initial_random=1, early_stopping=early_stop)
 
@@ -362,9 +361,8 @@ def test_early_stopping_complex():
         min_improvement_secs = 1
         objective_variation = 1
 
-    def early_stop(results, context=None):
-        if context is None:
-            context = Context()
+    def early_stop(results):
+        context = Context
 
         current_best = results['best_objective']
         current_time = time.time()
@@ -381,10 +379,10 @@ def test_early_stopping_complex():
             context.previous_best = current_best
             context.previous_best_time = current_time
 
-        return _stop, context
+        return _stop
 
     config = dict(num_iteration=20, initial_random=1, early_stopping=early_stop)
 
     tuner = Tuner(param_dict, objfunc, conf_dict=config)
     results = tuner.minimize()
-    assert (len(results['params_tried']) <= 3)
+    assert (len(results['params_tried']) == 3)

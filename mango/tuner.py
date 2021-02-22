@@ -42,7 +42,6 @@ class Tuner:
         exploration_min: float = 0.1
         fixed_domain: bool = False
         early_stopping: Callable = None
-        _early_stop_context: object = None
 
         def __post_init__(self):
             if self.optimizer not in self.valid_optimizers:
@@ -72,8 +71,7 @@ class Tuner:
                 return False
 
             results = copy.deepcopy(results)
-            out, self._early_stop_context = self.early_stopping(results, context=self._early_stop_context)
-            return out
+            return self.early_stopping(results)
 
     def __init__(self, param_dict, objective, conf_dict=None):
 
