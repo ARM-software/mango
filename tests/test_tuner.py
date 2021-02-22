@@ -8,7 +8,6 @@ $  python -m pytest tests/ --disable-warnings
 """
 import math
 import time
-from dataclasses import dataclass
 from pytest import approx
 import numpy as np
 
@@ -357,7 +356,6 @@ def test_early_stopping_complex():
         res = [np.random.uniform()] * len(p_list)
         return res
 
-    @dataclass
     class Context:
         previous_best = None
         previous_best_time = None
@@ -368,14 +366,13 @@ def test_early_stopping_complex():
         if context is None:
             context = Context()
 
-        previous_best = context.previous_best
         current_best = results['best_objective']
         current_time = time.time()
 
-        if previous_best is None:
+        if context.previous_best is None:
             context.previous_best = current_best
             context.previous_best_time = current_time
-        elif (current_best <= previous_best + context.objective_variation) and \
+        elif (current_best <= context.previous_best + context.objective_variation) and \
                 (current_time - context.previous_best_time > context.min_improvement_secs):
             print("no improvement in %d seconds: stopping early." % context.min_improvement_secs)
             return True, context
