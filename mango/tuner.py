@@ -3,8 +3,11 @@ Main Tuner Class which uses other abstractions.
 General usage is to find the optimal hyper-parameters of the classifier
 """
 
-from dataclasses import dataclass
+import copy
+from dataclasses import dataclass, field
+import logging
 import random
+from typing import Callable
 
 from mango.domain.domain_space import domain_space
 from mango.optimizer.bayesian_learning import BayesianLearning
@@ -17,6 +20,8 @@ import numpy as np
 import warnings
 
 warnings.filterwarnings('ignore')
+
+_logger = logging.getLogger(__name__)
 
 
 class Tuner:
@@ -36,6 +41,8 @@ class Tuner:
         exploration_decay: float = 0.9
         exploration_min: float = 0.1
         fixed_domain: bool = False
+        early_stopping: Callable = None
+        _early_stop_context: object = None
 
         def __post_init__(self):
             if self.optimizer not in self.valid_optimizers:
@@ -59,6 +66,14 @@ class Tuner:
         @property
         def strategy_is_clustering(self):
             return self.parallel_strategy == 'clustering'
+
+        def early_stop(self, results):
+            if self.early_stopping is None:
+                return False
+
+            results = copy.deepcopy(results)
+            out, self._early_stop_context = self.early_stopping(results, context=self._early_stop_context)
+            return out
 
     def __init__(self, param_dict, objective, conf_dict=None):
 
@@ -181,10 +196,12 @@ class Tuner:
 
         domain_list = self.ds.get_domain()
         X_domain_np = self.ds.convert_GP_space(domain_list)
+        context = None
 
         # running the iterations
         pbar = tqdm(range(self.config.num_iteration))
         for i in pbar:
+
             # adding a Minimum exploration to explore independent of UCB
             if random.random() < self.config.exploration:
                 random_parameters = self.ds.get_random_sample(self.config.batch_size)
@@ -242,18 +259,22 @@ class Tuner:
                 domain_list = self.ds.get_domain()
                 X_domain_np = self.ds.convert_GP_space(domain_list)
 
-            pbar.set_description("Best score: %s" % np.max(Y_sample))
+            results['params_tried'] = hyper_parameters_tried
+            results['objective_values'] = objective_function_values
+            results['surrogate_values'] = surrogate_values
 
-        results['params_tried'] = hyper_parameters_tried
-        results['objective_values'] = objective_function_values
-        results['surrogate_values'] = surrogate_values
+            results['best_objective'] = np.max(results['objective_values'])
+            results['best_params'] = results['params_tried'][np.argmax(results['objective_values'])]
+            if self.maximize_objective is False:
+                results['objective_values'] = -1 * results['objective_values']
+                results['best_objective'] = -1 * results['best_objective']
 
-        results['best_objective'] = np.max(Y_sample)
-        results['best_params'] = hyper_parameters_tried[np.argmax(Y_sample)]
+            pbar.set_description("Best score: %s" % results['best_objective'])
 
-        if self.maximize_objective is False:
-            results['objective_values'] = -1 * results['objective_values']
-            results['best_objective'] = -1 * results['best_objective']
+            # check if early stop criteria has been met
+            if self.config.early_stop(results):
+                _logger.info('Early stopping criteria satisfied')
+                break
 
         # saving the optimizer and ds in the tuner object which can save the surrogate function and ds details
         self.Optimizer = Optimizer
@@ -280,20 +301,21 @@ class Tuner:
             X_sample_list = np.append(X_sample_list, X_list)
             Y_sample_list = np.append(Y_sample_list, Y_list)
 
-            # FIXME: account for when maximizing as it would print neg values
-            pbar.set_description("Best score: %s" % np.max(Y_sample_list))
+            results['params_tried'] = X_sample_list
+            results['objective_values'] = Y_sample_list
 
-        # After all the iterations are done now bookkeeping and best hyper parameter values
-        results['params_tried'] = X_sample_list
-        results['objective_values'] = Y_sample_list
-
-        if len(Y_sample_list) > 0:
             results['best_objective'] = np.max(results['objective_values'])
             results['best_params'] = results['params_tried'][np.argmax(results['objective_values'])]
-
             if self.maximize_objective is False:
                 results['objective_values'] = -1 * results['objective_values']
                 results['best_objective'] = -1 * results['best_objective']
+
+            pbar.set_description("Best score: %s" % results['best_objective'])
+
+            # check if early stop criteria has been met
+            if self.config.early_stop(results):
+                _logger.info('Early stopping criteria satisfied')
+                break
 
         return results
 
