@@ -368,6 +368,7 @@ def test_early_stopping_complex():
 
         current_best = results['best_objective']
         current_time = time.time()
+        _stop = False
 
         if context.previous_best is None:
             context.previous_best = current_best
@@ -375,12 +376,12 @@ def test_early_stopping_complex():
         elif (current_best <= context.previous_best + context.objective_variation) and \
                 (current_time - context.previous_best_time > context.min_improvement_secs):
             print("no improvement in %d seconds: stopping early." % context.min_improvement_secs)
-            return True, context
+            _stop = True
         else:
             context.previous_best = current_best
             context.previous_best_time = current_time
 
-        return False, context
+        return _stop, context
 
     config = dict(num_iteration=20, initial_random=1, early_stopping=early_stop)
 
