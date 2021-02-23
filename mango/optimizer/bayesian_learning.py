@@ -1,11 +1,7 @@
-import json
 import numpy as np
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import Matern
 import math
-import scipy
-
-# used for clustering implementation
 from sklearn.cluster import KMeans
 
 from .base_predictor import BasePredictor
@@ -16,41 +12,18 @@ Bayesian Learning optimizer
 """
 
 
-def cmaes_optimization(obj_func, initial_theta, bounds):
-    import cma
-    initial_sigma = 0.3
-    # assuming bounds are same for all dimensions
-    cmaes_bounds = [[b[0] for b in bounds], [b[1] for b in bounds]]
-    opts = cma.CMAOptions()
-    opts.set("bounds", cmaes_bounds)
-    opts.set("verbose", -1)
-    opts.set("verb_log", 0)
-    opts.set("verb_disp", 0)
-    opts.set('tolfun', 1e-2)
-    es = cma.CMAEvolutionStrategy(initial_theta, initial_sigma, opts)
-    es.optimize(obj_func)
-    return es.result.xbest, es.result.fbest
-
-
 class BayesianLearning(BasePredictor):
 
-    def __init__(self, surrogate=None, n_features=None):
+    def __init__(self, surrogate=None, alpha=None, domain_size=1000):
         # initialzing some of the default values
         # The default surrogate function is gaussian_process with matern kernel
         if surrogate is None:
-            if n_features is not None:
-                # anisotropic kernel
-                length_scale = [2.] * n_features
-            else:
-                length_scale = 2.
-
-            self.surrogate = GaussianProcessRegressor(kernel=Matern(nu=2.5,
-                                                                    length_scale=length_scale,
-                                                                    length_scale_bounds=(0.1, 1024)),
-                                                      n_restarts_optimizer=3,
-                                                      # random_state=1,
-                                                      # optimizer=None,
-                                                      normalize_y=False)
+            self.surrogate = GaussianProcessRegressor(kernel=Matern(nu=2.5),
+                                                      n_restarts_optimizer=10,
+                                                      # FIXME:check if we should be passing this
+                                                      # random state
+                                                      random_state=1,
+                                                      normalize_y=True)
         else:
             self.surrogate = surrogate
 
@@ -58,98 +31,66 @@ class BayesianLearning(BasePredictor):
         self.iteration_count = 0
 
         # The size of the exploration domain, default to 1000
-        self.domain_size = 1000
+        self.domain_size = domain_size
 
-    """
-    This is based on the upper confidence bound algorithm used for the aquision function
-    Input: X is the values from which we need to select the best value using the aquision function.
-    return: The value which is best bases on the UCB and also the mean of this value.
-    """
+        self.alpha = alpha
 
-    def Upper_Confidence_Bound(self, X):
-        ''' Compute the upper confidence bound as per UCL paper
-        algorithm 2 GP-BUCB: C used here is C1 value which empirically works well'''
+    def Upper_Confidence_Bound_Remove_Duplicates(self, X, X_Sample, batch_idx):
+        """
+            Check if the returned index value is already present in X_Sample
+        """
         mu, sigma = self.surrogate.predict(X, return_std=True)
         mu = mu.reshape(mu.shape[0], 1)
-
         sigma = sigma.reshape(sigma.shape[0], 1)
 
-        tolerance = 1e-6
+        # use fixed alpha if given
+        if self.alpha is not None:
+            alpha = self.alpha
+        else:
+            alpha_inter = self.domain_size * (self.iteration_count) * (self.iteration_count) * math.pi * math.pi / (
+                    6 * 0.1)
 
-        sigma_inv_sq = 1.0 / (tolerance + (sigma * sigma))  # tolerance is used to avoid the divide by zero error
+            if alpha_inter == 0:
+                raise ValueError('alpha_inter is zero in Upper_Confidence_Bound')
 
-        C = 8 / (np.log(1 + sigma_inv_sq))
+            alpha = 2 * math.log(alpha_inter)  # We have set delta = 0.1
+            alpha = math.sqrt(alpha)
 
-        alpha_inter = self.domain_size * (self.iteration_count) * (self.iteration_count) * math.pi * math.pi / (6 * 0.1)
-
-        if alpha_inter == 0:
-            print('Error: alpha_inter is zero in Upper_Confidence_Bound')
-
-        alpha = 2 * math.log(alpha_inter)  # We have set delta = 0.1
-        alpha = math.sqrt(alpha)
-
-        beta = np.exp(2 * C) * alpha
-        beta = np.sqrt(beta)
-        Value = mu + (beta) * sigma
-        x_index = np.argmax(Value)
-        mu_value = mu[x_index]
-
-        return X[x_index], mu_value
-
-    """
-    Check if the returned index value is already present in X_Sample
-    """
-
-    def Upper_Confidence_Bound_Remove_Duplicates(self, X, X_Sample, batch_size):
-        mu, sigma = self.surrogate.predict(X, return_std=True)
-        mu = mu.reshape(mu.shape[0], 1)
-
-        sigma = sigma.reshape(sigma.shape[0], 1)
-
-        tolerance = 1e-6
-
-        sigma_inv_sq = 1.0 / (tolerance + (sigma * sigma))  # tolerance is used to avoid the divide by zero error
-
-        C = 8 / (np.log(1 + sigma_inv_sq))
-
-        alpha_inter = self.domain_size * (self.iteration_count) * (self.iteration_count) * math.pi * math.pi / (6 * 0.1)
-
-        if alpha_inter == 0:
-            print('Error: alpha_inter is zero in Upper_Confidence_Bound')
-
-        alpha = 2 * math.log(alpha_inter)  # We have set delta = 0.1
-        alpha = math.sqrt(alpha)
-
-        beta = np.exp(2 * C) * alpha
-        beta = np.sqrt(beta)
-
-        if batch_size == 1:
+        if batch_idx == 0:
             exploration_factor = alpha
         else:
+            tolerance = 1e-6
+            sigma_inv_sq = 1.0 / (tolerance + (sigma * sigma))  # tolerance is used to avoid the divide by zero error
+            C = 8 / (np.log(1 + sigma_inv_sq))
+            beta = np.exp(2 * C) * alpha
+            beta = np.sqrt(beta)
             exploration_factor = beta
 
         Value = mu + exploration_factor * sigma
 
         return self.remove_duplicates(X, X_Sample, mu, Value)
 
-    """
-    Returns the acqutition function
-    """
-
     def Get_Upper_Confidence_Bound(self, X):
+        """
+            Returns the acqutition function
+        """
         mu, sigma = self.surrogate.predict(X, return_std=True)
         mu = mu.reshape(mu.shape[0], 1)
-
         sigma = sigma.reshape(sigma.shape[0], 1)
-        alpha_inter = self.domain_size * (self.iteration_count) * (self.iteration_count) * math.pi * math.pi / (6 * 0.1)
 
-        if alpha_inter == 0:
-            print('Error: alpha_inter is zero in Upper_Confidence_Bound')
+        if self.alpha is not None:
+            exploration_factor = self.alpha
+        else:
+            alpha_inter = self.domain_size * (self.iteration_count) * (self.iteration_count) * math.pi * math.pi / (
+                    6 * 0.1)
+            if alpha_inter == 0:
+                raise ValueError('alpha_inter is zero in Upper_Confidence_Bound')
+            alpha = 2 * math.log(alpha_inter)  # We have set delta = 0.1
+            alpha = math.sqrt(alpha)
 
-        alpha = 2 * math.log(alpha_inter)  # We have set delta = 0.1
-        alpha = math.sqrt(alpha)
+            exploration_factor = alpha
 
-        Value = mu + (alpha) * sigma
+        Value = mu + exploration_factor * sigma
 
         return Value
 
@@ -231,7 +172,7 @@ class BayesianLearning(BasePredictor):
     This is the main function which returns the next batch to try along with the mean values for this batch
     """
 
-    def get_next_batch(self, X, Y, X_tries, batch_size=3):
+    def get_next_batch(self, X, Y, X_tries, batch_size):
         # print('In get_next_batch')
 
         X_temp = X
@@ -239,11 +180,11 @@ class BayesianLearning(BasePredictor):
 
         batch = []
 
-        for i in range(batch_size):
+        for idx in range(batch_size):
             self.iteration_count = self.iteration_count + 1
             self.surrogate.fit(X_temp, Y_temp)
 
-            X_next, u_value = self.Upper_Confidence_Bound_Remove_Duplicates(X_tries, X_temp, batch_size)
+            X_next, u_value = self.Upper_Confidence_Bound_Remove_Duplicates(X_tries, X_temp, idx)
             u_value = u_value.reshape(-1, 1)
             Y_temp = np.vstack((Y_temp, u_value))
             X_temp = np.vstack((X_temp, X_next))
@@ -259,7 +200,7 @@ class BayesianLearning(BasePredictor):
     Using clustering to select next batch
     """
 
-    def get_next_batch_clustering(self, X, Y, X_tries, batch_size=3):
+    def get_next_batch_clustering(self, X, Y, X_tries, batch_size):
         # print('In get_next_batch')
 
         X_temp = X

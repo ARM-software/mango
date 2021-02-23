@@ -36,6 +36,7 @@ def parallel(n_jobs):
 
 def celery(n_jobs, timeout=None):
     import celery
+    from celery import exceptions
 
     def decorator(func):
         func.is_wrapped = True
@@ -51,7 +52,7 @@ def celery(n_jobs, timeout=None):
                     result = async_result.get(timeout=timeout)
                     params_evaluated.append(params)
                     results.append(result)
-                except celery.exceptions.TimeoutError:
+                except exceptions.TimeoutError:
                     # ignore the timed out jobs as we are returning (params, result) tuple
                     continue
 

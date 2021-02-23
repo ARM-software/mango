@@ -114,24 +114,52 @@ def test_rosenbrock():
     a = 1
     b = 100
     x_opt = a
-    y_opt = a**2
+    y_opt = a ** 2
+
     def objfunc(args_list):
         results = []
         for hyper_par in args_list:
             x = hyper_par['x']
             y = hyper_par['y']
-            result = -(b*((y - x**2)**2) + ((a - x)**2))
+            result = -(b * ((y - x ** 2) ** 2) + ((a - x) ** 2))
             results.append(result)
         return results
 
-    tuner = Tuner(param_dict, objfunc)
+    tuner = Tuner(param_dict, objfunc, conf_dict=dict(domain_size=100000))
     results = tuner.run()
 
-    print('best hyper parameters:',results['best_params'])
-    print('best Accuracy:',results['best_objective'])
+    print('best hyper parameters:', results['best_params'])
+    print('best Accuracy:', results['best_objective'])
 
     assert abs(results['best_params']['x'] - x_opt) <= 2
     assert abs(results['best_params']['x'] - y_opt) <= 2
+
+
+def test_config():
+    param_dict = {
+        'x': range(-10, 10),
+        'y': range(-10, 10),
+    }
+
+    x_opt = 0
+    y_opt = 0
+
+    def objfunc(args_list):
+        results = []
+        for hyper_par in args_list:
+            x = hyper_par['x']
+            y = hyper_par['y']
+            result = (x ** 2 + y ** 2) / 1e4
+            results.append(result)
+        return results
+
+    def check(results, error_msg):
+        assert abs(results['best_params']['x'] - x_opt) <= 3, error_msg
+        assert abs(results['best_params']['y'] - y_opt) <= 3, error_msg
+
+    tuner = Tuner(param_dict, objfunc, conf_dict=dict(optimizer='Random'))
+    results = tuner.minimize()
+    check(results, 'error while minimizing random')
 
 
 def test_convex():
@@ -161,9 +189,10 @@ def test_convex():
     assert abs(results['best_params']['x'] - x_opt) <= 3
     assert abs(results['best_params']['y'] - y_opt) <= 3
 
+
 def test_local_scheduler():
     param_space = dict(x=range(-10, 10),
-                        y=range(-10, 10))
+                       y=range(-10, 10))
 
     @scheduler.serial
     def obj(x, y):
@@ -194,18 +223,18 @@ def test_local_scheduler():
 
 
 def test_six_hump():
-    def camel(x,y):
-        x2 = math.pow(x,2)
-        x4 = math.pow(x,4)
-        y2 = math.pow(y,2)
-        return (4.0 - 2.1 * x2 + (x4 / 3.0)) * x2 + x*y + (-4.0 + 4.0 * y2) * y2
+    def camel(x, y):
+        x2 = math.pow(x, 2)
+        x4 = math.pow(x, 4)
+        y2 = math.pow(y, 2)
+        return (4.0 - 2.1 * x2 + (x4 / 3.0)) * x2 + x * y + (-4.0 + 4.0 * y2) * y2
 
     param_dict = {
         'x': uniform(-3, 3),
         'y': uniform(-2, 2),
     }
 
-    x_opt = 0.0898 # or -0;0898
+    x_opt = 0.0898  # or -0;0898
     y_opt = -0.7126  # or 0.7126
 
     def objfunc(args_list):
@@ -220,15 +249,18 @@ def test_six_hump():
     tuner = Tuner(param_dict, objfunc)
     results = tuner.run()
 
-    print('best hyper parameters:',results['best_params'])
-    print('best objective:',results['best_objective'])
+    print('best hyper parameters:', results['best_params'])
+    print('best objective:', results['best_objective'])
 
     assert abs(results['best_params']['x']) - abs(x_opt) <= 0.1
     assert abs(results['best_params']['y']) - abs(y_opt) <= 0.2
 
 
 def test_celery_scheduler():
-    import celery
+    try:
+        import celery
+    except ModuleNotFoundError:
+        return
 
     # search space
     param_space = dict(x=range(-10, 10))
