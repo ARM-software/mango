@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name='arm-mango',
-    version='1.0.0',
+    version='1.1.0',
     author='Arm Research',
     author_email='mohit.aggarwalh@arm.com',
     description='parallel Bayesian optimization over complex search spaces',
