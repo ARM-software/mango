@@ -331,11 +331,24 @@ The default configuration parameters used by the Mango as below:
  'num_iteration': 20,
  'batch_size': 1}
 ```
-The configuration parameters are explained:
+The configuration parameters are:
 - domain_size: The size which is explored in each iteration by the gaussian process. Generally, a larger size is preferred if higher dimensional functions are optimized. More on this will be added with details about the internals of bayesian optimization.
 - initial_random: The number of random samples tried.
 - num_iteration: The total number of iterations used by Mango to find the optimal value.
 - batch_size: The size of args_list passed to the objective function for parallel evaluation. For larger batch sizes, Mango internally uses intelligent sampling to decide the optimal samples to evaluate.
+- early_stopping: A callback to specify custom stopping criteria. The callback has the following signature:
+   ```python
+  def early_stopping(results):
+      '''
+          results is the same as dict returned by tuner
+          keys available: params_tries, objective_values, 
+              best_objective, best_params
+      '''
+      ...
+      return True/False
+  ```
+  For usage see early stopping examples [notebook]((https://github.com/ARM-software/mango/blob/master/examples/EarlyStopping.ipynb)).
+
 
 The default configuration parameters can be modified, as shown below. Only the parameters whose values need to adjusted can be passed as the dictionary.
 
@@ -344,6 +357,7 @@ conf_dict = dict(num_iteration=40, domain_size=10000, initial_random=3)
 
 tuner = Tuner(param_dict, objective, conf_dict) 
 ```
+
 
 <!--
 <a name="Celery"></a>

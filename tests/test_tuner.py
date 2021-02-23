@@ -4,10 +4,10 @@ Testing the capabilities of Mango
 - Test the sampling capabilities
 - Test the bayesian learning optimizer iterations
 - Test the results of tuner for simple objective function
-$  python -m pytest mango/tests/ --disable-warnings
+$  python -m pytest tests/ --disable-warnings
 """
 import math
-
+import time
 from pytest import approx
 import numpy as np
 
@@ -323,3 +323,66 @@ def test_custom_scheduler():
     results = tuner.minimize()
 
     assert abs(results['best_params']['x'] - 0) <= 0.1
+
+
+def test_early_stopping_simple():
+    param_dict = dict(x=range(-10, 10))
+    def objfunc(p_list):
+        return [p['x'] ** 2 for p in p_list]
+
+    def early_stop(results):
+        if len(results['params_tried']) >= 5:
+            return True
+
+    config = dict(num_iteration=20, initial_random=1, early_stopping=early_stop)
+
+    tuner = Tuner(param_dict, objfunc, conf_dict=config)
+    results = tuner.minimize()
+    assert(len(results['params_tried']) == 5)
+
+    config = dict(num_iteration=20, initial_random=1, early_stopping=early_stop, optimizer='Random')
+
+    tuner = Tuner(param_dict, objfunc, conf_dict=config)
+    results = tuner.minimize()
+    assert (len(results['params_tried']) == 5)
+
+def test_early_stopping_complex():
+    '''testing early stop by time since last improvement'''
+    param_dict = dict(x=range(-10, 10))
+
+    def objfunc(p_list):
+        time.sleep(2)
+        res = [np.random.uniform()] * len(p_list)
+        return res
+
+    class Context:
+        previous_best = None
+        previous_best_time = None
+        min_improvement_secs = 1
+        objective_variation = 1
+
+    def early_stop(results):
+        context = Context
+
+        current_best = results['best_objective']
+        current_time = time.time()
+        _stop = False
+
+        if context.previous_best is None:
+            context.previous_best = current_best
+            context.previous_best_time = current_time
+        elif (current_best <= context.previous_best + context.objective_variation) and \
+                (current_time - context.previous_best_time > context.min_improvement_secs):
+            print("no improvement in %d seconds: stopping early." % context.min_improvement_secs)
+            _stop = True
+        else:
+            context.previous_best = current_best
+            context.previous_best_time = current_time
+
+        return _stop
+
+    config = dict(num_iteration=20, initial_random=1, early_stopping=early_stop)
+
+    tuner = Tuner(param_dict, objfunc, conf_dict=config)
+    results = tuner.minimize()
+    assert (len(results['params_tried']) == 3)
