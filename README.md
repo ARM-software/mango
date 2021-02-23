@@ -347,7 +347,7 @@ The configuration parameters are:
       ...
       return True/False
   ```
-  For usage see early stopping examples [notebook]((https://github.com/ARM-software/mango/blob/master/examples/EarlyStopping.ipynb)).
+  For usage see early stopping examples [notebook](https://github.com/ARM-software/mango/blob/master/examples/EarlyStopping.ipynb).
 
 
 The default configuration parameters can be modified, as shown below. Only the parameters whose values need to adjusted can be passed as the dictionary.
