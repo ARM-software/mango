@@ -348,7 +348,7 @@ The configuration parameters are:
       ...
       return True/False
   ```
-  For usage see early stopping examples [notebook](https://github.com/ARM-software/mango/blob/master/examples/EarlyStopping.ipynb).
+Early stopping is one of Mango's important features that allow to early terminate the current parallel search based on the custom user-designed criteria, such as the total optimization time spent, current validation accuracy achieved, or improvements in the past few iterations. For usage see early stopping examples [notebook](https://github.com/ARM-software/mango/blob/master/examples/EarlyStopping.ipynb).
 
 
 The default configuration parameters can be modified, as shown below. Only the parameters whose values need to adjusted can be passed as the dictionary.
