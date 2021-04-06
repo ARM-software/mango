@@ -20,6 +20,7 @@ Mango internally uses a parallel implementation of a multi-armed bandit bayesian
 4. [Search space definitions](#DomainSpace)
 5. [Scheduler](#scheduler)
 6. [Optional configurations](#MangoConfigurations)
+7. [Additional Features](#AdditionalFeatures)
 
 <!--
 7. [Schedule Objective Function on Celery](#Celery)
@@ -358,6 +359,10 @@ conf_dict = dict(num_iteration=40, domain_size=10000, initial_random=3)
 tuner = Tuner(param_dict, objective, conf_dict) 
 ```
 
+<a name="AdditionalFeatures"></a>
+## 7. Additional Features
+### Handling runtime failed evaluation
+At runtime, failed evaluations are widespread in production deployments. Mango abstractions enable users to make progress even in the presence of failures by only using the correct evaluations. The syntax can return the successful evaluation, and the user can flexibly keep track of failures, for example, using timeouts. An example showing the usage of Mango in the presence of random failures is shown [here](https://github.com/ARM-software/mango/blob/master/examples/Failure_Handling.ipynb).   
 
 <!--
 <a name="Celery"></a>
