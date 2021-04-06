@@ -364,6 +364,9 @@ tuner = Tuner(param_dict, objective, conf_dict)
 ### Handling runtime failed evaluation
 At runtime, failed evaluations are widespread in production deployments. Mango abstractions enable users to make progress even in the presence of failures by only using the correct evaluations. The syntax can return the successful evaluation, and the user can flexibly keep track of failures, for example, using timeouts. An example showing the usage of Mango in the presence of random failures is shown [here](https://github.com/ARM-software/mango/blob/master/examples/Failure_Handling.ipynb).   
 
+### Neural Architecture Search 
+Mango can also do an efficient neural architecture search. An example on the MNIST dataset to search for optimal filter sizes, the number of filters, etc., is [available](https://github.com/ARM-software/mango/blob/master/examples/NAS_Mnist.ipynb).
+
 <!--
 <a name="Celery"></a>
 ## 7. Schedule Objective Function on Celery
