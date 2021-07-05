@@ -5,7 +5,7 @@ setuptools.setup(
     version='1.1.0',
     author='Arm Research',
     author_email='mohit.aggarwal@arm.com',
-    description='parallel Bayesian optimization over complex search spaces',
+    description='parallel bayesian optimization over complex search spaces',
     long_description=open('README.md', 'r').read(),
     long_description_content_type='text/markdown',
     url='https://github.com/ARM-software/mango',

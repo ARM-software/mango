@@ -252,6 +252,130 @@ class BayesianLearning(BasePredictor):
         batch = batch.reshape(-1, X.shape[1])
         return batch
 
+    #used by MetaTuner which also returns the surrogate function values
+    def remove_duplicates_MetaTuner(self, X, X_Sample, mu, Value, Value_ext):
+        # print('*'*200)
+        v_sorting_index = np.argsort(-Value, axis=0)
+        index = 0
+        # go through all the values in X_Sample and check if anyvalue is close
+        # to the optimal x value, if yes, don't consider this optimal x value
+
+        while index < v_sorting_index.shape[0]:
+            x_optimal = X[v_sorting_index[index]]
+
+            # check if x_optimal is in X_Sample
+            check_closeness = self.closeness(x_optimal, X_Sample)
+
+            if check_closeness == False:  # No close element to x_optimal in X_Sample
+                break
+
+                # we will look for next optimal value to try
+            else:
+                index = index + 1
+
+        # If entire domain is same to the already selected samples, we will just pick the best by value then
+        if (index == v_sorting_index.shape[0]):
+            index = 0
+
+        return X[v_sorting_index[index]], Value[v_sorting_index[index]], Value_ext[v_sorting_index[index]], mu[v_sorting_index[index]]
+
+
+    """
+    Used by MetaTuner by Exponentially scaling the exploration factor
+    """
+    def Upper_Confidence_Bound_Remove_Duplicates_MetaTuner(self, X, X_Sample, batch_size, exploration_factor_tuner, Optimizer_iteration):
+        mu, sigma = self.surrogate.predict(X, return_std=True)
+        mu = mu.reshape(mu.shape[0], 1)
+
+        sigma = sigma.reshape(sigma.shape[0], 1)
+
+
+        #Optimizer_iteration: Number of times this function has been selected
+        alpha_inter = self.domain_size * (Optimizer_iteration) * (Optimizer_iteration) * math.pi * math.pi / (6 * 0.1)
+
+        if alpha_inter == 0:
+            print('Error: alpha_inter is zero in Upper_Confidence_Bound')
+
+        alpha = 2 * math.log(alpha_inter)  # We have set delta = 0.1
+        alpha = math.sqrt(alpha)
+
+        if batch_size == 1:
+            exploration_factor = 2.0
+        else: #for both cases we don't modify exploration factor: ToDO see if this if optimal
+            exploration_factor = 2.0
+
+        #used for internal exploration
+        Value = mu + (exploration_factor * sigma)
+
+        #used for exploration among functions
+        Value_ext = mu + (exploration_factor_tuner * sigma)
+
+
+        return self.remove_duplicates_MetaTuner(X, X_Sample, mu, Value, Value_ext)
+
+
+    """
+    Function used to select the next batch by MetaTuner
+    """
+    def get_next_batch_MetaTuner(self, X, Y, X_tries, batch_size=3, exploration_factor =1.0, Optimizer_iteration=1.0, classifier_index=0, last_used_index=0):
+        # print('In get_next_batch')
+
+        X_temp = X
+        Y_temp = Y
+
+        batch = []
+
+        #value of the surrogate function
+        s_values = []
+
+
+        #value of the external surrogate functio
+        s_values_ext = []
+
+
+        #value used to do external exploration among functions
+        u_values = []
+
+
+        for i in range(batch_size):
+
+            # fit only if some modified
+#             if classifier_index==last_used_index:
+#                 self.surrogate.fit(X_temp, Y_temp)
+#                 print('Doing fit of surrogate:',classifier_index)
+
+            try:
+                self.surrogate.fit(X_temp, Y_temp)
+
+            except:
+                print('*'*100)
+                print(X_temp)
+                print('*'*10)
+                print(Y_temp)
+            #print('Doing fit of surrogate:',classifier_index)
+
+            X_next, s_value, s_value_ext, u_value = self.Upper_Confidence_Bound_Remove_Duplicates_MetaTuner(X_tries, X_temp, batch_size, exploration_factor, Optimizer_iteration)
+
+            Optimizer_iteration = Optimizer_iteration + 1
+
+            s_values.append(s_value[0][0])
+            s_values_ext.append(s_value_ext[0][0])
+            u_values.append(u_value[0][0])
+
+            u_value = u_value.reshape(-1, 1)
+            Y_temp = np.vstack((Y_temp, u_value))
+            X_temp = np.vstack((X_temp, X_next))
+
+            batch.append(X_next)
+
+        #batch = np.array(batch)
+        #s_value = np.array(s_value)
+        #batch = batch.reshape(-1, X.shape[1])
+        #s_value = s_value.reshape(-1, s_value.shape[0])
+
+        return batch, s_values, s_values_ext, u_values
+
+
     """
     Get the predictions from the surrogate function
     along with the variance
