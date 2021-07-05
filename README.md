@@ -8,10 +8,10 @@
 
 
 Mango internally uses a parallel implementation of a multi-armed bandit bayesian optimizer based on the gaussian process. Some of the salient features of Mango are:
-- Ability to easily define complex search spaces that are compatible with the scikit-learn random search and gridsearch functions.
-- Internally uses state of the art optimizer, which allows sampling a batch of values in parallel for evaluation.
-- The objective function can be arbitrarily complex, which can be scheduled on local, cluster,  or cloud infrastructure.
-- The ease of usage was kept in mind with the ability to plugin new distributions for search space and new optimizer algorithms.
+- Ability to easily define complex search spaces compatible with the scikit-learn random search and grid-search functions.
+- Provides a state-of-the-art optimizer, which allows sampling a batch of values in parallel for evaluation.
+- The objective function can be arbitrarily complex, scheduled on local, cluster,  or cloud infrastructure.
+- The ease of usage was kept in mind to plugin new distributions for search space and optimizer algorithms.
 
 ## Index
 1. [Installation](#setup)
@@ -60,14 +60,14 @@ from mango import scheduler, Tuner
 
 # Search space
 param_space = dict(x=range(-10,10))
-             
+
 # Quadratic objective Function
 @scheduler.serial
-def objective(x): 
+def objective(x):
     return x * x
 
 # Initialize and run Tuner
-tuner = Tuner(param_space, objective) 
+tuner = Tuner(param_space, objective)
 results = tuner.minimize()
 
 print(f'Optimal value of parameters: {results["best_params"]} and objective: {results["best_objective"]}')```
@@ -105,18 +105,18 @@ print('best accuracy:', results['best_objective'])
 # => best parameters: {'algorithm': 'auto', 'n_neighbors': 11}
 # => best accuracy: 0.931486122714193
 ```
-Note that best parameters may be different but accuracy should be ~ 0.9315. More examples are available 
-in the `examples` directory ([Facebook's Prophet](https://github.com/ARM-software/mango/blob/master/examples/Prophet_Classifier.ipynb), 
+Note that best parameters may be different but accuracy should be ~ 0.9315. More examples are available
+in the `examples` directory ([Facebook's Prophet](https://github.com/ARM-software/mango/blob/master/examples/Prophet_Classifier.ipynb),
 [XGBoost](https://github.com/ARM-software/mango/blob/master/examples/Xgboost_XGBClassifier.ipynb), [SVM](https://github.com/ARM-software/mango/blob/master/examples/SVM_Example.ipynb)).
 
 
 <a name="DomainSpace"></a>
 ## 4. Search Space
-The search space defines the range and distribution of input parameters to the objective function. 
-Mango search space is compatible with scikit-learn's parameter space definitions used in 
+The search space defines the range and distribution of input parameters to the objective function.
+Mango search space is compatible with scikit-learn's parameter space definitions used in
 [RandomizedSearchCV](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.RandomizedSearchCV.html)
- or [GridSearchCV](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html). 
-The search space is defined as a dictionary with keys being the parameter names (string) and values being 
+ or [GridSearchCV](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html).
+The search space is defined as a dictionary with keys being the parameter names (string) and values being
 list of discreet choices, range of integers or the distributions. Example of some common search spaces are:
 
 ### Integer
@@ -131,17 +131,17 @@ Integers are uniformly sampled from the given range and are assumed to be ordere
 ### Categorical
 Discreet categories can be defined as lists. For example:
 ```python
-# string 
+# string
 param_space = dict(color=['red', 'blue', 'green'])
 # float
 param_space = dict(v=[0.2, 0.1, 0.3])
-# mixed 
+# mixed
 param_space = dict(max_features=['auto', 0.2, 0.3])
 ```
-Lists are uniformly sampled and are assumed to be unordered. They are one-hot encoded internally. 
+Lists are uniformly sampled and are assumed to be unordered. They are one-hot encoded internally.
 
 ### Distributions
-All the distributions supported by [`scipy.stats`](https://docs.scipy.org/doc/scipy/reference/stats.html) are supported. 
+All the distributions supported by [`scipy.stats`](https://docs.scipy.org/doc/scipy/reference/stats.html) are supported.
 In general, distributions must provide a `rvs` method for sampling.
 
 #### Uniform distribution
@@ -205,15 +205,15 @@ param_dict = {
     'kernel': ['rbf', 'sigmoid'],
     'gamma': uniform(0.1, 4), # 0.1 to 4.1
     'C': loguniform(-7, 8) # 10^-7 to 10
-} 
+}
 ```
 
 <a name="scheduler"></a>
 ## 5. Scheduler
 
-Mango is designed to take advantage of distributed computing. The objective function can be scheduled to 
-run locally or on a cluster with parallel evaluations. Mango is designed to allow the use of any distributed 
-computing framework (like Celery or Kubernetes). The `scheduler` module comes with some pre-defined 
+Mango is designed to take advantage of distributed computing. The objective function can be scheduled to
+run locally or on a cluster with parallel evaluations. Mango is designed to allow the use of any distributed
+computing framework (like Celery or Kubernetes). The `scheduler` module comes with some pre-defined
 schedulers.
 
 ### Serial scheduler
@@ -222,7 +222,7 @@ Serial scheduler runs locally with one objective function evaluation at a time
 from mango import scheduler
 
 @scheduler.serial
-def objective(x): 
+def objective(x):
     return x * x
 ```
 
@@ -232,11 +232,11 @@ Parallel scheduler runs locally and uses `joblib` to evaluate the objective func
 from mango import scheduler
 
 @scheduler.parallel(n_jobs=2)
-def objective(x): 
+def objective(x):
     return x * x
 ```
-`n_jobs` specifies the number of parallel evaluations. `n_jobs = -1` uses all the available cpu cores 
-on the machine. See [simple_parallel](https://github.com/ARM-software/mango/tree/master/examples/simple_parallel.py) 
+`n_jobs` specifies the number of parallel evaluations. `n_jobs = -1` uses all the available cpu cores
+on the machine. See [simple_parallel](https://github.com/ARM-software/mango/tree/master/examples/simple_parallel.py)
 for full working example.
 
 ### Custom distributed scheduler
@@ -249,8 +249,8 @@ from mango import scheduler
 def objective(params_batch):
     """ Template for custom distributed objective function
     Args:
-        params_batch (list): Batch of parameter dictionaries to be evaluated in parallel 
-    
+        params_batch (list): Batch of parameter dictionaries to be evaluated in parallel
+
     Returns:
         list: Values of objective function at given parameters
     """
@@ -259,7 +259,7 @@ def objective(params_batch):
     return results
 ```
 
-For example the following snippet uses [Celery](http://www.celeryproject.org/): 
+For example the following snippet uses [Celery](http://www.celeryproject.org/):
 ```python
 import celery
 from mango import Tuner, scheduler
@@ -283,7 +283,7 @@ tuner = Tuner(param_space, objective)
 results = tuner.minimize()
 ```
 A working example to tune hyperparameters of KNN using Celery is [here](https://github.com/ARM-software/mango/tree/master/examples/knn_celery.py).
- 
+
 <!--
 <a name="ObjectiveFunction"></a>
 ## 5. More on Objective Function
@@ -300,7 +300,7 @@ def objective_function(params_list):
 The objective function is called with the input list of hyper parameters. Each element of the list is the dictionary which is a sample drawn from the domain space of variables. Mango expects the objective function to return the list of
 evaluations which has the same size as the args_list. Each value of the evaluations list is the function evaluated at hyperparameters
 of params_list in the same order. A rich set of objective functions are shown in the [examples](https://github.com/ARM-software/mango/tree/master/examples). The size of the params_list is controlled by the batch_size configuration parameter of Mango. By default,
-batch_size is 1. The configuration parameters of Mango are explained in the [Mango Configurations](#MangoConfigurations) section. 
+batch_size is 1. The configuration parameters of Mango are explained in the [Mango Configurations](#MangoConfigurations) section.
 
 The sample skeleton of the Celery based parallel objective function in Mango is as following.
 
@@ -334,7 +334,7 @@ The default configuration parameters used by the Mango as below:
 ```
 The configuration parameters are:
 - domain_size: The size which is explored in each iteration by the gaussian process. Generally, a larger size is preferred if higher dimensional functions are optimized. More on this will be added with details about the internals of bayesian optimization.
-- initial_random: The number of random samples tried. Note: Mango returns all the random samples together. Users can exploit this to parallelize the random runs without any constraint. 
+- initial_random: The number of random samples tried. Note: Mango returns all the random samples together. Users can exploit this to parallelize the random runs without any constraint.
 - num_iteration: The total number of iterations used by Mango to find the optimal value.
 - batch_size: The size of args_list passed to the objective function for parallel evaluation. For larger batch sizes, Mango internally uses intelligent sampling to decide the optimal samples to evaluate.
 - early_stopping: A callback to specify custom stopping criteria. The callback has the following signature:
@@ -342,7 +342,7 @@ The configuration parameters are:
   def early_stopping(results):
       '''
           results is the same as dict returned by tuner
-          keys available: params_tries, objective_values, 
+          keys available: params_tries, objective_values,
               best_objective, best_params
       '''
       ...
@@ -356,7 +356,7 @@ The default configuration parameters can be modified, as shown below. Only the p
 ```python
 conf_dict = dict(num_iteration=40, domain_size=10000, initial_random=3)
 
-tuner = Tuner(param_dict, objective, conf_dict) 
+tuner = Tuner(param_dict, objective, conf_dict)
 ```
 
 <a name="AdditionalFeatures"></a>
@@ -364,7 +364,7 @@ tuner = Tuner(param_dict, objective, conf_dict)
 ### Handling runtime failed evaluation
 At runtime, failed evaluations are widespread in production deployments. Mango abstractions enable users to make progress even in the presence of failures by only using the correct evaluations. The syntax can return the successful evaluation, and the user can flexibly keep track of failures, for example, using timeouts. An example showing the usage of Mango in the presence of random failures is shown [here](https://github.com/ARM-software/mango/blob/master/examples/Failure_Handling.ipynb).   
 
-### Neural Architecture Search 
+### Neural Architecture Search
 Mango can also do an efficient neural architecture search. An example on the MNIST dataset to search for optimal filter sizes, the number of filters, etc., is [available](https://github.com/ARM-software/mango/blob/master/examples/NAS_Mnist.ipynb).
 
 <!--
@@ -379,16 +379,16 @@ are running. Default celery configurations can be modified in the [file](https:/
 - [Prophet example using celery workers](https://github.com/ARM-software/mango/blob/master/examples/Prophet_Celery.ipynb)
 
 More examples will be included to show the scheduling of objective function using local threads/processes. By default examples schedule
-the objective function on the local machine itself. 
+the objective function on the local machine itself.
 
 <a name ="mangoAlgorithms"></a>
 ## 8. Algorithms
-The optimization algorithms in Mango are based on widely used Bayesian optimization techniques, extended to sample a batch of configurations in parallel. Currently, Mango provides two parallel optimization algorithms that use the upper confidence bound as the acquisition function. The first algorithm uses hallucination combined with exponential rescaling of the surrogate function to select a batch. In the second algorithm, we create clusters of acquisition function in spatially distinct search spaces, and select the maximum value within each cluster to create the batch. 
+The optimization algorithms in Mango are based on widely used Bayesian optimization techniques, extended to sample a batch of configurations in parallel. Currently, Mango provides two parallel optimization algorithms that use the upper confidence bound as the acquisition function. The first algorithm uses hallucination combined with exponential rescaling of the surrogate function to select a batch. In the second algorithm, we create clusters of acquisition function in spatially distinct search spaces, and select the maximum value within each cluster to create the batch.
 
 <a name="contactDetails"></a>
 ## More Details
 Details about specifying parameter/variable domain space, user objective function, and internals of Mango will be added.
-Please stay tuned. 
+Please stay tuned.
 -->
 
 ## Participate
