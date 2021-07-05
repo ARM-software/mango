@@ -128,6 +128,22 @@ class MetaTuner:
         5- Modify the surrogate selections so as to avoid getting struck.
         """
 
+        results = dict()
+
+        #random params tried
+        results['random_params'] = []
+
+        #random objective values
+        results['random_params_objective'] = []
+
+        #random objective function id
+        results['random_objective_fid'] = []
+
+        results['params_tried'] = []
+        results['objective_values'] = []
+        results['objective_fid'] = []
+
+
         #print('*** Entering Metatuner *** ')
         num_of_random = self.initial_random
 
@@ -193,6 +209,11 @@ class MetaTuner:
 
             self.objective_values_list += y_list
 
+            results['random_params'] = results['random_params'] + x_list
+            results['random_params_objective'] = results['random_params_objective'] + y_list
+            results['random_objective_fid'] = results['random_objective_fid'] + [i]*len(x_list)
+
+
             #x_array2 = ds_i.convert_GP_space(random_hyper_parameters)
             #x_array = ds_i.convert_to_gp(random_hyper_parameters)
 
@@ -226,6 +247,9 @@ class MetaTuner:
             Optimizer_exploration.append(1.0)
             Optimizer_iteration.append(1.0)
 
+        results['params_tried'] = results['random_params']
+        results['objective_values'] = results['random_params_objective']
+        results['objective_fid'] = results['random_objective_fid']
 
         #print(Optimizer_exploration)
 
@@ -350,6 +374,10 @@ class MetaTuner:
 
             self.objective_values_list += y_list
 
+            results['params_tried'] = results['params_tried'] + curr_x_next
+            results['objective_values'] = results['objective_values'] + y_list
+            results['objective_fid'] = results['objective_fid'] + [index]
+
             curr_y_array = np.array(y_list).reshape(len(y_list), 1)
             #append the curr_x_next_np, curr_x_next, y_list to appropriate datastructures for book keeping
 
@@ -385,5 +413,9 @@ class MetaTuner:
         self.Y_dict_array_max = Y_dict_array_max
         self.ds = ds
 
-        #this return needs to be improved
-        return Y_dict_array_max
+        index_best = np.argmax(results['objective_values'])
+        results['best_objective'] = results['objective_values'][index_best]
+        results['best_params'] = results['params_tried'][index_best]
+        results['best_objective_fid'] = results['objective_fid'][index_best]
+
+        return results
