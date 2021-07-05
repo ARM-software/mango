@@ -7,11 +7,12 @@
 [![AirSim Drone Demo Video](documents/demo_video.png)](https://youtu.be/hFmSdDLLUfY)
 
 
-Mango internally uses a parallel implementation of a multi-armed bandit bayesian optimizer based on the gaussian process. Some of the salient features of Mango are:
-- Ability to easily define complex search spaces compatible with the scikit-learn random search and grid-search functions.
-- Provides a state-of-the-art optimizer, which allows sampling a batch of values in parallel for evaluation.
-- The objective function can be arbitrarily complex, scheduled on local, cluster,  or cloud infrastructure.
-- The ease of usage was kept in mind to plugin new distributions for search space and optimizer algorithms.
+Mango enables parallel hyperparameter tuning with the following salient features:
+- Ability to easily define complex search spaces compatible with the scikit-learn.
+- A state-of-the-art optimizers for continuous/discrete/categorical values.
+- Modular design allows the user to schedule objective function evaluations on local, cluster,  or cloud infrastructure.
+- New features are continuously added due to the testing and usage in production settings.
+
 
 ## Index
 1. [Installation](#setup)
