@@ -1,5 +1,7 @@
 # Welcome to Mango Documentation via MkDocs
 
+Hosted on Read the Docs [here](https://arm-mango.readthedocs.io/en/latest/about/).
+
 ## Getting Started
 
 Install and serve:
@@ -7,7 +9,7 @@ Install and serve:
     $ pip install -r docs/requirements.txt
     $ mkdocs serve
 
-Add markdown pages to `docs/` folder.
+Any changes pushed to the `docs` branch would be automatically published.
 
 ## Project layout
 
