@@ -4,7 +4,7 @@
 
 **Check out the quick 12 seconds demo** of Mango approximating a complex decision boundary of SVM
 
-[![AirSim Drone Demo Video](img/demo_video.png)](https://youtu.be/hFmSdDLLUfY)
+[![Demo Video](img/demo_video.png)](https://youtu.be/hFmSdDLLUfY)
 
 
 Mango enables parallel hyperparameter tuning with the following salient features:
