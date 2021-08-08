@@ -1,0 +1,7 @@
+site_name: Mango
+site_url: https://example.com/
+nav:
+    - Home: index.md
+    - About: about.md
+theme: readthedocs
+
