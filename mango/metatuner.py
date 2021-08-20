@@ -4,6 +4,7 @@ Meta Tuner Class: Used to optimize across a set of models:
 Current implementation: Bare Metal functionality for testing.
 ToDo: Improve code with better config management and remove hardcoded parameters
 """
+from dataclasses import dataclass
 from mango.domain.domain_space import domain_space
 from mango.optimizer.bayesian_learning import BayesianLearning
 from scipy.stats._distn_infrastructure import rv_frozen
@@ -17,10 +18,21 @@ import warnings
 warnings.filterwarnings('ignore')
 
 class MetaTuner:
+    @dataclass
+    class Config:
+        n_iter: int = 20
+        n_init: int = 2
 
-    def __init__(self,param_dict_list, objective_list):
+    def __init__(self,
+                 param_dict_list,
+                 objective_list,
+                 **kwargs):
         self.param_dict_list = param_dict_list
         self.objective_list = objective_list
+        self.config = MetaTuner.Config(**kwargs)
+        # adjustable parameters
+        self.num_of_iterations = self.config.n_iter
+        self.initial_random = self.config.n_init
 
         #list of GPR for each objective
         self.gpr_list = []
@@ -31,13 +43,10 @@ class MetaTuner:
         #batch size of the entire metaTuner
         self.batch_size = 1
 
-        #initial random
-        self.initial_random = 2
-
         #batch size per function to select
         self.obj_batch_size = 1
 
-        self.num_of_iterations = 20
+
 
         #use to see the info and fix the seeds metaTuner is running
         self.debug = False
