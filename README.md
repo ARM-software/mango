@@ -362,7 +362,7 @@ The configuration parameters are:
         satisfies the constraints or not
     '''
   ```
-  See [this](<https://github.com/ARM-software/mango/blob/master/examples/Constrained Optimization.ipynb>) notebook for an example. 
+  See [this](<examples/Constrained Optimization.ipynb>) notebook for an example. 
 
 
 The default configuration parameters can be modified, as shown below. Only the parameters whose values need to adjusted can be passed as the dictionary.
