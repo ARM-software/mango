@@ -334,11 +334,11 @@ The default configuration parameters used by the Mango as below:
  'batch_size': 1}
 ```
 The configuration parameters are:
-- domain_size: The size which is explored in each iteration by the gaussian process. Generally, a larger size is preferred if higher dimensional functions are optimized. More on this will be added with details about the internals of bayesian optimization.
-- initial_random: The number of random samples tried. Note: Mango returns all the random samples together. Users can exploit this to parallelize the random runs without any constraint.
-- num_iteration: The total number of iterations used by Mango to find the optimal value.
-- batch_size: The size of args_list passed to the objective function for parallel evaluation. For larger batch sizes, Mango internally uses intelligent sampling to decide the optimal samples to evaluate.
-- early_stopping: A callback to specify custom stopping criteria. The callback has the following signature:
+- *domain_size*: The size which is explored in each iteration by the gaussian process. Generally, a larger size is preferred if higher dimensional functions are optimized. More on this will be added with details about the internals of bayesian optimization.
+- *initial_random*: The number of random samples tried. Note: Mango returns all the random samples together. Users can exploit this to parallelize the random runs without any constraint.
+- *num_iteration*: The total number of iterations used by Mango to find the optimal value.
+- *batch_size*: The size of args_list passed to the objective function for parallel evaluation. For larger batch sizes, Mango internally uses intelligent sampling to decide the optimal samples to evaluate.
+- *early_stopping*: A Callable to specify custom stopping criteria. The callback has the following signature:
    ```python
   def early_stopping(results):
       '''
@@ -349,7 +349,21 @@ The configuration parameters are:
       ...
       return True/False
   ```
-Early stopping is one of Mango's important features that allow to early terminate the current parallel search based on the custom user-designed criteria, such as the total optimization time spent, current validation accuracy achieved, or improvements in the past few iterations. For usage see early stopping examples [notebook](https://github.com/ARM-software/mango/blob/master/examples/EarlyStopping.ipynb).
+    Early stopping is one of Mango's important features that allow to early terminate the current parallel search
+    based on the custom user-designed criteria, such as the total optimization time spent, current validation accuracy
+    achieved, or improvements in the past few iterations. For usage see early stopping examples [notebook](https://github.com/ARM-software/mango/blob/master/examples/EarlyStopping.ipynb).
+- *constraint*: A callable to specify constraints on parameter space. It has the following
+  signature:
+  ```python
+  def constraint(samples: List[dict]) -> List[bool]:
+    '''
+        Given a list of samples (dict with parameter names as keys)
+        Returns a list of True/False elements indicating whether each sample
+        satisfies the constraints or not
+    '''
+  ```
+  See [this](<https://github.com/ARM-software/mango/blob/master/examples/Constrained Optimization.ipynb>
+.ipynb) notebook for an example. 
 
 
 The default configuration parameters can be modified, as shown below. Only the parameters whose values need to adjusted can be passed as the dictionary.
