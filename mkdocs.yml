@@ -1,5 +1,7 @@
 site_name: Mango
 site_url: https://arm-mango.readthedocs.io/
+repo_url: https://github.com/ARM-software/mango/
+
 nav:
     - Home: index.md
     - About: about.md
