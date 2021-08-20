@@ -42,6 +42,7 @@ class Tuner:
         exploration_min: float = 0.1
         fixed_domain: bool = False
         early_stopping: Callable = None
+        constraint: Callable = None
 
         def __post_init__(self):
             if self.optimizer not in self.valid_optimizers:
@@ -92,7 +93,9 @@ class Tuner:
             self.config.batch_size = objective.batch_size
 
         # save domain size
-        self.ds = domain_space(self.param_dict, self.config.domain_size)
+        self.ds = domain_space(self.param_dict,
+                               self.config.domain_size,
+                               constraint=self.config.constraint)
 
         # stores the results of using the tuner
         self.results = dict()
