@@ -22,6 +22,7 @@ Mango enables parallel hyperparameter tuning with the following salient features
 5. [Scheduler](#scheduler)
 6. [Optional configurations](#MangoConfigurations)
 7. [Additional Features](#AdditionalFeatures)
+8. [CASH Feature](#CASHFeature)
 
 <!--
 7. [Schedule Objective Function on Celery](#Celery)
@@ -391,6 +392,30 @@ The optimization algorithms in Mango are based on widely used Bayesian optimizat
 Details about specifying parameter/variable domain space, user objective function, and internals of Mango will be added.
 Please stay tuned.
 -->
+
+<a name="CASHFeature"></a>
+## 8. Combiner Classifier Selection and Optimization (CASH)
+Mango now provides a novel functionality of combined classifier selection and optimization. It allows developers to directly specify a set of classifiers along with their different hyperparameter spaces. Mango internally finds the best classifier along with the optimal parameters with the least possible number of overall iterations. The examples are  available [here](https://github.com/ARM-software/mango/tree/master/benchmarking/MetaTuner_Examples)
+
+The important parts in the skeletion code are as below.
+
+```python
+from mango import MetaTuner
+
+#define search spaces and objective functions as done for tuner.
+
+param_space_list = [param_space1, param_space2, param_space3, param_space4, ..]
+objective_list = [objective_1, objective_2, objective_3, objective_4, ..]
+
+metatuner = MetaTuner(param_space_list, objective_list)
+
+results = metatuner.run()
+
+print('best_objective:',results['best_objective'])
+print('best_params:',results['best_params'])
+print('best_objective_fid:',results['best_objective_fid'])
+
+```
 
 ## Participate
 
