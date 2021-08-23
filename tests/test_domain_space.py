@@ -119,3 +119,17 @@ def test_gp_space():
 
     X2 = ds.convert_GP_space(params)
     assert np.isclose(X2, X).all()
+
+
+def test_np_space():
+    space = {
+        'x': np.array(['a', 'b', 'c']),
+        'y': np.arange(100),
+    }
+
+    ds = domain_space(space, domain_size=10)
+    params = ds.get_domain()
+    assert len(params) == 10
+
+    gp_params = ds.convert_GP_space(params)
+    assert gp_params.shape == (10, 4)
