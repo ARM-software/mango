@@ -357,13 +357,12 @@ The configuration parameters are:
   ```python
   def constraint(samples: List[dict]) -> List[bool]:
     '''
-        Given a list of samples (dict with parameter names as keys)
-        Returns a list of True/False elements indicating whether each sample
+        Given a list of samples (each sample is a dict with parameter names as keys)
+        Returns a list of True/False elements indicating whether the corresponding sample
         satisfies the constraints or not
     '''
   ```
-  See [this](<examples/Constrained Optimization.ipynb>) notebook for an example. 
-
+  See [this](<examples/Test functions for constrained optimization.ipynb>) notebook for an example.
 
 The default configuration parameters can be modified, as shown below. Only the parameters whose values need to adjusted can be passed as the dictionary.
 
