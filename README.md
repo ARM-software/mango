@@ -23,6 +23,8 @@ Mango enables parallel hyperparameter tuning with the following salient features
 6. [Optional configurations](#MangoConfigurations)
 7. [Additional Features](#AdditionalFeatures)
 8. [CASH Feature](#CASHFeature)
+9. [Mango Slides-1](https://github.com/ARM-software/mango/blob/master/documents/Mango_github_slides.pdf), [Mango Slides-2](https://drive.google.com/file/d/1_sUOnbW-LkHMMcjq_WgzabN7IQ-wBRgn/view), [Mango paper-1 (ICASSP 2020)](https://arxiv.org/pdf/2005.11394.pdf) and [Mango paper-2 (CogMI 2021)](https://drive.google.com/file/d/1uzcTUfLM3JSc47RLQJin-YzybwNl6BZO/view).
+
 
 <!--
 7. [Schedule Objective Function on Celery](#Celery)
@@ -421,7 +423,8 @@ print('best_objective_fid:',results['best_objective_fid'])
 
 ### Paper
 
-More technical details are available in the [Mango paper (ICASSP 2020 Conference)](https://arxiv.org/pdf/2005.11394.pdf). Please cite this as:
+More technical details are available in the [Mango paper-1 (ICASSP 2020)](https://arxiv.org/pdf/2005.11394.pdf) and [Mango paper-2 (CogMI 2021)](https://drive.google.com/file/d/1uzcTUfLM3JSc47RLQJin-YzybwNl6BZO/view)
+Please cite them as:
 ```
 @inproceedings{sandha2020mango,
   title={Mango: A Python Library for Parallel Hyperparameter Tuning},
@@ -432,9 +435,18 @@ More technical details are available in the [Mango paper (ICASSP 2020 Conference
   organization={IEEE}
 }
 ```
+```
+@inproceedings{sandha2021mango,
+  title={Enabling Hyperparameter Tuning of Machine Learning Classifiers in Production},
+  author={Sandha, Sandeep Singh and Aggarwal, Mohit and Saha, Swapnil Sayan and Srivastava, Mani},
+  booktitle={CogMI 2021, IEEE International Conference on Cognitive Machine Intelligence},
+  year={2021},
+  organization={IEEE}
+}
+```
 ### Slides
 
-Slides explaining Mango abstractions and design choices are available. [Mango Slides](https://github.com/ARM-software/mango/blob/master/documents/Mango_github_slides.pdf).
+Slides explaining Mango abstractions and design choices are available. [Mango Slides-1](https://github.com/ARM-software/mango/blob/master/documents/Mango_github_slides.pdf), [Mango Slides-2](https://drive.google.com/file/d/1_sUOnbW-LkHMMcjq_WgzabN7IQ-wBRgn/view).
 
 ### Contribute
 
