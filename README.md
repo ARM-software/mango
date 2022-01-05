@@ -1,4 +1,4 @@
-# Mango: A parallel black-box optimization library
+# Mango: A parallel hyperparameter tuning library
 
 **Mango** is a python library for parallel optimization over complex search spaces. Currently, Mango is intended to find the optimal hyperparameters for machine learning algorithms.
 
