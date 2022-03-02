@@ -29,6 +29,7 @@ class Tuner:
     class Config:
         domain_size: int = None
         initial_random: int = 2
+        initial_custom: dict = None
         num_iteration: int = 20
         batch_size: int = 1
         optimizer: str = 'Bayesian'
@@ -151,25 +152,35 @@ class Tuner:
         self.maximize_objective = False
         return self.run()
 
+
+    def run_initial(self):
+        if self.config.initial_custom is not None:
+            X_tried = copy.deepcopy(self.config.initial_custom)
+            X_list, Y_list = self.runUserObjective(X_tried)
+        else:
+            # getting first few random values
+            X_tried = self.ds.get_random_sample(self.config.initial_random)
+            X_list, Y_list = self.runUserObjective(X_tried)
+
+            # in case initial random results are invalid try different samples
+            n_tries = 1
+            while len(Y_list) < self.config.initial_random and n_tries < 3:
+                X_tried2 = self.ds.get_random_sample(self.config.initial_random - len(Y_list))
+                X_list2, Y_list2 = self.runUserObjective(X_tried2)
+                X_tried2.extend(X_tried2)
+                X_list = np.append(X_list, X_list2)
+                Y_list = np.append(Y_list, Y_list2)
+                n_tries += 1
+
+            if len(Y_list) == 0:
+                raise ValueError("No valid configuration found to initiate the Bayesian Optimizer")
+        return X_list, Y_list, X_tried
+
     def runBayesianOptimizer(self):
         results = dict()
 
-        # getting first few random values
-        random_hyper_parameters = self.ds.get_random_sample(self.config.initial_random)
-        X_list, Y_list = self.runUserObjective(random_hyper_parameters)
+        X_list, Y_list, X_tried = self.run_initial()
 
-        # in case initial random results are invalid try different samples
-        n_tries = 1
-        while len(Y_list) < self.config.initial_random and n_tries < 3:
-            random_hps = self.ds.get_random_sample(self.config.initial_random - len(Y_list))
-            X_list2, Y_list2 = self.runUserObjective(random_hps)
-            random_hyper_parameters.extend(random_hps)
-            X_list = np.append(X_list, X_list2)
-            Y_list = np.append(Y_list, Y_list2)
-            n_tries += 1
-
-        if len(Y_list) == 0:
-            raise ValueError("No valid configuration found to initiate the Bayesian Optimizer")
 
         # evaluated hyper parameters are used
         X_init = self.ds.convert_GP_space(X_list)
@@ -186,7 +197,7 @@ class Tuner:
         X_sample = X_init
         Y_sample = Y_init
 
-        hyper_parameters_tried = random_hyper_parameters
+        hyper_parameters_tried = X_tried
         objective_function_values = Y_list
         surrogate_values = Y_list
 

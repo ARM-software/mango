@@ -14,7 +14,6 @@ import numpy as np
 from mango.domain.domain_space import domain_space
 from mango import Tuner, scheduler
 from scipy.stats import uniform
-from mango.domain.distribution import loguniform
 
 # Simple param_dict
 param_dict = {"a": uniform(0, 1),  # uniform distribution
@@ -125,7 +124,7 @@ def test_rosenbrock():
             results.append(result)
         return results
 
-    tuner = Tuner(param_dict, objfunc, conf_dict=dict(domain_size=100000))
+    tuner = Tuner(param_dict, objfunc, conf_dict=dict(domain_size=100000, num_iteration=40))
     results = tuner.run()
 
     print('best hyper parameters:', results['best_params'])
@@ -188,6 +187,40 @@ def test_convex():
 
     assert abs(results['best_params']['x'] - x_opt) <= 3
     assert abs(results['best_params']['y'] - y_opt) <= 3
+
+
+def test_initial_custom():
+    param_dict = {
+        'x': range(-100, 10),
+        'y': range(-10, 20),
+    }
+
+    x_opt = 0
+    y_opt = 0
+
+    def objfunc(args_list):
+        results = []
+        for hyper_par in args_list:
+            x = hyper_par['x']
+            y = hyper_par['y']
+            result = (x ** 2 + y ** 2) / 1e4
+            results.append(result)
+        return results
+
+    config = dict(initial_custom=[dict(x=-100, y=20),
+                                 dict(x=10, y=20)]
+                 )
+
+    tuner = Tuner(param_dict, objfunc, conf_dict=config)
+    results = tuner.minimize()
+
+    print('best hyper parameters:', results['best_params'])
+    print('best Accuracy:', results['best_objective'])
+
+    assert abs(results['best_params']['x'] - x_opt) <= 3
+    assert abs(results['best_params']['y'] - y_opt) <= 3
+    assert results['random_params'][0] == config['initial_custom'][0]
+    assert results['random_params'][1] == config['initial_custom'][1]
 
 
 def test_local_scheduler():
