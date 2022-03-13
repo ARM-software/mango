@@ -1,16 +1,17 @@
 # Mango: A parallel hyperparameter tuning library
 
-**Mango** is a python library for parallel optimization over complex search spaces. Currently, Mango is intended to find the optimal hyperparameters for machine learning algorithms.
+**Mango** is a python library to find the optimal hyperparameters for machine learning classifiers. 
+Mango enables parallel optimization over complex search spaces of continuous/discrete/categorical values.
 
 **Check out the quick 12 seconds demo** of Mango approximating a complex decision boundary of SVM
 
 [![AirSim Drone Demo Video](documents/demo_video.png)](https://youtu.be/hFmSdDLLUfY)
 
-
-Mango enables parallel hyperparameter tuning with the following salient features:
-- Ability to easily define complex search spaces compatible with the scikit-learn.
-- A state-of-the-art optimizers for continuous/discrete/categorical values.
-- Modular design allows the user to schedule objective function evaluations on local, cluster,  or cloud infrastructure.
+Mango has the following salient features:
+- Easily define complex search spaces compatible with the scikit-learn.
+- A novel state-of-the-art gradient-free optimizer for continuous/discrete/categorical values.
+- Modular design to schedule objective function on local, cluster,  or cloud infrastructure.
+- Failure detection in the application layer for scalability on commodity hardware.
 - New features are continuously added due to the testing and usage in production settings.
 
 
@@ -21,9 +22,9 @@ Mango enables parallel hyperparameter tuning with the following salient features
 4. [Search space definitions](#DomainSpace)
 5. [Scheduler](#scheduler)
 6. [Optional configurations](#MangoConfigurations)
-7. [Additional Features](#AdditionalFeatures)
-8. [CASH Feature](#CASHFeature)
-9. [Mango Slides-1](https://github.com/ARM-software/mango/blob/master/documents/Mango_github_slides.pdf), [Mango Slides-2](https://drive.google.com/file/d/1_sUOnbW-LkHMMcjq_WgzabN7IQ-wBRgn/view), [Mango paper-1 (ICASSP 2020)](https://arxiv.org/pdf/2005.11394.pdf) and [Mango paper-2 (CogMI 2021)](https://drive.google.com/file/d/1uzcTUfLM3JSc47RLQJin-YzybwNl6BZO/view).
+7. [Additional features](#AdditionalFeatures)
+8. [CASH feature](#CASHFeature)
+9. [Mango introduction slides](https://github.com/ARM-software/mango/blob/master/documents/Mango_github_slides.pdf), [Mango production usage slides](https://github.com/ARM-software/mango/blob/master/documents/Mango_cogml_slides.pdf), [Mango paper-1 (ICASSP 2020)](https://arxiv.org/pdf/2005.11394.pdf) and [Mango paper-2 (CogMI 2021)](https://github.com/ARM-software/mango/blob/master/documents/Mango_CogMI_paper.pdf).
 
 
 <!--
