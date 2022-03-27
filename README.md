@@ -24,8 +24,9 @@ Mango has the following salient features:
 6. [Optional configurations](#MangoConfigurations)
 7. [Additional features](#AdditionalFeatures)
 8. [CASH feature](#CASHFeature)
-9. [Mango introduction slides](https://github.com/ARM-software/mango/blob/master/documents/Mango_github_slides.pdf) & [Mango production usage slides](https://github.com/ARM-software/mango/blob/master/documents/Mango_cogml_slides.pdf).
-10. [Mango paper (ICASSP 2020)](https://arxiv.org/pdf/2005.11394.pdf) & [Mango paper (CogMI 2021)](https://github.com/ARM-software/mango/blob/master/documents/Mango_CogMI_paper.pdf).
+9. [Platform-aware neural architecture search](https://github.com/ARM-software/mango/tree/master/examples/THIN-Bayes)
+10. [Mango introduction slides](https://github.com/ARM-software/mango/blob/master/documents/Mango_github_slides.pdf) & [Mango production usage slides](https://github.com/ARM-software/mango/blob/master/documents/Mango_cogml_slides.pdf).
+11. [Mango paper (ICASSP 2020)](https://arxiv.org/pdf/2005.11394.pdf) & [Mango paper (CogMI 2021)](https://github.com/ARM-software/mango/blob/master/documents/Mango_CogMI_paper.pdf).
 
 
 <!--
@@ -373,6 +374,8 @@ At runtime, failed evaluations are widespread in production deployments. Mango a
 
 ### Neural Architecture Search
 Mango can also do an efficient neural architecture search. An example on the MNIST dataset to search for optimal filter sizes, the number of filters, etc., is [available](https://github.com/ARM-software/mango/blob/master/examples/NAS_Mnist.ipynb).
+
+More extensive examples are available in the [THIN-Bayes](https://github.com/ARM-software/mango/tree/master/examples/THIN-Bayes) folder doing *Neural Architecture Search* for a class of neural networks and classical models for different regression and classification tasks. 
 
 <!--
 <a name="Celery"></a>
