@@ -5,7 +5,7 @@ This repository explores developing human activity detection classifiers for low
 ## Code Architecture
 
 - Download the activity dataset from: https://github.com/swapnilsayansaha/tinyml_security/tree/main/Model%20Training/Human%20Activity%20Recognition/Data
-- ```auritus_tcn``` has actual Tensorflow Lite Micro style C++ code that can be run on Mbed-enabled boards. Please place it in your home directory in the Mbed programs folder (e.g., ```home/nesl/Mbed Programs/auritus_tcn```). Refer to the TFLM guide to understand how ```main.cpp``` works: https://www.tensorflow.org/lite/microcontrollers
+- [```auritus_tcn```](https://drive.google.com/file/d/1htTsLH4gPPdamwP6WmqyMqU4YzgbspJd/view?usp=sharing) has actual Tensorflow Lite Micro style C++ code that can be run on Mbed-enabled boards. Please place it in your home directory in the Mbed programs folder (e.g., ```home/nesl/Mbed Programs/auritus_tcn```). Refer to the TFLM guide to understand how ```main.cpp``` works: https://www.tensorflow.org/lite/microcontrollers
 - You can add your own Mbed-enabled target hardware in ```hardware_utls.py```. You need to know the maximum amount of RAM, maximum amount of Flash and a list of arena sizes you want to optimize for for the hardware.
 - The Jupyter notebook is well-commented to guide you through the NAS process. One particular thing to note is how the score weighs each optimization variable (accuracy, RAM, flash, latency). You can play around with the weights.
 - The scripts are written to be trained on GPU. If you do not have GPU, first comment this line in each notebook: ```os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"```, then change the next line as follows: ```os.environ["CUDA_VISIBLE_DEVICES"]="-1"```
