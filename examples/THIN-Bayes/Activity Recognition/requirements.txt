@@ -1,4 +1,4 @@
-tensorflow-gpu==2.5.0
+tensorflow-gpu==2.6.4
 tensorflow==2.5.3 
 tensorflow-estimator==2.5.0 
 tensorboard==2.5.0 
