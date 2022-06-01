@@ -155,8 +155,16 @@ class Tuner:
 
     def run_initial(self):
         if self.config.initial_custom is not None:
-            X_tried = copy.deepcopy(self.config.initial_custom)
-            X_list, Y_list = self.runUserObjective(X_tried)
+            #X_tried = copy.deepcopy(self.config.initial_custom)
+            #X_list, Y_list = self.runUserObjective(X_tried)
+
+            X_list = self.config.initial_custom['hyper_pars']
+            X_tried = X_list
+
+            Y_list = np.array(self.config.initial_custom['objectives'])
+
+            print('Initiliazing Mango with:', len(X_list), ' points')
+
         else:
             # getting first few random values
             X_tried = self.ds.get_random_sample(self.config.initial_random)
