@@ -26,8 +26,11 @@ Mango has the following salient features:
 8. [CASH feature](#CASHFeature)
 9. [Platform-aware neural architecture search](https://github.com/ARM-software/mango/tree/master/examples/THIN-Bayes)
 10. [Mango introduction slides](https://github.com/ARM-software/mango/blob/master/documents/Mango_github_slides.pdf) & [Mango production usage slides](https://github.com/ARM-software/mango/blob/master/documents/Mango_cogml_slides.pdf).
-11. [Mango paper (ICASSP 2020)](https://arxiv.org/pdf/2005.11394.pdf) & [Mango paper (CogMI 2021)](https://github.com/ARM-software/mango/blob/master/documents/Mango_CogMI_paper.pdf).
+11. [Core Mango research papers to cite](CorePapers) and [novel applications built over Mango](ApplicationPapers)
 
+<!--
+11. [Mango paper (ICASSP 2020)](https://arxiv.org/pdf/2005.11394.pdf) & [Mango paper (CogMI 2021)](https://github.com/ARM-software/mango/blob/master/documents/Mango_CogMI_paper.pdf).
+-->
 
 <!--
 7. [Schedule Objective Function on Celery](#Celery)
@@ -427,7 +430,8 @@ print('best_objective_fid:',results['best_objective_fid'])
 
 ## Participate
 
-### Paper
+<a name="CorePapers"></a>
+### Core Papers to Cite Mango
 
 More technical details are available in the [Mango paper-1 (ICASSP 2020)](https://arxiv.org/pdf/2005.11394.pdf) and [Mango paper-2 (CogMI 2021)](https://drive.google.com/file/d/1uzcTUfLM3JSc47RLQJin-YzybwNl6BZO/view)
 Please cite them as:
@@ -450,6 +454,42 @@ Please cite them as:
   organization={IEEE}
 }
 ```
+
+<a name="ApplicationPapers"></a>
+### Novel Application built over Mango
+```
+@article{saha2022auritus,
+  title={Auritus: An open-source optimization toolkit for training and development of human movement models and filters using earables},
+  author={Saha, Swapnil Sayan and Sandha, Sandeep Singh and Pei, Siyou and Jain, Vivek and Wang, Ziqi and Li, Yuchen and Sarker, Ankur and Srivastava, Mani},
+  journal={Proceedings of the ACM on Interactive, Mobile, Wearable and Ubiquitous Technologies},
+  volume={6},
+  number={2},
+  pages={1--34},
+  year={2022},
+  publisher={ACM New York, NY, USA}
+}
+```
+```
+@article{saha2022tinyodom,
+  title={Tinyodom: Hardware-aware efficient neural inertial navigation},
+  author={Saha, Swapnil Sayan and Sandha, Sandeep Singh and Garcia, Luis Antonio and Srivastava, Mani},
+  journal={Proceedings of the ACM on Interactive, Mobile, Wearable and Ubiquitous Technologies},
+  volume={6},
+  number={2},
+  pages={1--32},
+  year={2022},
+  publisher={ACM New York, NY, USA}
+}
+```
+```
+@article{saha2022thin,
+  title={THIN-Bayes: Platform-Aware Machine Learning for Low-End IoT Devices},
+  author={Saha, Swapnil Sayan and Sandha, Sandeep Singh and Aggarwal, Mohit and Srivastava, Mani},
+  year={2022}
+}
+```
+
+
 ### Slides
 
 Slides explaining Mango abstractions and design choices are available. [Mango Slides-1](https://github.com/ARM-software/mango/blob/master/documents/Mango_github_slides.pdf), [Mango Slides-2](https://drive.google.com/file/d/1_sUOnbW-LkHMMcjq_WgzabN7IQ-wBRgn/view).
