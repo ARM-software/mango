@@ -456,7 +456,7 @@ Please cite them as:
 ```
 
 <a name="ApplicationPapers"></a>
-### Novel Application built over Mango
+### Novel Applications built over Mango
 ```
 @article{saha2022auritus,
   title={Auritus: An open-source optimization toolkit for training and development of human movement models and filters using earables},
