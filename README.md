@@ -112,10 +112,10 @@ tuner = Tuner(param_space, objective)
 results = tuner.maximize()
 print('best parameters:', results['best_params'])
 print('best accuracy:', results['best_objective'])
-# => best parameters: {'algorithm': 'auto', 'n_neighbors': 11}
-# => best accuracy: 0.931486122714193
+# => best parameters: {'algorithm': 'ball_tree', 'n_neighbors': 11}
+# => best accuracy: 0.9332401800962584
 ```
-Note that best parameters may be different but accuracy should be ~ 0.9315. More examples are available
+Note that best parameters may be different but accuracy should be ~ 0.93. More examples are available
 in the `examples` directory ([Facebook's Prophet](https://github.com/ARM-software/mango/blob/master/examples/Prophet_Classifier.ipynb),
 [XGBoost](https://github.com/ARM-software/mango/blob/master/examples/Xgboost_XGBClassifier.ipynb), [SVM](https://github.com/ARM-software/mango/blob/master/examples/SVM_Example.ipynb)).
 
