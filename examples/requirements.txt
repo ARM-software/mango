@@ -18,7 +18,7 @@ decorator==4.4.0
 defusedxml==0.6.0
 docs==0.2.1
 entrypoints==0.3
-future==0.18.1
+future==0.18.3
 idna==2.8
 importlib-metadata==0.23
 ipykernel==5.1.2
