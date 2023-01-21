@@ -1,16 +1,17 @@
-# Mango: A parallel black-box optimization library
+# Mango: A parallel hyperparameter tuning library
 
-**Mango** is a python library for parallel optimization over complex search spaces. Currently, Mango is intended to find the optimal hyperparameters for machine learning algorithms.
+**Mango** is a python library to find the optimal hyperparameters for machine learning classifiers. 
+Mango enables parallel optimization over complex search spaces of continuous/discrete/categorical values.
 
 **Check out the quick 12 seconds demo** of Mango approximating a complex decision boundary of SVM
 
 [![AirSim Drone Demo Video](documents/demo_video.png)](https://youtu.be/hFmSdDLLUfY)
 
-
-Mango enables parallel hyperparameter tuning with the following salient features:
-- Ability to easily define complex search spaces compatible with the scikit-learn.
-- A state-of-the-art optimizers for continuous/discrete/categorical values.
-- Modular design allows the user to schedule objective function evaluations on local, cluster,  or cloud infrastructure.
+Mango has the following salient features:
+- Easily define complex search spaces compatible with the scikit-learn.
+- A novel state-of-the-art gradient-free optimizer for continuous/discrete/categorical values.
+- Modular design to schedule objective function on local, cluster,  or cloud infrastructure.
+- Failure detection in the application layer for scalability on commodity hardware.
 - New features are continuously added due to the testing and usage in production settings.
 
 
@@ -21,7 +22,15 @@ Mango enables parallel hyperparameter tuning with the following salient features
 4. [Search space definitions](#DomainSpace)
 5. [Scheduler](#scheduler)
 6. [Optional configurations](#MangoConfigurations)
-7. [Additional Features](#AdditionalFeatures)
+7. [Additional features](#AdditionalFeatures)
+8. [CASH feature](#CASHFeature)
+9. [Platform-aware neural architecture search](https://github.com/ARM-software/mango/tree/master/examples/THIN-Bayes)
+10. [Mango introduction slides](https://github.com/ARM-software/mango/blob/master/documents/Mango_github_slides.pdf) & [Mango production usage slides](https://github.com/ARM-software/mango/blob/master/documents/Mango_cogml_slides.pdf).
+11. [Core Mango research papers to cite](#CorePapers) and [novel applications built over Mango](#ApplicationPapers)
+
+<!--
+11. [Mango paper (ICASSP 2020)](https://arxiv.org/pdf/2005.11394.pdf) & [Mango paper (CogMI 2021)](https://github.com/ARM-software/mango/blob/master/documents/Mango_CogMI_paper.pdf).
+-->
 
 <!--
 7. [Schedule Objective Function on Celery](#Celery)
@@ -103,10 +112,10 @@ tuner = Tuner(param_space, objective)
 results = tuner.maximize()
 print('best parameters:', results['best_params'])
 print('best accuracy:', results['best_objective'])
-# => best parameters: {'algorithm': 'auto', 'n_neighbors': 11}
-# => best accuracy: 0.931486122714193
+# => best parameters: {'algorithm': 'ball_tree', 'n_neighbors': 11}
+# => best accuracy: 0.9332401800962584
 ```
-Note that best parameters may be different but accuracy should be ~ 0.9315. More examples are available
+Note that best parameters may be different but accuracy should be ~ 0.93. More examples are available
 in the `examples` directory ([Facebook's Prophet](https://github.com/ARM-software/mango/blob/master/examples/Prophet_Classifier.ipynb),
 [XGBoost](https://github.com/ARM-software/mango/blob/master/examples/Xgboost_XGBClassifier.ipynb), [SVM](https://github.com/ARM-software/mango/blob/master/examples/SVM_Example.ipynb)).
 
@@ -334,11 +343,11 @@ The default configuration parameters used by the Mango as below:
  'batch_size': 1}
 ```
 The configuration parameters are:
-- domain_size: The size which is explored in each iteration by the gaussian process. Generally, a larger size is preferred if higher dimensional functions are optimized. More on this will be added with details about the internals of bayesian optimization.
-- initial_random: The number of random samples tried. Note: Mango returns all the random samples together. Users can exploit this to parallelize the random runs without any constraint.
-- num_iteration: The total number of iterations used by Mango to find the optimal value.
-- batch_size: The size of args_list passed to the objective function for parallel evaluation. For larger batch sizes, Mango internally uses intelligent sampling to decide the optimal samples to evaluate.
-- early_stopping: A callback to specify custom stopping criteria. The callback has the following signature:
+- *domain_size*: The size which is explored in each iteration by the gaussian process. Generally, a larger size is preferred if higher dimensional functions are optimized. More on this will be added with details about the internals of bayesian optimization.
+- *initial_random*: The number of random samples tried. Note: Mango returns all the random samples together. Users can exploit this to parallelize the random runs without any constraint.
+- *num_iteration*: The total number of iterations used by Mango to find the optimal value.
+- *batch_size*: The size of args_list passed to the objective function for parallel evaluation. For larger batch sizes, Mango internally uses intelligent sampling to decide the optimal samples to evaluate.
+- *early_stopping*: A Callable to specify custom stopping criteria. The callback has the following signature:
    ```python
   def early_stopping(results):
       '''
@@ -349,7 +358,21 @@ The configuration parameters are:
       ...
       return True/False
   ```
-Early stopping is one of Mango's important features that allow to early terminate the current parallel search based on the custom user-designed criteria, such as the total optimization time spent, current validation accuracy achieved, or improvements in the past few iterations. For usage see early stopping examples [notebook](https://github.com/ARM-software/mango/blob/master/examples/EarlyStopping.ipynb).
+    Early stopping is one of Mango's important features that allow to early terminate the current parallel search
+    based on the custom user-designed criteria, such as the total optimization time spent, current validation accuracy
+    achieved, or improvements in the past few iterations. For usage see early stopping examples [notebook](https://github.com/ARM-software/mango/blob/master/examples/EarlyStopping.ipynb).
+- *constraint*: A callable to specify constraints on parameter space. It has the following
+  signature:
+  ```python
+  def constraint(samples: List[dict]) -> List[bool]:
+    '''
+        Given a list of samples (each sample is a dict with parameter names as keys)
+        Returns a list of True/False elements indicating whether the corresponding sample
+        satisfies the constraints or not
+    '''
+  ```
+  See [this](<examples/Test functions for constrained optimization.ipynb>) notebook for an example.
+- *initial_custom*: A list of initial evaluation points to warm up the optimizer instead of random sampling. For example, for a search space with two parameters `x1` and `x2` the input could be:   `[{'x1': 10, 'x2': -5}, {'x1': 0, 'x2': 10}]`. This allows the user to customize the initial evaluation points and therefore guide the optimization process. If this option is given then `initial_random` is ignored.  
 
 
 The default configuration parameters can be modified, as shown below. Only the parameters whose values need to adjusted can be passed as the dictionary.
@@ -363,10 +386,12 @@ tuner = Tuner(param_dict, objective, conf_dict)
 <a name="AdditionalFeatures"></a>
 ## 7. Additional Features
 ### Handling runtime failed evaluation
-At runtime, failed evaluations are widespread in production deployments. Mango abstractions enable users to make progress even in the presence of failures by only using the correct evaluations. The syntax can return the successful evaluation, and the user can flexibly keep track of failures, for example, using timeouts. An example showing the usage of Mango in the presence of random failures is shown [here](https://github.com/ARM-software/mango/blob/master/examples/Failure_Handling.ipynb).   
+At runtime, failed evaluations are widespread in production deployments. Mango abstractions enable users to make progress even in the presence of failures by only using the correct evaluations. The syntax can return the successful evaluation, and the user can flexibly keep track of failures, for example, using timeouts. Examples showing the usage of Mango in the presence of failures: [serial execution](https://github.com/ARM-software/mango/blob/master/examples/Failure_Handling.ipynb) and [parallel execution](https://github.com/ARM-software/mango/blob/master/examples/Failure_Handling_Parallel.ipynb)
 
 ### Neural Architecture Search
 Mango can also do an efficient neural architecture search. An example on the MNIST dataset to search for optimal filter sizes, the number of filters, etc., is [available](https://github.com/ARM-software/mango/blob/master/examples/NAS_Mnist.ipynb).
+
+More extensive examples are available in the [THIN-Bayes](https://github.com/ARM-software/mango/tree/master/examples/THIN-Bayes) folder doing *Neural Architecture Search* for a class of neural networks and classical models for different regression and classification tasks. 
 
 <!--
 <a name="Celery"></a>
@@ -392,11 +417,37 @@ Details about specifying parameter/variable domain space, user objective functio
 Please stay tuned.
 -->
 
+<a name="CASHFeature"></a>
+## 8. Combiner Classifier Selection and Optimization (CASH)
+Mango now provides a novel functionality of combined classifier selection and optimization. It allows developers to directly specify a set of classifiers along with their different hyperparameter spaces. Mango internally finds the best classifier along with the optimal parameters with the least possible number of overall iterations. The examples are  available [here](https://github.com/ARM-software/mango/tree/master/benchmarking/MetaTuner_Examples)
+
+The important parts in the skeletion code are as below.
+
+```python
+from mango import MetaTuner
+
+#define search spaces and objective functions as done for tuner.
+
+param_space_list = [param_space1, param_space2, param_space3, param_space4, ..]
+objective_list = [objective_1, objective_2, objective_3, objective_4, ..]
+
+metatuner = MetaTuner(param_space_list, objective_list)
+
+results = metatuner.run()
+
+print('best_objective:',results['best_objective'])
+print('best_params:',results['best_params'])
+print('best_objective_fid:',results['best_objective_fid'])
+
+```
+
 ## Participate
 
-### Paper
+<a name="CorePapers"></a>
+### Core Papers to Cite Mango
 
-More technical details are available in the [Mango paper (ICASSP 2020 Conference)](https://arxiv.org/pdf/2005.11394.pdf). Please cite this as:
+More technical details are available in the [Mango paper-1 (ICASSP 2020)](https://arxiv.org/pdf/2005.11394.pdf) and [Mango paper-2 (CogMI 2021)](https://drive.google.com/file/d/1uzcTUfLM3JSc47RLQJin-YzybwNl6BZO/view)
+Please cite them as:
 ```
 @inproceedings{sandha2020mango,
   title={Mango: A Python Library for Parallel Hyperparameter Tuning},
@@ -407,9 +458,54 @@ More technical details are available in the [Mango paper (ICASSP 2020 Conference
   organization={IEEE}
 }
 ```
+```
+@inproceedings{sandha2021mango,
+  title={Enabling Hyperparameter Tuning of Machine Learning Classifiers in Production},
+  author={Sandha, Sandeep Singh and Aggarwal, Mohit and Saha, Swapnil Sayan and Srivastava, Mani},
+  booktitle={CogMI 2021, IEEE International Conference on Cognitive Machine Intelligence},
+  year={2021},
+  organization={IEEE}
+}
+```
+
+<a name="ApplicationPapers"></a>
+### Novel Applications built over Mango
+```
+@article{saha2022auritus,
+  title={Auritus: An open-source optimization toolkit for training and development of human movement models and filters using earables},
+  author={Saha, Swapnil Sayan and Sandha, Sandeep Singh and Pei, Siyou and Jain, Vivek and Wang, Ziqi and Li, Yuchen and Sarker, Ankur and Srivastava, Mani},
+  journal={Proceedings of the ACM on Interactive, Mobile, Wearable and Ubiquitous Technologies},
+  volume={6},
+  number={2},
+  pages={1--34},
+  year={2022},
+  publisher={ACM New York, NY, USA}
+}
+```
+```
+@article{saha2022tinyodom,
+  title={Tinyodom: Hardware-aware efficient neural inertial navigation},
+  author={Saha, Swapnil Sayan and Sandha, Sandeep Singh and Garcia, Luis Antonio and Srivastava, Mani},
+  journal={Proceedings of the ACM on Interactive, Mobile, Wearable and Ubiquitous Technologies},
+  volume={6},
+  number={2},
+  pages={1--32},
+  year={2022},
+  publisher={ACM New York, NY, USA}
+}
+```
+```
+@article{saha2022thin,
+  title={THIN-Bayes: Platform-Aware Machine Learning for Low-End IoT Devices},
+  author={Saha, Swapnil Sayan and Sandha, Sandeep Singh and Aggarwal, Mohit and Srivastava, Mani},
+  year={2022}
+}
+```
+
+
 ### Slides
 
-Slides explaining Mango abstractions and design choices are available. [Mango Slides](https://github.com/ARM-software/mango/blob/master/documents/Mango_github_slides.pdf).
+Slides explaining Mango abstractions and design choices are available. [Mango Slides-1](https://github.com/ARM-software/mango/blob/master/documents/Mango_github_slides.pdf), [Mango Slides-2](https://drive.google.com/file/d/1_sUOnbW-LkHMMcjq_WgzabN7IQ-wBRgn/view).
 
 ### Contribute
 

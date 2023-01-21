@@ -119,3 +119,46 @@ def test_gp_space():
 
     X2 = ds.convert_GP_space(params)
     assert np.isclose(X2, X).all()
+
+
+
+def test_constraint():
+    param_dict = dict(
+        p1=['a', 'b', 'c'],
+        p2=uniform(0, 1),
+    )
+
+    def constraint(samples):
+        p1 = np.array([s['p1'] for s in samples])
+        p2 = np.array([s['p2'] for s in samples])
+        return ((p1 == 'a') & (p2 < .5)) | ((p1 != 'a') & (p2 >= .5))
+
+    ds = domain_space(param_dict,
+                      domain_size=100,
+                      constraint=constraint)
+    samples = ds.get_domain()
+    assert len(samples) == 100
+    assert all(constraint(samples))
+
+    ds = domain_space(param_dict,
+                      domain_size=100,
+                      constraint=constraint,
+                      constraint_max_retries=1)
+    samples = ds.get_domain()
+    assert len(samples) < 100
+    assert all(constraint(samples))
+
+
+def test_np_space():
+    space = {
+        'x': np.array(['a', 'b', 'c']),
+        'y': np.arange(100),
+    }
+
+    ds = domain_space(space, domain_size=10)
+    params = ds.get_domain()
+    assert len(params) == 10
+
+    gp_params = ds.convert_GP_space(params)
+    assert gp_params.shape == (10, 4)
+
