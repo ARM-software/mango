@@ -84,7 +84,7 @@ class domain_space():
                 pass  # we are not doing anything at present, and will directly use its value for GP.
 
             elif isinstance(param_dict[par], range):
-                mapping_int[par] = param_dict[par]
+                mapping_int[par] = list(param_dict[par])
 
             elif isinstance(param_dict[par], Iterable):
 
@@ -97,11 +97,11 @@ class domain_space():
                     all_int = False
 
                 if all_int:
-                    mapping_int[par] = param_dict[par]
+                    mapping_int[par] = list(param_dict[par])
 
                 # For lists with mixed type, floats or strings we consider them categorical or discrete
                 else:
-                    mapping_categorical[par] = param_dict[par]
+                    mapping_categorical[par] = list(param_dict[par])
 
         self.mapping_categorical = mapping_categorical
         self.mapping_int = mapping_int

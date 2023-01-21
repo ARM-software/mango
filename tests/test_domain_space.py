@@ -121,6 +121,7 @@ def test_gp_space():
     assert np.isclose(X2, X).all()
 
 
+
 def test_constraint():
     param_dict = dict(
         p1=['a', 'b', 'c'],
@@ -146,4 +147,18 @@ def test_constraint():
     samples = ds.get_domain()
     assert len(samples) < 100
     assert all(constraint(samples))
+
+
+def test_np_space():
+    space = {
+        'x': np.array(['a', 'b', 'c']),
+        'y': np.arange(100),
+    }
+
+    ds = domain_space(space, domain_size=10)
+    params = ds.get_domain()
+    assert len(params) == 10
+
+    gp_params = ds.convert_GP_space(params)
+    assert gp_params.shape == (10, 4)
 
