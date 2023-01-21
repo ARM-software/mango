@@ -419,3 +419,45 @@ def test_early_stopping_complex():
     tuner = Tuner(param_dict, objfunc, conf_dict=config)
     results = tuner.minimize()
     assert (len(results['params_tried']) == 3)
+
+
+def test_constrainted_opt():
+    param_dict = {"a": uniform(0, 1),  # uniform distribution
+                  "b": range(1, 5),  # Integer variable
+                  "c": [1, 2, 3],  # Integer variable
+                  "d": ["-1", "1"]  # Categorical variable
+                  }
+
+    def constraint(samples):
+        is_valid = []
+        for sample in samples:
+            if sample['a'] < 0.5:
+                v = sample['b'] >= 3
+            else:
+                v = sample['b'] < 3
+            is_valid.append(v)
+
+        return is_valid
+
+    def objectiveFunction(args_list):
+        results = []
+        for hyper_par in args_list:
+            a = hyper_par['a']
+            b = hyper_par['b']
+            c = hyper_par['c']
+            d = hyper_par['d']
+            result = (a + b + c + int(d))
+            results.append(result)
+        return results
+
+    config = dict(
+        num_iteration=20,
+        constraint=constraint
+    )
+    tuner = Tuner(param_dict, objectiveFunction, config)
+
+    results = tuner.maximize()
+
+    assert results['best_objective'] > 8.4
+    assert results['best_params']['b'] == 4
+    assert constraint([results['best_params']])

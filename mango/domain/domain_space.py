@@ -6,8 +6,9 @@ Define the domain space abstractions for the Optimizer
 # if the parameter type is a disribution or rv_frozen, the parameter sampler can handle it
 from scipy.stats._distn_infrastructure import rv_frozen
 import numpy as np
-from sklearn.preprocessing import StandardScaler
-from collections.abc import Iterable
+from collections.abc import Iterable, Callable
+import warnings
+from itertools import compress
 
 from .batch_parameter_sampler import BatchParameterSampler
 
@@ -22,30 +23,43 @@ class domain_space():
 
     def __init__(self,
                  param_dict,
-                 domain_size):
+                 domain_size,
+                 constraint: Callable = None,
+                 constraint_max_retries: int = 10):
         self.param_dict = param_dict
 
         # the domain size to explore using the parameter sampler
         self.domain_size = domain_size
+        self.constraint = constraint
+        self.constraint_max_tries = constraint_max_retries
 
         # creating a mapping of categorical variables
         self.create_mappings()
 
 
-    """
-    returns the list of domain values using the parameter sampler
-    The size of values is the domain_size
-    """
-
     def get_domain(self):
-        domain_list = list(BatchParameterSampler(self.param_dict, n_iter=self.domain_size))
-        return domain_list
-
-    """
-    return a random sample using the ParameterSample
-    """
+        return self.get_random_sample(self.domain_size)
 
     def get_random_sample(self, size):
+        if self.constraint is None:
+            return self._get_random_sample(size)
+
+        samples = []
+        n_tries = 0
+        while len(samples) < size and n_tries < self.constraint_max_tries:
+            _samples = self._get_random_sample(size)
+            _filters = self.constraint(_samples)
+            _samples = list(compress(_samples, _filters))
+            samples += _samples
+            n_tries += 1
+        if len(samples) < size:
+            warnings.warn(
+                f'Could not get {size} samples that satisfy the constraint'
+                f'even after {n_tries * size} random samples ', UserWarning)
+        return samples[:size]
+
+
+    def _get_random_sample(self, size):
         domain_list = list(BatchParameterSampler(self.param_dict, n_iter=size))
         return domain_list
 
