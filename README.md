@@ -372,7 +372,17 @@ The configuration parameters are:
     '''
   ```
   See [this](<examples/Test functions for constrained optimization.ipynb>) notebook for an example.
-- *initial_custom*: A list of initial evaluation points to warm up the optimizer instead of random sampling. For example, for a search space with two parameters `x1` and `x2` the input could be:   `[{'x1': 10, 'x2': -5}, {'x1': 0, 'x2': 10}]`. This allows the user to customize the initial evaluation points and therefore guide the optimization process. If this option is given then `initial_random` is ignored.  
+- *initial_custom*: A list of initial evaluation points to warm up the optimizer instead of random sampling. 
+It can be either:  
+  - A list of dict with parameters. For example, for a search space with two parameters `x1` and `x2` the input could be:
+  `[{'x1': 10, 'x2': -5}, {'x1': 0, 'x2': 10}]`. 
+  - A list of tuple with parameters and objective function values. For example, if the objective function is to add 
+  `x1` and `x2` the input could be:
+  `[({'x1': 10, 'x2': -5}, 5), ({'x1': 0, 'x2': 10}, 10)]`. 
+  
+  This allows the user to customize the initial evaluation points and therefore guide the optimization process.
+It also enables starting the optimizer from the results of a previous tuner run (see [this](<examples/warmup.ipynb>) notebook for a working example).
+Note that if `initial_custom` option is given then `initial_random` is ignored.  
 
 
 The default configuration parameters can be modified, as shown below. Only the parameters whose values need to adjusted can be passed as the dictionary.
