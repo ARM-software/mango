@@ -4,7 +4,8 @@ General usage is to find the optimal hyper-parameters of the classifier
 """
 
 import copy
-from dataclasses import dataclass, field
+from collections.abc import Mapping, Iterable
+from dataclasses import dataclass
 import logging
 import random
 from typing import Callable
@@ -19,7 +20,7 @@ import numpy as np
 # setting warnings to ignore for now
 import warnings
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
 _logger = logging.getLogger(__name__)
 
@@ -29,14 +30,14 @@ class Tuner:
     class Config:
         domain_size: int = None
         initial_random: int = 2
-        initial_custom: dict = None
+        initial_custom: list = None
         num_iteration: int = 20
         batch_size: int = 1
-        optimizer: str = 'Bayesian'
-        parallel_strategy: str = 'clustering'
+        optimizer: str = "Bayesian"
+        parallel_strategy: str = "clustering"
         surrogate: object = None  # used to test different kernel functions
-        valid_optimizers = ['Bayesian', 'Random']
-        valid_parallel_strategies = ['penalty', 'clustering']
+        valid_optimizers = ["Bayesian", "Random"]
+        valid_parallel_strategies = ["penalty", "clustering"]
         alpha: float = 2.0
         exploration: float = 1.0
         exploration_decay: float = 0.9
@@ -47,26 +48,29 @@ class Tuner:
 
         def __post_init__(self):
             if self.optimizer not in self.valid_optimizers:
-                raise ValueError(f'optimizer: {self.optimizer} is not valid, should be one of {self.valid_optimizers}')
+                raise ValueError(
+                    f"optimizer: {self.optimizer} is not valid, should be one of {self.valid_optimizers}"
+                )
             if self.parallel_strategy not in self.valid_parallel_strategies:
                 raise ValueError(
-                    f'parallel strategy: {self.parallel_strategy} is not valid, should be one of {self.valid_parallel_strategies}')
+                    f"parallel strategy: {self.parallel_strategy} is not valid, should be one of {self.valid_parallel_strategies}"
+                )
 
         @property
         def is_bayesian(self):
-            return self.optimizer == 'Bayesian'
+            return self.optimizer == "Bayesian"
 
         @property
         def is_random(self):
-            return self.optimizer == 'Random'
+            return self.optimizer == "Random"
 
         @property
         def strategy_is_penalty(self):
-            return self.parallel_strategy == 'penalty'
+            return self.parallel_strategy == "penalty"
 
         @property
         def strategy_is_clustering(self):
-            return self.parallel_strategy == 'clustering'
+            return self.parallel_strategy == "clustering"
 
         def early_stop(self, results):
             if self.early_stopping is None:
@@ -90,13 +94,13 @@ class Tuner:
             self.config.domain_size = self.calculateDomainSize(self.param_dict)
 
         # overwrite batch size if given as a property of objective function
-        if hasattr(objective, 'batch_size'):
+        if hasattr(objective, "batch_size"):
             self.config.batch_size = objective.batch_size
 
         # save domain size
-        self.ds = domain_space(self.param_dict,
-                               self.config.domain_size,
-                               constraint=self.config.constraint)
+        self.ds = domain_space(
+            self.param_dict, self.config.domain_size, constraint=self.config.constraint
+        )
 
         # stores the results of using the tuner
         self.results = dict()
@@ -104,8 +108,8 @@ class Tuner:
     @staticmethod
     def calculateDomainSize(param_dict):
         """
-           Calculating the domain size to be explored for finding
-           optimum of bayesian optimizer
+        Calculating the domain size to be explored for finding
+        optimum of bayesian optimizer
         """
         # Minimum and maximum domain size
         domain_min = 50000
@@ -155,11 +159,26 @@ class Tuner:
         self.maximize_objective = False
         return self.run()
 
+    def process_initial_custom(self):
+        init_values = self.config.initial_custom
+
+        if all(isinstance(v, Mapping) for v in init_values):
+            X_tried = copy.deepcopy(init_values)
+            X_list, Y_list = self.runUserObjective(X_tried)
+            return X_list, Y_list, X_tried
+        elif all(isinstance(v, tuple) and len(v) == 2 for v in init_values):
+            X_list = copy.deepcopy([v[0] for v in init_values])
+            Y_list = np.array([v[1] for v in init_values])
+            return X_list, Y_list, X_list
+        else:
+            raise TypeError(
+                f"Elements of initial_custom param should be either a dict of params or tuple (params, y),"
+                f" got: {[type(v).__name__ for v in init_values]}"
+            )
 
     def run_initial(self):
         if self.config.initial_custom is not None:
-            X_tried = copy.deepcopy(self.config.initial_custom)
-            X_list, Y_list = self.runUserObjective(X_tried)
+            return self.process_initial_custom()
         else:
             # getting first few random values
             X_tried = self.ds.get_random_sample(self.config.initial_random)
@@ -168,7 +187,9 @@ class Tuner:
             # in case initial random results are invalid try different samples
             n_tries = 1
             while len(Y_list) < self.config.initial_random and n_tries < 3:
-                X_tried2 = self.ds.get_random_sample(self.config.initial_random - len(Y_list))
+                X_tried2 = self.ds.get_random_sample(
+                    self.config.initial_random - len(Y_list)
+                )
                 X_list2, Y_list2 = self.runUserObjective(X_tried2)
                 X_tried2.extend(X_tried2)
                 X_list = np.append(X_list, X_list2)
@@ -176,7 +197,9 @@ class Tuner:
                 n_tries += 1
 
             if len(Y_list) == 0:
-                raise ValueError("No valid configuration found to initiate the Bayesian Optimizer")
+                raise ValueError(
+                    "No valid configuration found to initiate the Bayesian Optimizer"
+                )
         return X_list, Y_list, X_tried
 
     def runBayesianOptimizer(self):
@@ -184,18 +207,19 @@ class Tuner:
 
         X_list, Y_list, X_tried = self.run_initial()
 
-
         # evaluated hyper parameters are used
         X_init = self.ds.convert_GP_space(X_list)
         Y_init = Y_list.reshape(len(Y_list), 1)
 
         # setting the initial random hyper parameters tried
-        results['random_params'] = X_list
-        results['random_params_objective'] = Y_list
+        results["random_params"] = X_list
+        results["random_params_objective"] = Y_list
 
-        Optimizer = BayesianLearning(surrogate=self.config.surrogate,
-                                     alpha=self.config.alpha,
-                                     domain_size=self.config.domain_size)
+        Optimizer = BayesianLearning(
+            surrogate=self.config.surrogate,
+            alpha=self.config.alpha,
+            domain_size=self.config.domain_size,
+        )
 
         X_sample = X_init
         Y_sample = Y_init
@@ -220,18 +244,23 @@ class Tuner:
                 X_next_batch = self.ds.convert_GP_space(random_parameters)
 
                 if self.config.exploration > self.config.exploration_min:
-                    self.config.exploration = self.config.exploration * self.config.exploration_decay
+                    self.config.exploration = (
+                        self.config.exploration * self.config.exploration_decay
+                    )
 
             elif self.config.strategy_is_penalty:
-                X_next_batch = Optimizer.get_next_batch(X_sample, Y_sample, X_domain_np,
-                                                        batch_size=self.config.batch_size)
+                X_next_batch = Optimizer.get_next_batch(
+                    X_sample, Y_sample, X_domain_np, batch_size=self.config.batch_size
+                )
             elif self.config.strategy_is_clustering:
-                X_next_batch = Optimizer.get_next_batch_clustering(X_sample, Y_sample, X_domain_np,
-                                                                   batch_size=self.config.batch_size)
+                X_next_batch = Optimizer.get_next_batch_clustering(
+                    X_sample, Y_sample, X_domain_np, batch_size=self.config.batch_size
+                )
             else:
                 # assume penalty approach
-                X_next_batch = Optimizer.get_next_batch(X_sample, Y_sample, X_domain_np,
-                                                        batch_size=self.config.batch_size)
+                X_next_batch = Optimizer.get_next_batch(
+                    X_sample, Y_sample, X_domain_np, batch_size=self.config.batch_size
+                )
 
             # Scheduler
             X_next_PS = self.ds.convert_PS_space(X_next_batch)
@@ -259,8 +288,12 @@ class Tuner:
 
             # update the bookeeping of values tried
             hyper_parameters_tried = np.append(hyper_parameters_tried, X_next_list)
-            objective_function_values = np.append(objective_function_values, Y_next_list)
-            surrogate_values = np.append(surrogate_values, Optimizer.surrogate.predict(X_next_batch))
+            objective_function_values = np.append(
+                objective_function_values, Y_next_list
+            )
+            surrogate_values = np.append(
+                surrogate_values, Optimizer.surrogate.predict(X_next_batch)
+            )
 
             # Appending to the current samples
             X_sample = np.vstack((X_sample, X_next_batch))
@@ -271,21 +304,23 @@ class Tuner:
                 domain_list = self.ds.get_domain()
                 X_domain_np = self.ds.convert_GP_space(domain_list)
 
-            results['params_tried'] = hyper_parameters_tried
-            results['objective_values'] = objective_function_values
-            results['surrogate_values'] = surrogate_values
+            results["params_tried"] = hyper_parameters_tried
+            results["objective_values"] = objective_function_values
+            results["surrogate_values"] = surrogate_values
 
-            results['best_objective'] = np.max(results['objective_values'])
-            results['best_params'] = results['params_tried'][np.argmax(results['objective_values'])]
+            results["best_objective"] = np.max(results["objective_values"])
+            results["best_params"] = results["params_tried"][
+                np.argmax(results["objective_values"])
+            ]
             if self.maximize_objective is False:
-                results['objective_values'] = -1 * results['objective_values']
-                results['best_objective'] = -1 * results['best_objective']
+                results["objective_values"] = -1 * results["objective_values"]
+                results["best_objective"] = -1 * results["best_objective"]
 
-            pbar.set_description("Best score: %s" % results['best_objective'])
+            pbar.set_description("Best score: %s" % results["best_objective"])
 
             # check if early stop criteria has been met
             if self.config.early_stop(results):
-                _logger.info('Early stopping criteria satisfied')
+                _logger.info("Early stopping criteria satisfied")
                 break
 
         # saving the optimizer and ds in the tuner object which can save the surrogate function and ds details
@@ -307,26 +342,28 @@ class Tuner:
         pbar = tqdm(range(0, len(random_hyper_parameters), batch_size))
         for idx in pbar:
             # getting batch by batch random values to try
-            batch_hyper_parameters = random_hyper_parameters[idx:idx + batch_size]
+            batch_hyper_parameters = random_hyper_parameters[idx : idx + batch_size]
             X_list, Y_list = self.runUserObjective(batch_hyper_parameters)
 
             X_sample_list = np.append(X_sample_list, X_list)
             Y_sample_list = np.append(Y_sample_list, Y_list)
 
-            results['params_tried'] = X_sample_list
-            results['objective_values'] = Y_sample_list
+            results["params_tried"] = X_sample_list
+            results["objective_values"] = Y_sample_list
 
-            results['best_objective'] = np.max(results['objective_values'])
-            results['best_params'] = results['params_tried'][np.argmax(results['objective_values'])]
+            results["best_objective"] = np.max(results["objective_values"])
+            results["best_params"] = results["params_tried"][
+                np.argmax(results["objective_values"])
+            ]
             if self.maximize_objective is False:
-                results['objective_values'] = -1 * results['objective_values']
-                results['best_objective'] = -1 * results['best_objective']
+                results["objective_values"] = -1 * results["objective_values"]
+                results["best_objective"] = -1 * results["best_objective"]
 
-            pbar.set_description("Best score: %s" % results['best_objective'])
+            pbar.set_description("Best score: %s" % results["best_objective"])
 
             # check if early stop criteria has been met
             if self.config.early_stop(results):
-                _logger.info('Early stopping criteria satisfied')
+                _logger.info("Early stopping criteria satisfied")
                 break
 
         return results
