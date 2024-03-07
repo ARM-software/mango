@@ -2,8 +2,7 @@
 Define the domain space abstractions for the Optimizer
 """
 
-# this is used to check whether the domain space object is a of type rv_frozen.
-# if the parameter type is a disribution or rv_frozen, the parameter sampler can handle it
+import math
 from scipy.stats._distn_infrastructure import rv_frozen
 import numpy as np
 from collections.abc import Iterable, Callable
@@ -47,11 +46,17 @@ class domain_space:
 
         samples = []
         n_tries = 0
+        factor = 2.0
         while len(samples) < size and n_tries < self.constraint_max_tries:
-            _samples = self._get_random_sample(size * 100)
-            _filters = self.constraint(_samples)
-            _samples = list(compress(_samples, _filters))
-            samples += _samples
+            n_samples = math.ceil((size - len(samples)) * factor)
+            raw_samples = self._get_random_sample(n_samples)
+            _filters = self.constraint(raw_samples)
+            filtered_samples = list(compress(raw_samples, _filters))
+            if len(filtered_samples) == 0:
+                factor *= 10
+            else:
+                factor = max(len(raw_samples) / len(filtered_samples), 1.0)
+            samples += filtered_samples
             n_tries += 1
         if len(samples) < size:
             warnings.warn(
