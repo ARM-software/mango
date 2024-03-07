@@ -11,16 +11,18 @@ class BatchParameterSampler:
 
     def __init__(self, param_distribution, n_iter, *, random_state=None):
         if not isinstance(param_distribution, (Mapping)):
-            raise TypeError('Parameter distribution is not a dict or '
-                            '({!r})'.format(param_distribution))
+            raise TypeError(
+                "Parameter distribution is not a dict or "
+                "({!r})".format(param_distribution)
+            )
 
         dist = param_distribution
         for key in dist:
-            if (not isinstance(dist[key], Iterable)
-                    and not hasattr(dist[key], 'rvs')):
-                raise TypeError('Parameter value is not iterable '
-                                'or distribution (key={!r}, value={!r})'
-                                .format(key, dist[key]))
+            if not isinstance(dist[key], Iterable) and not hasattr(dist[key], "rvs"):
+                raise TypeError(
+                    "Parameter value is not iterable "
+                    "or distribution (key={!r}, value={!r})".format(key, dist[key])
+                )
         self.n_iter = n_iter
         self.random_state = random_state
         self.dist = param_distribution
@@ -41,13 +43,13 @@ class BatchParameterSampler:
 
             if grid_size < n_iter:
                 warnings.warn(
-                    'The total space of parameters %d is smaller '
-                    'than n_iter=%d. Running %d iterations. For exhaustive '
-                    'searches, use GridSearchCV.'
-                    % (grid_size, self.n_iter, grid_size), UserWarning)
+                    "The total space of parameters %d is smaller "
+                    "than n_iter=%d. Running %d iterations. For exhaustive "
+                    "searches, use GridSearchCV." % (grid_size, self.n_iter, grid_size),
+                    UserWarning,
+                )
                 n_iter = grid_size
-            for i in sample_without_replacement(grid_size, n_iter,
-                                                random_state=rng):
+            for i in sample_without_replacement(grid_size, n_iter, random_state=rng):
                 yield param_grid[i]
 
         else:
@@ -74,4 +76,3 @@ class BatchParameterSampler:
             return min(self.n_iter, grid_size)
         else:
             return self.n_iter
-
