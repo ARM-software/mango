@@ -169,6 +169,8 @@ class Tuner:
         elif all(isinstance(v, tuple) and len(v) == 2 for v in init_values):
             X_list = copy.deepcopy([v[0] for v in init_values])
             Y_list = np.array([v[1] for v in init_values])
+            if self.maximize_objective is False:
+                Y_list = -1 * Y_list
             return X_list, Y_list, X_list
         else:
             raise TypeError(
