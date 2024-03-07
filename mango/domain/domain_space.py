@@ -13,19 +13,21 @@ from itertools import compress
 from .batch_parameter_sampler import BatchParameterSampler
 
 
-class domain_space():
+class domain_space:
     """
-     initializer
-     1) We expect a parameter dictionary as an input from which we will creating a mapping.
-     2) The mapping is storing the categorical variables or discrete variables along with the discrete possible values
-     3) The categorical variables are handeled as one hot encoding values
+    initializer
+    1) We expect a parameter dictionary as an input from which we will creating a mapping.
+    2) The mapping is storing the categorical variables or discrete variables along with the discrete possible values
+    3) The categorical variables are handeled as one hot encoding values
     """
 
-    def __init__(self,
-                 param_dict,
-                 domain_size,
-                 constraint: Callable = None,
-                 constraint_max_retries: int = 10):
+    def __init__(
+        self,
+        param_dict,
+        domain_size,
+        constraint: Callable = None,
+        constraint_max_retries: int = 10,
+    ):
         self.param_dict = param_dict
 
         # the domain size to explore using the parameter sampler
@@ -35,7 +37,6 @@ class domain_space():
 
         # creating a mapping of categorical variables
         self.create_mappings()
-
 
     def get_domain(self):
         return self.get_random_sample(self.domain_size)
@@ -47,17 +48,18 @@ class domain_space():
         samples = []
         n_tries = 0
         while len(samples) < size and n_tries < self.constraint_max_tries:
-            _samples = self._get_random_sample(size)
+            _samples = self._get_random_sample(size * 100)
             _filters = self.constraint(_samples)
             _samples = list(compress(_samples, _filters))
             samples += _samples
             n_tries += 1
         if len(samples) < size:
             warnings.warn(
-                f'Could not get {size} samples that satisfy the constraint'
-                f'even after {n_tries * size} random samples ', UserWarning)
+                f"Could not get {size} samples that satisfy the constraint"
+                f"even after {n_tries * size} random samples ",
+                UserWarning,
+            )
         return samples[:size]
-
 
     def _get_random_sample(self, size):
         domain_list = list(BatchParameterSampler(self.param_dict, n_iter=size))
@@ -91,8 +93,9 @@ class domain_space():
                 # for list with all int we are considering it as non-categorical
                 try:
                     # this check takes care of numpy ints as well
-                    all_int = all(x == int(x) and type(x) != bool
-                                  for x in param_dict[par])
+                    all_int = all(
+                        x == int(x) and type(x) != bool for x in param_dict[par]
+                    )
                 except (ValueError, TypeError):
                     all_int = False
 
@@ -105,7 +108,6 @@ class domain_space():
 
         self.mapping_categorical = mapping_categorical
         self.mapping_int = mapping_int
-
 
     """
     convert the hyperparameters from the param_dict space to the GP space, by converting the
@@ -185,7 +187,7 @@ class domain_space():
                 elif par in mapping_categorical:
                     size = len(mapping_categorical[par])  # total number of categories.
 
-                    one_hot_encoded = curr_x_gp[index:index + size]
+                    one_hot_encoded = curr_x_gp[index : index + size]
                     category_type = np.argmax(one_hot_encoded)
 
                     category_type = mapping_categorical[par][category_type]
