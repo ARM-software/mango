@@ -193,9 +193,9 @@ class Tuner:
                     self.config.initial_random - len(Y_list)
                 )
                 X_list2, Y_list2 = self.runUserObjective(X_tried2)
-                X_tried2.extend(X_tried2)
-                X_list = np.append(X_list, X_list2)
-                Y_list = np.append(Y_list, Y_list2)
+                X_tried = np.append(X_tried, X_tried2, axis=0)
+                X_list = np.append(X_list, X_list2, axis=0)
+                Y_list = np.append(Y_list, Y_list2, axis=0)
                 n_tries += 1
 
             if len(Y_list) == 0:
@@ -269,14 +269,25 @@ class Tuner:
 
             # if all the xs have failed before, replace them with random sample
             # as we will not get any new information otherwise
-            if all(x in x_failed_evaluations for x in X_next_PS):
+            if np.all(
+                [
+                    any(np.array_equal(x, y) for y in x_failed_evaluations)
+                    for x in X_next_PS
+                ]
+            ):
                 X_next_PS = self.ds.get_random_sample(self.config.batch_size)
 
             # Evaluate the Objective function
             X_next_list, Y_next_list = self.runUserObjective(X_next_PS)
 
             # keep track of all parameters that failed
-            x_failed = [x for x in X_next_PS if x not in X_next_list]
+            x_failed = [
+                x
+                for x in X_next_PS
+                if not np.any(
+                    np.array_equal(np.ravel(x), np.ravel(y)) for y in X_next_list
+                )
+            ]
             x_failed_evaluations = np.append(x_failed_evaluations, x_failed)
 
             if len(Y_next_list) == 0:
@@ -289,12 +300,17 @@ class Tuner:
             X_next_batch = self.ds.convert_GP_space(X_next_list)
 
             # update the bookeeping of values tried
-            hyper_parameters_tried = np.append(hyper_parameters_tried, X_next_list)
-            objective_function_values = np.append(
-                objective_function_values, Y_next_list
+            hyper_parameters_tried = np.append(
+                hyper_parameters_tried, X_next_list, axis=0
             )
+            objective_function_values = np.append(
+                objective_function_values, Y_next_list, axis=0
+            )
+            X_next_batch_flattened = np.array([np.hstack(row) for row in X_next_batch])
+            prediction = Optimizer.predict(X_next_batch_flattened)
             surrogate_values = np.append(
-                surrogate_values, Optimizer.surrogate.predict(X_next_batch)
+                surrogate_values,
+                prediction,
             )
 
             # Appending to the current samples
@@ -347,8 +363,8 @@ class Tuner:
             batch_hyper_parameters = random_hyper_parameters[idx : idx + batch_size]
             X_list, Y_list = self.runUserObjective(batch_hyper_parameters)
 
-            X_sample_list = np.append(X_sample_list, X_list)
-            Y_sample_list = np.append(Y_sample_list, Y_list)
+            X_sample_list = np.append(X_sample_list, X_list, axis=0)
+            Y_sample_list = np.append(Y_sample_list, Y_list, axis=0)
 
             results["params_tried"] = X_sample_list
             results["objective_values"] = Y_sample_list

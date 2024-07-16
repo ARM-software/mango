@@ -151,7 +151,7 @@ class domain_space:
 
             X.append(curr_x)
 
-        X = np.array(X)
+        X = np.array(X, dtype=object)
 
         return X
 

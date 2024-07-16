@@ -1,10 +1,14 @@
+import logging
 import numpy as np
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import Matern
 import math
 from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
 
 from .base_predictor import BasePredictor
+
+_logger = logging.getLogger(__name__)
 
 """
 Bayesian Learning optimizer
@@ -17,6 +21,7 @@ class BayesianLearning(BasePredictor):
     def __init__(self, surrogate=None, alpha=None, domain_size=1000):
         # initialzing some of the default values
         # The default surrogate function is gaussian_process with matern kernel
+        self.scaler = StandardScaler()
         if surrogate is None:
             self.surrogate = GaussianProcessRegressor(
                 kernel=Matern(nu=2.5),
@@ -41,7 +46,7 @@ class BayesianLearning(BasePredictor):
         """
         Check if the returned index value is already present in X_Sample
         """
-        mu, sigma = self.surrogate.predict(X, return_std=True)
+        mu, sigma = self.predict(X, return_std=True)
         mu = mu.reshape(mu.shape[0], 1)
         sigma = sigma.reshape(sigma.shape[0], 1)
 
@@ -84,7 +89,7 @@ class BayesianLearning(BasePredictor):
         """
         Returns the acqutition function
         """
-        mu, sigma = self.surrogate.predict(X, return_std=True)
+        mu, sigma = self.predict(X, return_std=True)
         mu = mu.reshape(mu.shape[0], 1)
         sigma = sigma.reshape(sigma.shape[0], 1)
 
@@ -176,8 +181,16 @@ class BayesianLearning(BasePredictor):
         # check if x_optimal is close to X_Sample
         tolerance = 1e-3
 
+        # Flatten x_optimal if it contains nested arrays
+        x_optimal_flat = np.array([np.hstack(row) for row in x_optimal])
+
         for i in range(X_Sample.shape[0]):
-            diff = np.sum(np.absolute(X_Sample[i] - x_optimal))
+            # Flatten the current sample if it contains nested arrays
+            X_Sample_flat = np.array([np.hstack(row) for row in X_Sample[i]])
+
+            # Calculate the difference
+            diff = np.sum(np.absolute(X_Sample_flat - x_optimal_flat))
+
             if diff < tolerance:
                 # print('Removed Duplicate')
                 return True
@@ -198,7 +211,7 @@ class BayesianLearning(BasePredictor):
 
         for idx in range(batch_size):
             self.iteration_count = self.iteration_count + 1
-            self.surrogate.fit(X_temp, Y_temp)
+            self.fit(X_temp, Y_temp)
 
             X_next, u_value = self.Upper_Confidence_Bound_Remove_Duplicates(
                 X_tries, X_temp, idx
@@ -224,20 +237,25 @@ class BayesianLearning(BasePredictor):
         X_temp = X
         Y_temp = Y
 
-        self.surrogate.fit(X_temp, Y_temp)
+        X_temp_flatten = np.array([np.hstack(row) for row in X_temp])
+        X_tries_flatten = np.array([np.hstack(row) for row in X_tries])
+
+        self.fit(X_temp_flatten, Y_temp)
         self.iteration_count = self.iteration_count + 1
 
-        Acquition = self.Get_Upper_Confidence_Bound(X_tries)
+        Acquition = self.Get_Upper_Confidence_Bound(X_tries_flatten)
 
         if batch_size > 1:
             gen = sorted(zip(Acquition, X_tries), key=lambda x: -x[0])
             x_best_acq_value, x_best_acq_domain = (
                 np.array(t)[: len(Acquition) // 4] for t in zip(*gen)
             )
-
+            x_best_acq_domain_flat = np.array(
+                [np.hstack(row) for row in x_best_acq_domain]
+            )
             # Do the domain space based clustering on the best points
             kmeans = KMeans(n_clusters=batch_size, random_state=0).fit(
-                x_best_acq_domain
+                x_best_acq_domain_flat
             )
             cluster_pred_domain = kmeans.labels_.reshape(kmeans.labels_.shape[0])
 
@@ -312,7 +330,7 @@ class BayesianLearning(BasePredictor):
     def Upper_Confidence_Bound_Remove_Duplicates_MetaTuner(
         self, X, X_Sample, batch_size, exploration_factor_tuner, Optimizer_iteration
     ):
-        mu, sigma = self.surrogate.predict(X, return_std=True)
+        mu, sigma = self.predict(X, return_std=True)
         mu = mu.reshape(mu.shape[0], 1)
 
         sigma = sigma.reshape(sigma.shape[0], 1)
@@ -385,7 +403,7 @@ class BayesianLearning(BasePredictor):
             #                 print('Doing fit of surrogate:',classifier_index)
 
             try:
-                self.surrogate.fit(X_temp, Y_temp)
+                self.fit(X_temp, Y_temp)
 
             except:
                 print("*" * 100)
@@ -424,13 +442,16 @@ class BayesianLearning(BasePredictor):
     along with the variance
     """
 
-    def predict(self, X):
-        pred_y, sigma = self.surrogate.predict(X, return_std=True)
-        return pred_y, sigma
+    def predict(self, X, **kwargs):
+        self.scaler.partial_fit(X)
+        X_scaled = self.scaler.transform(X)
+        return self.surrogate.predict(X_scaled, **kwargs)
 
     """
     fit the optimizer on the X and Y values
     """
 
     def fit(self, X, Y):
-        self.surrogate.fit(X, Y)
+        self.scaler.partial_fit(X)
+        X_scaled = self.scaler.transform(X)
+        self.surrogate.fit(X_scaled, Y)
