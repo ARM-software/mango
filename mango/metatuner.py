@@ -6,9 +6,9 @@ ToDo: Improve code with better config management and remove hardcoded parameters
 """
 
 from dataclasses import dataclass
-from mango.domain.domain_space import domain_space
+from mango.domain.domain_space import DomainSpace
+from mango.domain.parameter_sampler import ParameterSampler
 from mango.optimizer.bayesian_learning import BayesianLearning
-from scipy.stats._distn_infrastructure import rv_frozen
 import numpy as np
 from tqdm.auto import tqdm
 import random
@@ -77,43 +77,6 @@ class MetaTuner:
         self.results = self.runExponentialTuner()
         return self.results
 
-    @staticmethod
-    def calculateDomainSize(param_dict):
-        """
-        Calculating the domain size to be explored for finding
-        optimum of bayesian optimizer
-        """
-        # Minimum and maximum domain size
-        domain_min = 5000
-        domain_max = 30000
-
-        domain_size = 1
-
-        for par in param_dict:
-            if isinstance(param_dict[par], rv_frozen):
-                distrib = param_dict[par]
-                loc, scale = distrib.args
-                min_scale = 1
-                scale = int(scale)
-                if scale < min_scale:
-                    scale = min_scale
-
-                domain_size = domain_size * scale * 50
-
-            elif isinstance(param_dict[par], range):
-                domain_size = domain_size * len(param_dict[par])
-
-            elif isinstance(param_dict[par], list):
-                domain_size = domain_size * len(param_dict[par])
-
-        if domain_size < domain_min:
-            domain_size = domain_min
-
-        if domain_size > domain_max:
-            domain_size = domain_max
-
-        return domain_size
-
     # return the max value of Y from current evaluations
     def get_max_y_value(self, Y_dict_array):
         values = Y_dict_array[0]
@@ -155,8 +118,8 @@ class MetaTuner:
 
         ds = []
         for i in self.param_dict_list:
-            domain_size = self.calculateDomainSize(i)
-            ds.append(domain_space(i, domain_size))
+            param_sampler = ParameterSampler(i)
+            ds.append(DomainSpace(param_sampler))
 
         # dict of list for each obj function
         X_dict_list = {}

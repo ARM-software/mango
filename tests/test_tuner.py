@@ -6,42 +6,45 @@ Testing the capabilities of Mango
 - Test the results of tuner for simple objective function
 $  python -m pytest tests/ --disable-warnings
 """
+
 import math
 import time
 from pytest import approx
 import numpy as np
 
-from mango.domain.domain_space import domain_space
+from mango.domain.domain_space import DomainSpace
+from mango.domain.parameter_sampler import ParameterSampler
 from mango import Tuner, scheduler
 from scipy.stats import uniform
 
 # Simple param_dict
-param_dict = {"a": uniform(0, 1),  # uniform distribution
-              "b": range(1, 5),  # Integer variable
-              "c": [1, 2],  # Integer variable
-              "d": ["-1", "1"]  # Categorical variable
-              }
+param_dict = {
+    "a": uniform(0, 1),  # uniform distribution
+    "b": range(1, 5),  # Integer variable
+    "c": [1, 2],  # Integer variable
+    "d": ["-1", "1"],  # Categorical variable
+}
 
 
 # Simple objective function
 def objectiveFunction(args_list):
     results = []
     for hyper_par in args_list:
-        a = hyper_par['a']
-        b = hyper_par['b']
-        c = hyper_par['c']
-        d = hyper_par['d']
-        result = (a + b + c + int(d))
+        a = hyper_par["a"]
+        b = hyper_par["b"]
+        c = hyper_par["c"]
+        d = hyper_par["d"]
+        result = a + b + c + int(d)
         results.append(result)
     return results
 
 
-domain_size = 10
-
-
 # test the functionality of domain space transformations
 def test_domain():
-    ds = domain_space(param_dict, domain_size)
+    domain_size = 10
+    sampler = ParameterSampler(param_dict)
+    sampler.domain_size = domain_size
+    ds = DomainSpace(sampler)
 
     # getting the samples from the domain
     domain_list = ds.get_domain()
@@ -74,8 +77,10 @@ def test_domain():
         for key in l1.keys():
             assert key in param_dict.keys()
 
-    ps = dict(x=range(1, 100), y=['a', 'b'], z=uniform(-10, 20))
-    ds = domain_space(ps, 100)
+    ps = dict(x=range(1, 100), y=["a", "b"], z=uniform(-10, 20))
+    sampler = ParameterSampler(ps)
+    sampler.domain_size = 100
+    ds = DomainSpace(sampler)
 
     x = ds.get_domain()
     x_gp = ds.convert_GP_space(x)
@@ -100,44 +105,46 @@ def test_tuner():
     tuner_user = Tuner(param_dict, objectiveFunction)
     results = tuner_user.run()
     # max objective is 8, and minimum is 1
-    assert results['best_objective'] > 1
+    assert results["best_objective"] > 1
 
 
 # test on Rosenbrock's Valley
 # Rosenbrock's valley (a.k.k the banana function) has a global optimimum lying inside a long, narrow parabolic valley with a flat floor
 def test_rosenbrock():
     param_dict = {
-        'x': range(-10, 10),
-        'y': range(-10, 10),
+        "x": range(-10, 10),
+        "y": range(-10, 10),
     }
     a = 1
     b = 100
     x_opt = a
-    y_opt = a ** 2
+    y_opt = a**2
 
     def objfunc(args_list):
         results = []
         for hyper_par in args_list:
-            x = hyper_par['x']
-            y = hyper_par['y']
-            result = -(b * ((y - x ** 2) ** 2) + ((a - x) ** 2))
+            x = hyper_par["x"]
+            y = hyper_par["y"]
+            result = -(b * ((y - x**2) ** 2) + ((a - x) ** 2))
             results.append(result)
         return results
 
-    tuner = Tuner(param_dict, objfunc, conf_dict=dict(domain_size=100000, num_iteration=40))
+    tuner = Tuner(
+        param_dict, objfunc, conf_dict=dict(domain_size=100000, num_iteration=40)
+    )
     results = tuner.run()
 
-    print('best hyper parameters:', results['best_params'])
-    print('best Accuracy:', results['best_objective'])
+    print("best hyper parameters:", results["best_params"])
+    print("best Accuracy:", results["best_objective"])
 
-    assert abs(results['best_params']['x'] - x_opt) <= 2
-    assert abs(results['best_params']['x'] - y_opt) <= 2
+    assert abs(results["best_params"]["x"] - x_opt) <= 2
+    assert abs(results["best_params"]["x"] - y_opt) <= 2
 
 
 def test_config():
     param_dict = {
-        'x': range(-10, 10),
-        'y': range(-10, 10),
+        "x": range(-10, 10),
+        "y": range(-10, 10),
     }
 
     x_opt = 0
@@ -146,25 +153,25 @@ def test_config():
     def objfunc(args_list):
         results = []
         for hyper_par in args_list:
-            x = hyper_par['x']
-            y = hyper_par['y']
-            result = (x ** 2 + y ** 2) / 1e4
+            x = hyper_par["x"]
+            y = hyper_par["y"]
+            result = (x**2 + y**2) / 1e4
             results.append(result)
         return results
 
     def check(results, error_msg):
-        assert abs(results['best_params']['x'] - x_opt) <= 3, error_msg
-        assert abs(results['best_params']['y'] - y_opt) <= 3, error_msg
+        assert abs(results["best_params"]["x"] - x_opt) <= 3, error_msg
+        assert abs(results["best_params"]["y"] - y_opt) <= 3, error_msg
 
-    tuner = Tuner(param_dict, objfunc, conf_dict=dict(optimizer='Random'))
+    tuner = Tuner(param_dict, objfunc, conf_dict=dict(optimizer="Random"))
     results = tuner.minimize()
-    check(results, 'error while minimizing random')
+    check(results, "error while minimizing random")
 
 
 def test_convex():
     param_dict = {
-        'x': range(-100, 10),
-        'y': range(-10, 20),
+        "x": range(-100, 10),
+        "y": range(-10, 20),
     }
 
     x_opt = 0
@@ -173,26 +180,26 @@ def test_convex():
     def objfunc(args_list):
         results = []
         for hyper_par in args_list:
-            x = hyper_par['x']
-            y = hyper_par['y']
-            result = (x ** 2 + y ** 2) / 1e4
+            x = hyper_par["x"]
+            y = hyper_par["y"]
+            result = (x**2 + y**2) / 1e4
             results.append(result)
         return results
 
     tuner = Tuner(param_dict, objfunc)
     results = tuner.minimize()
 
-    print('best hyper parameters:', results['best_params'])
-    print('best Accuracy:', results['best_objective'])
+    print("best hyper parameters:", results["best_params"])
+    print("best Accuracy:", results["best_objective"])
 
-    assert abs(results['best_params']['x'] - x_opt) <= 3
-    assert abs(results['best_params']['y'] - y_opt) <= 3
+    assert abs(results["best_params"]["x"] - x_opt) <= 3
+    assert abs(results["best_params"]["y"] - y_opt) <= 3
 
 
 def test_initial_custom():
     param_dict = {
-        'x': range(-100, 10),
-        'y': range(-10, 20),
+        "x": range(-100, 10),
+        "y": range(-10, 20),
     }
 
     x_opt = 0
@@ -201,31 +208,28 @@ def test_initial_custom():
     def objfunc(args_list):
         results = []
         for hyper_par in args_list:
-            x = hyper_par['x']
-            y = hyper_par['y']
-            result = (x ** 2 + y ** 2) / 1e4
+            x = hyper_par["x"]
+            y = hyper_par["y"]
+            result = (x**2 + y**2) / 1e4
             results.append(result)
         return results
 
-    config = dict(initial_custom=[dict(x=-100, y=20),
-                                 dict(x=10, y=20)]
-                 )
+    config = dict(initial_custom=[dict(x=-100, y=20), dict(x=10, y=20)])
 
     tuner = Tuner(param_dict, objfunc, conf_dict=config)
     results = tuner.minimize()
 
-    print('best hyper parameters:', results['best_params'])
-    print('best Accuracy:', results['best_objective'])
+    print("best hyper parameters:", results["best_params"])
+    print("best Accuracy:", results["best_objective"])
 
-    assert abs(results['best_params']['x'] - x_opt) <= 3
-    assert abs(results['best_params']['y'] - y_opt) <= 3
-    assert results['random_params'][0] == config['initial_custom'][0]
-    assert results['random_params'][1] == config['initial_custom'][1]
+    assert abs(results["best_params"]["x"] - x_opt) <= 3
+    assert abs(results["best_params"]["y"] - y_opt) <= 3
+    assert results["random_params"][0] == config["initial_custom"][0]
+    assert results["random_params"][1] == config["initial_custom"][1]
 
 
 def test_local_scheduler():
-    param_space = dict(x=range(-10, 10),
-                       y=range(-10, 10))
+    param_space = dict(x=range(-10, 10), y=range(-10, 10))
 
     @scheduler.serial
     def obj(x, y):
@@ -233,8 +237,8 @@ def test_local_scheduler():
 
     results = Tuner(param_space, obj).maximize()
 
-    assert abs(results['best_params']['x'] - 10) <= 3
-    assert abs(results['best_params']['y'] + 10) <= 3
+    assert abs(results["best_params"]["x"] - 10) <= 3
+    assert abs(results["best_params"]["y"] + 10) <= 3
 
     @scheduler.parallel(n_jobs=-1)
     def obj(x, y):
@@ -242,8 +246,8 @@ def test_local_scheduler():
 
     results = Tuner(param_space, obj).maximize()
 
-    assert abs(results['best_params']['x'] - 10) <= 3
-    assert abs(results['best_params']['y'] + 10) <= 3
+    assert abs(results["best_params"]["x"] - 10) <= 3
+    assert abs(results["best_params"]["y"] + 10) <= 3
 
     @scheduler.parallel(n_jobs=2)
     def obj(x, y):
@@ -251,8 +255,8 @@ def test_local_scheduler():
 
     results = Tuner(param_space, obj).maximize()
 
-    assert abs(results['best_params']['x'] - 10) <= 3
-    assert abs(results['best_params']['y'] + 10) <= 3
+    assert abs(results["best_params"]["x"] - 10) <= 3
+    assert abs(results["best_params"]["y"] + 10) <= 3
 
 
 def test_six_hump():
@@ -263,8 +267,8 @@ def test_six_hump():
         return (4.0 - 2.1 * x2 + (x4 / 3.0)) * x2 + x * y + (-4.0 + 4.0 * y2) * y2
 
     param_dict = {
-        'x': uniform(-3, 3),
-        'y': uniform(-2, 2),
+        "x": uniform(-3, 3),
+        "y": uniform(-2, 2),
     }
 
     x_opt = 0.0898  # or -0;0898
@@ -273,20 +277,20 @@ def test_six_hump():
     def objfunc(args_list):
         results = []
         for hyper_par in args_list:
-            x = hyper_par['x']
-            y = hyper_par['y']
-            result = - camel(x, y)
+            x = hyper_par["x"]
+            y = hyper_par["y"]
+            result = -camel(x, y)
             results.append(result)
         return results
 
     tuner = Tuner(param_dict, objfunc)
     results = tuner.run()
 
-    print('best hyper parameters:', results['best_params'])
-    print('best objective:', results['best_objective'])
+    print("best hyper parameters:", results["best_params"])
+    print("best objective:", results["best_objective"])
 
-    assert abs(results['best_params']['x']) - abs(x_opt) <= 0.1
-    assert abs(results['best_params']['y']) - abs(y_opt) <= 0.2
+    assert abs(results["best_params"]["x"]) - abs(x_opt) <= 0.1
+    assert abs(results["best_params"]["y"]) - abs(y_opt) <= 0.2
 
 
 def test_celery_scheduler():
@@ -318,7 +322,7 @@ def test_celery_scheduler():
 
     results = tuner.minimize()
 
-    assert abs(results['best_params']['x']) <= 0.1
+    assert abs(results["best_params"]["x"]) <= 0.1
 
     class MockTask:
 
@@ -340,7 +344,7 @@ def test_celery_scheduler():
     tuner = Tuner(param_space, objective)
     results = tuner.minimize()
 
-    assert abs(results['best_params']['x'] - 5) <= 0.1
+    assert abs(results["best_params"]["x"] - 5) <= 0.1
 
 
 def test_custom_scheduler():
@@ -350,37 +354,44 @@ def test_custom_scheduler():
     @scheduler.custom(n_jobs=2)
     def objective(params):
         assert len(params) == 2
-        return [p['x'] * p['x'] for p in params]
+        return [p["x"] * p["x"] for p in params]
 
     tuner = Tuner(param_space, objective, dict(initial_random=2))
     results = tuner.minimize()
 
-    assert abs(results['best_params']['x'] - 0) <= 0.1
+    assert abs(results["best_params"]["x"] - 0) <= 0.1
 
 
 def test_early_stopping_simple():
     param_dict = dict(x=range(-10, 10))
+
     def objfunc(p_list):
-        return [p['x'] ** 2 for p in p_list]
+        return [p["x"] ** 2 for p in p_list]
 
     def early_stop(results):
-        if len(results['params_tried']) >= 5:
+        if len(results["params_tried"]) >= 5:
             return True
 
     config = dict(num_iteration=20, initial_random=1, early_stopping=early_stop)
 
     tuner = Tuner(param_dict, objfunc, conf_dict=config)
     results = tuner.minimize()
-    assert(len(results['params_tried']) == 5)
+    assert len(results["params_tried"]) == 5
 
-    config = dict(num_iteration=20, initial_random=1, early_stopping=early_stop, optimizer='Random')
+    config = dict(
+        num_iteration=20,
+        initial_random=1,
+        early_stopping=early_stop,
+        optimizer="Random",
+    )
 
     tuner = Tuner(param_dict, objfunc, conf_dict=config)
     results = tuner.minimize()
-    assert (len(results['params_tried']) == 5)
+    assert len(results["params_tried"]) == 5
+
 
 def test_early_stopping_complex():
-    '''testing early stop by time since last improvement'''
+    """testing early stop by time since last improvement"""
     param_dict = dict(x=range(-10, 10))
 
     def objfunc(p_list):
@@ -397,16 +408,20 @@ def test_early_stopping_complex():
     def early_stop(results):
         context = Context
 
-        current_best = results['best_objective']
+        current_best = results["best_objective"]
         current_time = time.time()
         _stop = False
 
         if context.previous_best is None:
             context.previous_best = current_best
             context.previous_best_time = current_time
-        elif (current_best <= context.previous_best + context.objective_variation) and \
-                (current_time - context.previous_best_time > context.min_improvement_secs):
-            print("no improvement in %d seconds: stopping early." % context.min_improvement_secs)
+        elif (current_best <= context.previous_best + context.objective_variation) and (
+            current_time - context.previous_best_time > context.min_improvement_secs
+        ):
+            print(
+                "no improvement in %d seconds: stopping early."
+                % context.min_improvement_secs
+            )
             _stop = True
         else:
             context.previous_best = current_best
@@ -418,23 +433,24 @@ def test_early_stopping_complex():
 
     tuner = Tuner(param_dict, objfunc, conf_dict=config)
     results = tuner.minimize()
-    assert (len(results['params_tried']) == 3)
+    assert len(results["params_tried"]) == 3
 
 
 def test_constrainted_opt():
-    param_dict = {"a": uniform(0, 1),  # uniform distribution
-                  "b": range(1, 5),  # Integer variable
-                  "c": [1, 2, 3],  # Integer variable
-                  "d": ["-1", "1"]  # Categorical variable
-                  }
+    param_dict = {
+        "a": uniform(0, 1),  # uniform distribution
+        "b": range(1, 5),  # Integer variable
+        "c": [1, 2, 3],  # Integer variable
+        "d": ["-1", "1"],  # Categorical variable
+    }
 
     def constraint(samples):
         is_valid = []
         for sample in samples:
-            if sample['a'] < 0.5:
-                v = sample['b'] >= 3
+            if sample["a"] < 0.5:
+                v = sample["b"] >= 3
             else:
-                v = sample['b'] < 3
+                v = sample["b"] < 3
             is_valid.append(v)
 
         return is_valid
@@ -442,22 +458,19 @@ def test_constrainted_opt():
     def objectiveFunction(args_list):
         results = []
         for hyper_par in args_list:
-            a = hyper_par['a']
-            b = hyper_par['b']
-            c = hyper_par['c']
-            d = hyper_par['d']
-            result = (a + b + c + int(d))
+            a = hyper_par["a"]
+            b = hyper_par["b"]
+            c = hyper_par["c"]
+            d = hyper_par["d"]
+            result = a + b + c + int(d)
             results.append(result)
         return results
 
-    config = dict(
-        num_iteration=20,
-        constraint=constraint
-    )
+    config = dict(num_iteration=20, constraint=constraint)
     tuner = Tuner(param_dict, objectiveFunction, config)
 
     results = tuner.maximize()
 
-    assert results['best_objective'] > 8.4
-    assert results['best_params']['b'] == 4
-    assert constraint([results['best_params']])
+    assert results["best_objective"] > 8.4
+    assert results["best_params"]["b"] == 4
+    assert constraint([results["best_params"]])
