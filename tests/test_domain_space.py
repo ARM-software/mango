@@ -2,7 +2,6 @@ import numpy as np
 from scipy.stats import uniform, loguniform
 
 from mango.domain.domain_space import DomainSpace
-from mango.domain.parameter_sampler import ParameterSampler
 from mango.domain.distribution import loguniform as mango_loguniform
 
 
@@ -15,11 +14,10 @@ def test_domain():
         "f": ["1", "-1"],
         "h": [True, False],
     }
-    sampler = ParameterSampler(params)
-    sampler.domain_size = 1000
-    ds = DomainSpace(sampler)
-    assert all(k in sampler.integer_params for k in ["a", "b"])
-    assert all(k in sampler.categorical_params for k in ["d", "e", "f", "h"])
+    ds = DomainSpace(params)
+    ds.domain_size = 1000
+    assert all(k in ds.integer_params for k in ["a", "b"])
+    assert all(k in ds.categorical_params for k in ["d", "e", "f", "h"])
     samples = ds.get_domain()
 
     for sample in samples:
@@ -29,10 +27,9 @@ def test_domain():
     params = {
         "a": [1],
     }
-    sampler = ParameterSampler(params)
-    sampler.domain_size = 1000
-    ds = DomainSpace(sampler)
-    assert all(k in sampler.integer_params for k in ["a"])
+    ds = DomainSpace(params)
+    ds.domain_size = 1000
+    assert all(k in ds.integer_params for k in ["a"])
     samples = ds.get_domain()
 
     for sample in samples:
@@ -42,9 +39,8 @@ def test_domain():
 
 def test_mango_loguniform():
     params = {"a": mango_loguniform(-3, 6)}
-    sampler = ParameterSampler(params)
-    sampler.domain_size = 1000
-    ds = DomainSpace(sampler)
+    ds = DomainSpace(params)
+    ds.domain_size = 1000
     samples = ds.get_domain()
     assert all(1e-3 < sample["a"] < 1e3 for sample in samples)
 
@@ -60,9 +56,8 @@ def test_gp_samples_to_params():
         "h": [10],
     }
 
-    sampler = ParameterSampler(params)
-    sampler.domain_size = 1000
-    ds = DomainSpace(sampler)
+    ds = DomainSpace(params)
+    ds.domain_size = 1000
 
     X = np.array(
         [
@@ -102,9 +97,8 @@ def test_gp_space():
         "i": [True, False],
     }
 
-    sampler = ParameterSampler(params)
-    sampler.domain_size = 10000
-    ds = DomainSpace(sampler)
+    ds = DomainSpace(params)
+    ds.domain_size = 1000
     domain_list = ds.get_domain()
     X = ds.convert_GP_space(domain_list)
 
@@ -112,7 +106,7 @@ def test_gp_space():
     assert (X[:, 1] == 10.0).all()  # b
     assert np.isin(X[:, 2], [1, 2, 3]).all()  # c
     assert np.isin(X[:, 4:7], np.eye(3)).all()  # e
-    assert X.shape == (sampler.domain_size, 12)
+    assert X.shape == (ds.domain_size, 12)
 
     samples = ds.convert_PS_space(X)
 
@@ -142,9 +136,9 @@ def test_constraint():
         p2 = np.array([s["p2"] for s in samples])
         return ((p1 == "a") & (p2 < 0.5)) | ((p1 != "a") & (p2 >= 0.5))
 
-    sampler = ParameterSampler(param_dict)
-    sampler.domain_size = 100
-    ds = DomainSpace(sampler, constraint=constraint)
+    ds = DomainSpace(param_dict, constraint=constraint)
+    ds.domain_size = 100
+
     samples = ds.get_domain()
     assert len(samples) == 100
     assert all(constraint(samples))
@@ -155,9 +149,9 @@ def test_np_space():
         "x": np.array(["a", "b", "c"]),
         "y": np.arange(100),
     }
-    sampler = ParameterSampler(param_dict)
-    sampler.domain_size = 10
-    ds = DomainSpace(sampler)
+    ds = DomainSpace(param_dict)
+    ds.domain_size = 10
+
     params = ds.get_domain()
     assert len(params) == 10
 

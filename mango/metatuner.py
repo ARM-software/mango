@@ -7,7 +7,6 @@ ToDo: Improve code with better config management and remove hardcoded parameters
 
 from dataclasses import dataclass
 from mango.domain.domain_space import DomainSpace
-from mango.domain.parameter_sampler import ParameterSampler
 from mango.optimizer.bayesian_learning import BayesianLearning
 import numpy as np
 from tqdm.auto import tqdm
@@ -118,8 +117,7 @@ class MetaTuner:
 
         ds = []
         for i in self.param_dict_list:
-            param_sampler = ParameterSampler(i)
-            ds.append(DomainSpace(param_sampler))
+            ds.append(DomainSpace(i))
 
         # dict of list for each obj function
         X_dict_list = {}

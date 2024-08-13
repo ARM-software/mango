@@ -13,7 +13,6 @@ from pytest import approx
 import numpy as np
 
 from mango.domain.domain_space import DomainSpace
-from mango.domain.parameter_sampler import ParameterSampler
 from mango import Tuner, scheduler
 from scipy.stats import uniform
 
@@ -42,10 +41,8 @@ def objectiveFunction(args_list):
 # test the functionality of domain space transformations
 def test_domain():
     domain_size = 10
-    sampler = ParameterSampler(param_dict)
-    sampler.domain_size = domain_size
-    ds = DomainSpace(sampler)
-
+    ds = DomainSpace(param_dict)
+    ds.domain_size = domain_size
     # getting the samples from the domain
     domain_list = ds.get_domain()
 
@@ -78,9 +75,8 @@ def test_domain():
             assert key in param_dict.keys()
 
     ps = dict(x=range(1, 100), y=["a", "b"], z=uniform(-10, 20))
-    sampler = ParameterSampler(ps)
-    sampler.domain_size = 100
-    ds = DomainSpace(sampler)
+    ds = DomainSpace(ps)
+    ds.domain_size = 100
 
     x = ds.get_domain()
     x_gp = ds.convert_GP_space(x)

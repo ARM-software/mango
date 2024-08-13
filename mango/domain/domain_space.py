@@ -1,29 +1,57 @@
-"""
-Define the domain space abstractions for the Optimizer
-"""
-
+from collections.abc import Mapping, Iterable
 import math
 import numpy as np
 from collections.abc import Callable
 import warnings
 from itertools import compress
+from functools import cached_property
 
-from .parameter_sampler import AbstractParameterSampler, ParameterSampler
+from scipy.stats._distn_infrastructure import rv_frozen
+
+from mango.domain.parameter_sampler import parameter_sampler
 
 
 class DomainSpace:
     def __init__(
         self,
-        param_sampler: type[AbstractParameterSampler] = ParameterSampler,
+        param_dist: dict,
+        *,
+        param_sampler: Callable = parameter_sampler,
         constraint: Callable = None,
         constraint_max_retries: int = 10,
     ):
+        self.dist = param_dist
+        if not isinstance(self.dist, (Mapping)):
+            raise TypeError(
+                "Parameter distribution is not a dict or " "({!r})".format(self.dist)
+            )
+
+        for key in self.dist:
+            if not isinstance(self.dist[key], Iterable) and not hasattr(
+                self.dist[key], "rvs"
+            ):
+                raise TypeError(
+                    "Parameter value is not iterable "
+                    "or distribution (key={!r}, value={!r})".format(key, self.dist[key])
+                )
+
         self.param_sampler = param_sampler
         self.constraint = constraint
         self.constraint_max_tries = constraint_max_retries
+        self.domain_size = self.calc_domain_size(self.dist)
+        self.categorical_params, self.integer_params = self.classify_parameters(
+            self.dist
+        )
+
+    @cached_property
+    def categorical_index_lookup(self):
+        res = {}
+        for param in self.categorical_params:
+            res[param] = {ele: pos for pos, ele in enumerate(self.dist[param])}
+        return res
 
     def get_domain(self):
-        return self.get_random_sample(self.param_sampler.domain_size)
+        return self.get_random_sample(self.domain_size)
 
     def get_random_sample(self, size):
         if self.constraint is None:
@@ -52,7 +80,7 @@ class DomainSpace:
         return samples[:size]
 
     def _get_random_sample(self, size):
-        return self.param_sampler.sample(size)
+        return self.param_sampler(self.dist, size)
 
     def convert_GP_space(self, domain_list):
         """
@@ -61,7 +89,7 @@ class DomainSpace:
 
         input is the domain_list generated using the Parameter Sampler.
         """
-        categorical_params = self.param_sampler.categorical_params
+        categorical_params = self.categorical_params
 
         X = []
         for domain in domain_list:
@@ -75,11 +103,9 @@ class DomainSpace:
 
                 # this is a categorical variable which require special handling
                 elif x in categorical_params:
-                    size = len(
-                        self.param_sampler.dist[x]
-                    )  # total number of categories.
+                    size = len(self.dist[x])  # total number of categories.
                     # we need to see the index where domain[x] appears in param_dict[x]
-                    index = self.param_sampler.categorical_index_lookup[x][domain[x]]
+                    index = self.categorical_index_lookup[x][domain[x]]
                     listofzeros = [0.0] * size
                     # We will set the value to one for one hot encoding
                     listofzeros[index] = 1.0
@@ -100,9 +126,9 @@ class DomainSpace:
         """
         X_ps = []
 
-        categorical_params = self.param_sampler.categorical_params
-        int_params = self.param_sampler.integer_params
-        param_dict = self.param_sampler.dist
+        categorical_params = self.categorical_params
+        int_params = self.integer_params
+        param_dict = self.dist
 
         for i in range(X_gp.shape[0]):
 
@@ -134,3 +160,79 @@ class DomainSpace:
 
             X_ps.append(curr_x_ps)
         return X_ps
+
+    @staticmethod
+    def calc_domain_size(param_dict: dict) -> int:
+        """
+        Return an estimate of number of points in the search space.
+        """
+        # Minimum and maximum domain size
+        domain_min = 50000
+        domain_max = 500000
+
+        ans = domain_min
+
+        for par in param_dict:
+            if isinstance(param_dict[par], rv_frozen):
+                distrib = param_dict[par]
+                loc, scale = distrib.args
+                min_scale = 1
+                scale = int(scale)
+                if scale < min_scale:
+                    scale = min_scale
+
+                ans = ans * scale * 50
+
+            elif isinstance(param_dict[par], range):
+                ans = ans * len(param_dict[par])
+
+            elif isinstance(param_dict[par], list):
+                ans = ans * len(param_dict[par])
+
+        if ans < domain_min:
+            ans = domain_min
+
+        if ans > domain_max:
+            ans = domain_max
+
+        return ans
+
+    @staticmethod
+    def classify_parameters(param_dict: dict) -> (list, list):
+        """
+        Identify parameters that are categorical or integer types.
+        Categorical values/discrete values are considered from the list of each value being str.
+        Integer values are considered from list of each value as int or from a range
+
+        :param param_dict: dictionary of parameter distributions
+        :return: a tuple of two sets where first element is the set of parameter that are categorical
+        and second element is the set of parameters that are integer
+        """
+        categorical_params = set()
+        int_params = set()
+
+        for par in param_dict:
+            if isinstance(param_dict[par], rv_frozen):
+                # FIXME: what if the distribution generators ints , GP would convert it to float
+                pass  # we are not doing anything at present, and will directly use its value for GP.
+
+            elif isinstance(param_dict[par], range):
+                int_params.add(par)
+
+            elif isinstance(param_dict[par], Iterable):
+                # for list with all int we are considering it as non-categorical
+                try:
+                    # this check takes care of numpy ints as well
+                    all_int = all(
+                        x == int(x) and type(x) != bool for x in param_dict[par]
+                    )
+                except (ValueError, TypeError):
+                    all_int = False
+
+                if all_int:
+                    int_params.add(par)
+                # For lists with mixed type, floats or strings we consider them categorical or discrete
+                else:
+                    categorical_params.add(par)
+
+        return (categorical_params, int_params)

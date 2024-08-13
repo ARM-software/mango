@@ -16,7 +16,7 @@ import numpy as np
 
 from mango.domain.domain_space import DomainSpace
 from mango.optimizer.bayesian_learning import BayesianLearning
-from mango.domain.parameter_sampler import AbstractParameterSampler, ParameterSampler
+from mango.domain.parameter_sampler import parameter_sampler
 
 # setting warnings to ignore for now
 warnings.filterwarnings("ignore")
@@ -43,7 +43,7 @@ class TunerConfig:
     fixed_domain: bool = False
     early_stopping: Callable = None
     constraint: Callable = None
-    param_sampler: type[AbstractParameterSampler] = ParameterSampler
+    param_sampler: Callable = parameter_sampler
 
     def __post_init__(self):
         if self.optimizer not in self.valid_optimizers:
@@ -90,17 +90,18 @@ class Tuner:
             conf_dict = {}
 
         self.config = TunerConfig(**conf_dict)
-        self.param_sampler = self.config.param_sampler(param_dict)
+        self.ds = DomainSpace(
+            param_dict,
+            param_sampler=self.config.param_sampler,
+            constraint=self.config.constraint,
+        )
 
         if self.config.domain_size is not None:
-            self.param_sampler.domain_size = self.config.domain_size
+            self.ds.domain_size = self.config.domain_size
 
         # overwrite batch size if given as a property of objective function
         if hasattr(objective, "batch_size"):
             self.config.batch_size = objective.batch_size
-
-        # save domain size
-        self.ds = DomainSpace(self.param_sampler, constraint=self.config.constraint)
 
         # stores the results of using the tuner
         self.results = dict()
@@ -264,7 +265,7 @@ class Tuner:
             X_sample = np.vstack((X_sample, X_next_batch))
             Y_sample = np.vstack((Y_sample, Y_next_batch))
 
-            # referesh domain if not fixed
+            # refresh domain if not fixed
             if not self.config.fixed_domain:
                 domain_list = self.ds.get_domain()
                 X_domain_np = self.ds.convert_GP_space(domain_list)
