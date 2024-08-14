@@ -151,7 +151,7 @@ param_space = dict(max_features=['auto', 0.2, 0.3])
 Lists are uniformly sampled and are assumed to be unordered. They are one-hot encoded internally.
 
 ### Distributions
-All the distributions supported by [`scipy.stats`](https://docs.scipy.org/doc/scipy/reference/stats.html) are supported.
+All the distributions, including multivariate, supported by [`scipy.stats`](https://docs.scipy.org/doc/scipy/reference/stats.html) are supported.
 In general, distributions must provide a `rvs` method for sampling.
 
 #### Uniform distribution

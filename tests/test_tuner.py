@@ -464,7 +464,6 @@ def test_constrainted_opt():
 
 
 def test_multivar():
-    # for di
     def objfun(params):
         res = []
         for param in params:
@@ -479,6 +478,7 @@ def test_multivar():
     tuner = Tuner(param_space, objfun)
     results = tuner.run()
 
+    # for dirichlet distribution the maximum  sum of squares is at an edge
     assert results["best_params"]["min"] == pytest.approx(10)
     assert max(results["best_params"]["multi"]) == pytest.approx(1, abs=0.04)
     assert min(results["best_params"]["multi"]) == pytest.approx(0, abs=0.04)
