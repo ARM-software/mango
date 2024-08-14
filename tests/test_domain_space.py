@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.stats import uniform, loguniform
+from scipy.stats import uniform, loguniform, dirichlet
 
 from mango.domain.domain_space import DomainSpace
 from mango.domain.distribution import loguniform as mango_loguniform
@@ -157,3 +157,23 @@ def test_np_space():
 
     gp_params = ds.convert_GP_space(params)
     assert gp_params.shape == (10, 4)
+
+
+def test_multivar_space():
+    param_dict = {
+        "x": np.array(["a", "b", "c"]),
+        "y": uniform(-1, 1),
+        "z": dirichlet([0.4, 0.1, 0.8]),
+    }
+    ds = DomainSpace(param_dict)
+    x_ps = ds.get_random_sample(5)
+    x_gp = ds.convert_GP_space(x_ps)
+    x_ps2 = ds.convert_PS_space(x_gp)
+    for x in x_gp:
+        assert len(x) == 7
+    for x, y in zip(x_ps, x_ps2):
+        for k, v in x.items():
+            if k == "z":
+                assert (v == y[k]).all()
+            else:
+                assert v == y[k]

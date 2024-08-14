@@ -1,20 +1,11 @@
-"""
-Testing the capabilities of Mango
-- Test the domain space transformations
-- Test the sampling capabilities
-- Test the bayesian learning optimizer iterations
-- Test the results of tuner for simple objective function
-$  python -m pytest tests/ --disable-warnings
-"""
-
 import math
 import time
-from pytest import approx
+import pytest
 import numpy as np
 
 from mango.domain.domain_space import DomainSpace
 from mango import Tuner, scheduler
-from scipy.stats import uniform
+from scipy.stats import uniform, dirichlet
 
 # Simple param_dict
 param_dict = {
@@ -86,7 +77,7 @@ def test_domain():
             v1 = x1[k]
             v2 = x2[k]
             if isinstance(v1, np.float64):
-                assert v1 == approx(v2, abs=1e-5)
+                assert v1 == pytest.approx(v2, abs=1e-5)
             else:
                 if not v1 == v2:
                     print(k)
@@ -470,3 +461,24 @@ def test_constrainted_opt():
     assert results["best_objective"] > 8.4
     assert results["best_params"]["b"] == 4
     assert constraint([results["best_params"]])
+
+
+def test_multivar():
+    # for di
+    def objfun(params):
+        res = []
+        for param in params:
+            res.append(sum([v**2 for v in param["multi"]]) - param["min"])
+        return res
+
+    param_space = {
+        "multi": dirichlet([1, 1, 1]),
+        "min": range(10, 100),
+    }
+
+    tuner = Tuner(param_space, objfun)
+    results = tuner.run()
+
+    assert results["best_params"]["min"] == pytest.approx(10)
+    assert max(results["best_params"]["multi"]) == pytest.approx(1, abs=0.04)
+    assert min(results["best_params"]["multi"]) == pytest.approx(0, abs=0.04)

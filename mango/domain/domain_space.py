@@ -7,6 +7,7 @@ from itertools import compress
 from functools import cached_property
 
 from scipy.stats._distn_infrastructure import rv_frozen
+from scipy.stats._multivariate import multi_rv_frozen
 
 from mango.domain.parameter_sampler import parameter_sampler
 
@@ -39,8 +40,8 @@ class DomainSpace:
         self.constraint = constraint
         self.constraint_max_tries = constraint_max_retries
         self.domain_size = self.calc_domain_size(self.dist)
-        self.categorical_params, self.integer_params = self.classify_parameters(
-            self.dist
+        self.categorical_params, self.integer_params, self.multivariate_params = (
+            self.classify_parameters(self.dist)
         )
 
     @cached_property
@@ -48,6 +49,13 @@ class DomainSpace:
         res = {}
         for param in self.categorical_params:
             res[param] = {ele: pos for pos, ele in enumerate(self.dist[param])}
+        return res
+
+    @cached_property
+    def multivariate_param_dimensions(self):
+        res = {}
+        for param in self.multivariate_params:
+            res[param] = len(self.dist[param].mean())
         return res
 
     def get_domain(self):
@@ -94,15 +102,9 @@ class DomainSpace:
         X = []
         for domain in domain_list:
             curr_x = []
-            # for x in domain:
             for x in sorted(domain.keys()):
-                # this value can be directly used, for int too, we will consider it as a float for GP
-
-                if x not in categorical_params:
-                    curr_x.append(domain[x])
-
                 # this is a categorical variable which require special handling
-                elif x in categorical_params:
+                if x in categorical_params:
                     size = len(self.dist[x])  # total number of categories.
                     # we need to see the index where domain[x] appears in param_dict[x]
                     index = self.categorical_index_lookup[x][domain[x]]
@@ -111,6 +113,12 @@ class DomainSpace:
                     listofzeros[index] = 1.0
                     # expanding current list
                     curr_x = curr_x + listofzeros
+                elif x in self.multivariate_params:
+                    curr_x = curr_x + list(domain[x])
+
+                # this value can be directly used, for int too, we will consider it as a float for GP
+                else:
+                    curr_x.append(domain[x])
 
             X.append(curr_x)
 
@@ -128,6 +136,7 @@ class DomainSpace:
 
         categorical_params = self.categorical_params
         int_params = self.integer_params
+        mv_params = self.multivariate_params
         param_dict = self.dist
 
         for i in range(X_gp.shape[0]):
@@ -153,6 +162,12 @@ class DomainSpace:
                     curr_x_ps[par] = category_val
                     # we have processed the entire one-hotencoded
                     index = index + size
+
+                elif par in mv_params:
+                    dim = self.multivariate_param_dimensions[par]
+                    curr_x_ps[par] = curr_x_gp[index : index + dim]
+                    index += dim
+
                 # this is a float value
                 else:
                     curr_x_ps[par] = curr_x_gp[index]
@@ -170,7 +185,7 @@ class DomainSpace:
         domain_min = 50000
         domain_max = 500000
 
-        ans = domain_min
+        ans = 1
 
         for par in param_dict:
             if isinstance(param_dict[par], rv_frozen):
@@ -201,20 +216,25 @@ class DomainSpace:
     def classify_parameters(param_dict: dict) -> (list, list):
         """
         Identify parameters that are categorical or integer types.
-        Categorical values/discrete values are considered from the list of each value being str.
+        Categorical values/discrete values are considered from the list of each value being str
         Integer values are considered from list of each value as int or from a range
+        Multivariate values are random variables defined using scipy stats multivariate distribution
 
         :param param_dict: dictionary of parameter distributions
-        :return: a tuple of two sets where first element is the set of parameter that are categorical
-        and second element is the set of parameters that are integer
+        :return: a tuple of three sets where first element is the set of parameter that are categorical,
+        second element is the set of parameters that are integer, and third element is the set of params that are
+        multivariate
         """
         categorical_params = set()
         int_params = set()
+        multivariate_params = set()
 
         for par in param_dict:
             if isinstance(param_dict[par], rv_frozen):
                 # FIXME: what if the distribution generators ints , GP would convert it to float
                 pass  # we are not doing anything at present, and will directly use its value for GP.
+            if isinstance(param_dict[par], multi_rv_frozen):
+                multivariate_params.add(par)
 
             elif isinstance(param_dict[par], range):
                 int_params.add(par)
@@ -235,4 +255,4 @@ class DomainSpace:
                 else:
                     categorical_params.add(par)
 
-        return (categorical_params, int_params)
+        return (categorical_params, int_params, multivariate_params)
