@@ -44,6 +44,7 @@ class TunerConfig:
     early_stopping: Callable = None
     constraint: Callable = None
     param_sampler: Callable = parameter_sampler
+    scale_params: bool = False
 
     def __post_init__(self):
         if self.optimizer not in self.valid_optimizers:
@@ -94,6 +95,7 @@ class Tuner:
             param_dict,
             param_sampler=self.config.param_sampler,
             constraint=self.config.constraint,
+            scale_params=self.config.scale_params,
         )
 
         if self.config.domain_size is not None:
@@ -198,7 +200,6 @@ class Tuner:
 
         domain_list = self.ds.get_domain()
         X_domain_np = self.ds.convert_GP_space(domain_list)
-        context = None
 
         # running the iterations
         pbar = tqdm(range(self.config.num_iteration))

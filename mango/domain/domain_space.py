@@ -8,6 +8,7 @@ from functools import cached_property
 
 from scipy.stats._distn_infrastructure import rv_frozen
 from scipy.stats._multivariate import multi_rv_frozen
+from sklearn.preprocessing import MinMaxScaler
 
 from mango.domain.parameter_sampler import parameter_sampler
 
@@ -20,6 +21,7 @@ class DomainSpace:
         param_sampler: Callable = parameter_sampler,
         constraint: Callable = None,
         constraint_max_retries: int = 10,
+        scale_params: bool = False,
     ):
         self.dist = param_dist
         if not isinstance(self.dist, (Mapping)):
@@ -39,6 +41,8 @@ class DomainSpace:
         self.param_sampler = param_sampler
         self.constraint = constraint
         self.constraint_max_tries = constraint_max_retries
+        self.scale_params = scale_params
+
         self.domain_size = self.calc_domain_size(self.dist)
         self.categorical_params, self.integer_params, self.multivariate_params = (
             self.classify_parameters(self.dist)
@@ -57,6 +61,14 @@ class DomainSpace:
         for param in self.multivariate_params:
             res[param] = len(self.dist[param].mean())
         return res
+
+    @cached_property
+    def gp_scaler(self):
+        data = self.get_domain()
+        x_gp = self._convert_GP_space(data)
+        scaler = MinMaxScaler()
+        scaler.fit(x_gp)
+        return scaler
 
     def get_domain(self):
         return self.get_random_sample(self.domain_size)
@@ -90,13 +102,7 @@ class DomainSpace:
     def _get_random_sample(self, size):
         return self.param_sampler(self.dist, size)
 
-    def convert_GP_space(self, domain_list):
-        """
-        convert the hyperparameters from the param_dict space to the GP space, by converting the
-        categorical variables to one hotencoded, and return a numpy array which can be used to train the GP
-
-        input is the domain_list generated using the Parameter Sampler.
-        """
+    def _convert_GP_space(self, domain_list):
         categorical_params = self.categorical_params
 
         X = []
@@ -125,6 +131,18 @@ class DomainSpace:
         X = np.array(X)
         return X
 
+    def convert_GP_space(self, domain_list):
+        """
+        convert the hyperparameters from the param_dict space to the GP space, by converting the
+        categorical variables to one hotencoded, and return a numpy array which can be used to train the GP
+
+        input is the domain_list generated using the Parameter Sampler.
+        """
+        X = self._convert_GP_space(domain_list)
+        if self.scale_params:
+            X = self.gp_scaler.transform(X)
+        return X
+
     def convert_PS_space(self, X_gp):
         """
         Convert from the X_gp space which is a numpy array that can be given input to the gaussian process
@@ -138,6 +156,9 @@ class DomainSpace:
         int_params = self.integer_params
         mv_params = self.multivariate_params
         param_dict = self.dist
+
+        if self.scale_params:
+            X_gp = self.gp_scaler.inverse_transform(X_gp)
 
         for i in range(X_gp.shape[0]):
 

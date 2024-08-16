@@ -247,7 +247,11 @@ def test_local_scheduler():
 
 
 def test_six_hump():
+    y_scale = 1
+    scale_params = False
+
     def camel(x, y):
+        y = y / y_scale
         x2 = math.pow(x, 2)
         x4 = math.pow(x, 4)
         y2 = math.pow(y, 2)
@@ -255,11 +259,11 @@ def test_six_hump():
 
     param_dict = {
         "x": uniform(-3, 3),
-        "y": uniform(-2, 2),
+        "y": uniform(-2 * y_scale, 2 * y_scale),
     }
 
-    x_opt = 0.0898  # or -0;0898
-    y_opt = -0.7126  # or 0.7126
+    x_opt = 0.0898  # or -0.0898
+    y_opt = -0.7126 * y_scale  # or 0.7126
 
     def objfunc(args_list):
         results = []
@@ -270,14 +274,16 @@ def test_six_hump():
             results.append(result)
         return results
 
-    tuner = Tuner(param_dict, objfunc)
+    tuner = Tuner(
+        param_dict, objfunc, dict(num_iteration=20, scale_params=scale_params)
+    )
     results = tuner.run()
 
     print("best hyper parameters:", results["best_params"])
     print("best objective:", results["best_objective"])
 
     assert abs(results["best_params"]["x"]) - abs(x_opt) <= 0.1
-    assert abs(results["best_params"]["y"]) - abs(y_opt) <= 0.2
+    assert abs(results["best_params"]["y"]) - abs(y_opt) <= 0.1 * y_scale
 
 
 def test_celery_scheduler():
