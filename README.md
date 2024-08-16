@@ -127,7 +127,12 @@ Mango search space is compatible with scikit-learn's parameter space definitions
 [RandomizedSearchCV](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.RandomizedSearchCV.html)
  or [GridSearchCV](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html).
 The search space is defined as a dictionary with keys being the parameter names (string) and values being
-list of discreet choices, range of integers or the distributions. Example of some common search spaces are:
+list of discreet choices, range of integers or the distributions. 
+
+> [!NOTE]  
+> Mango does not scale or normalize the search space parameters. Users should use their judgement on whether input space needs to be normalized.
+
+Example of some common search spaces are:
 
 ### Integer
 Following space defines `x` as an integer parameters with values in `range(-10, 11)` (11 is not included):
