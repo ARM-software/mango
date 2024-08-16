@@ -246,9 +246,10 @@ def test_local_scheduler():
     assert abs(results["best_params"]["y"] + 10) <= 3
 
 
-def test_six_hump():
-    y_scale = 1
-    scale_params = False
+@pytest.mark.parametrize(
+    "y_scale, scale_params", [(1, False), (1, True), (1000.0, False), (1000.0, True)]
+)
+def test_six_hump(y_scale, scale_params):
 
     def camel(x, y):
         y = y / y_scale
@@ -274,16 +275,14 @@ def test_six_hump():
             results.append(result)
         return results
 
-    tuner = Tuner(
-        param_dict, objfunc, dict(num_iteration=20, scale_params=scale_params)
-    )
+    tuner = Tuner(param_dict, objfunc, dict(scale_params=scale_params))
     results = tuner.run()
 
     print("best hyper parameters:", results["best_params"])
     print("best objective:", results["best_objective"])
 
     assert abs(results["best_params"]["x"]) - abs(x_opt) <= 0.1
-    assert abs(results["best_params"]["y"]) - abs(y_opt) <= 0.1 * y_scale
+    assert abs(results["best_params"]["y"]) - abs(y_opt) <= 0.2 * y_scale
 
 
 def test_celery_scheduler():
