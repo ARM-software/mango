@@ -254,7 +254,7 @@ class DomainSpace:
             if isinstance(param_dict[par], rv_frozen):
                 # FIXME: what if the distribution generators ints , GP would convert it to float
                 pass  # we are not doing anything at present, and will directly use its value for GP.
-            if isinstance(param_dict[par], multi_rv_frozen):
+            elif isinstance(param_dict[par], multi_rv_frozen):
                 multivariate_params.add(par)
 
             elif isinstance(param_dict[par], range):
