@@ -1,6 +1,6 @@
 """
 Main Tuner Class which uses other abstractions.
-General usage is to find the optimal hyper-parameters of the classifier
+General usage is to find the optimal hyperparameters of the classifier
 """
 
 import copy
@@ -53,7 +53,8 @@ class TunerConfig:
             )
         if self.parallel_strategy not in self.valid_parallel_strategies:
             raise ValueError(
-                f"parallel strategy: {self.parallel_strategy} is not valid, should be one of {self.valid_parallel_strategies}"
+                f"parallel strategy: {self.parallel_strategy} is not valid,"
+                f" should be one of {self.valid_parallel_strategies}"
             )
 
     @property
@@ -129,15 +130,15 @@ class Tuner:
         init_values = self.config.initial_custom
 
         if all(isinstance(v, Mapping) for v in init_values):
-            X_tried = copy.deepcopy(init_values)
-            X_list, Y_list = self.runUserObjective(X_tried)
-            return X_list, Y_list, X_tried
+            X_init = copy.deepcopy(init_values)
+            X_list, Y_list = self.runUserObjective(X_init)
+            return X_list, Y_list
         elif all(isinstance(v, tuple) and len(v) == 2 for v in init_values):
             X_list = copy.deepcopy([v[0] for v in init_values])
             Y_list = np.array([v[1] for v in init_values])
             if self.maximize_objective is False:
                 Y_list = -1 * Y_list
-            return X_list, Y_list, X_list
+            return X_list, Y_list
         else:
             raise TypeError(
                 f"Elements of initial_custom param should be either a dict of params or tuple (params, y),"
@@ -149,17 +150,16 @@ class Tuner:
             return self.process_initial_custom()
         else:
             # getting first few random values
-            X_tried = self.ds.get_random_sample(self.config.initial_random)
-            X_list, Y_list = self.runUserObjective(X_tried)
+            X_init = self.ds.get_random_sample(self.config.initial_random)
+            X_list, Y_list = self.runUserObjective(X_init)
 
             # in case initial random results are invalid try different samples
             n_tries = 1
             while len(Y_list) < self.config.initial_random and n_tries < 3:
-                X_tried2 = self.ds.get_random_sample(
+                X_init = self.ds.get_random_sample(
                     self.config.initial_random - len(Y_list)
                 )
-                X_list2, Y_list2 = self.runUserObjective(X_tried2)
-                X_tried2.extend(X_tried2)
+                X_list2, Y_list2 = self.runUserObjective(X_init)
                 X_list = np.append(X_list, X_list2)
                 Y_list = np.append(Y_list, Y_list2)
                 n_tries += 1
@@ -168,18 +168,18 @@ class Tuner:
                 raise ValueError(
                     "No valid configuration found to initiate the Bayesian Optimizer"
                 )
-        return X_list, Y_list, X_tried
+        return X_list, Y_list
 
     def runBayesianOptimizer(self):
         results = dict()
 
-        X_list, Y_list, X_tried = self.run_initial()
+        X_list, Y_list = self.run_initial()
 
-        # evaluated hyper parameters are used
+        # evaluated hyperparameters are used
         X_init = self.ds.convert_GP_space(X_list)
         Y_init = Y_list.reshape(len(Y_list), 1)
 
-        # setting the initial random hyper parameters tried
+        # setting the initial random hyperparameters tried
         results["random_params"] = X_list
         results["random_params_objective"] = Y_list
 
@@ -192,7 +192,7 @@ class Tuner:
         X_sample = X_init
         Y_sample = Y_init
 
-        hyper_parameters_tried = X_tried
+        hyper_parameters_tried = X_list
         objective_function_values = Y_list
         surrogate_values = Y_list
 
@@ -203,7 +203,7 @@ class Tuner:
 
         # running the iterations
         pbar = tqdm(range(self.config.num_iteration))
-        for i in pbar:
+        for _ in pbar:
 
             # adding a Minimum exploration to explore independent of UCB
             if random.random() < self.config.exploration:

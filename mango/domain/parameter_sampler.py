@@ -48,7 +48,7 @@ def parameter_sampler(
         for k, v in items:
             keys.append(k)
             if hasattr(v, "rvs"):
-                samples.append(v.rvs(random_state=rng, size=n_size))
+                samples.append(v.rvs(random_state=rng, size=n_size).tolist())
             else:
                 # forcing object dtype to avoid conversion of mixed datatypes
                 v = np.array(v, dtype=object)

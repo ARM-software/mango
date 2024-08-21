@@ -2,6 +2,7 @@ import math
 import time
 import pytest
 import numpy as np
+import random
 
 from mango.domain.domain_space import DomainSpace
 from mango import Tuner, scheduler
@@ -480,10 +481,88 @@ def test_multivar():
         "min": range(10, 100),
     }
 
-    tuner = Tuner(param_space, objfun)
+    tuner = Tuner(param_space, objfun, conf_dict={"batch_size": 2})
     results = tuner.run()
 
     # for dirichlet distribution the maximum  sum of squares is at an edge
     assert results["best_params"]["min"] == pytest.approx(10)
     assert max(results["best_params"]["multi"]) == pytest.approx(1, abs=0.5)
     assert min(results["best_params"]["multi"]) == pytest.approx(0, abs=0.5)
+
+
+def test_multivar_with_fails():
+    @scheduler.custom(n_jobs=3)
+    def objfun(batch):
+        loss = []
+        suc = []
+        for params in batch:
+            if random.choice([True, False]):
+                l = params["a"] + params["b"] + sum(params["c"])
+                loss.append(l)
+                suc.append(params)
+        return suc, loss
+
+    param_space = {
+        "a": range(1, 100),
+        "b": range(1, 100),
+        "c": dirichlet([1.0] * 3),
+    }
+
+    tuner = Tuner(param_space, objfun, conf_dict={"initial_random": 4})
+    results = tuner.run()
+    assert results["best_params"]["a"] == pytest.approx(99)
+    assert results["best_params"]["b"] == pytest.approx(99)
+
+
+def test_failure_handling():
+    param_dict = {
+        "x": uniform(-5, 10),
+        "y": uniform(-5, 10),
+    }
+
+    # Randomly fail the evaluatioon
+    def objfunc(args_list):
+        hyper_evaluated = []
+        objective_evaluated = []
+        for hyper_par in args_list:
+            if random.random() > 0.3:
+                x = hyper_par["x"]
+                y = hyper_par["y"]
+                objective = -(x**2 + y**2)
+                objective_evaluated.append(objective)
+                hyper_evaluated.append(hyper_par)
+            else:
+                continue
+
+        return hyper_evaluated, objective_evaluated
+
+    tuner = Tuner(param_dict, objfunc)
+    results = tuner.maximize()
+    x = results["params_tried"]
+    y = results["objective_values"]
+    for params, obj in zip(x, y):
+        assert obj == -(params["x"] ** 2 + params["y"] ** 2)
+
+
+def test_warmup():
+    def objfun(params):
+        return [param["a"] + param["b"] for param in params]
+
+    param_space = {
+        "a": range(1, 100),
+        "b": range(1, 100),
+    }
+
+    tuner = Tuner(param_space, objfun)
+    results = tuner.run()
+
+    x = results["params_tried"]
+    y = results["objective_values"]
+    xy = list(zip(x, y))
+
+    config = {"initial_custom": xy}
+
+    tuner = Tuner(param_space, objfun, conf_dict=config)
+    results = tuner.run()
+
+    assert all([i in results["params_tried"] for i in x])

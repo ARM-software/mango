@@ -174,6 +174,6 @@ def test_multivar_space():
     for x, y in zip(x_ps, x_ps2):
         for k, v in x.items():
             if k == "z":
-                assert (v == y[k]).all()
+                assert v == y[k]
             else:
                 assert v == y[k]

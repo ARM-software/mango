@@ -5,6 +5,7 @@ from collections.abc import Callable
 import warnings
 from itertools import compress
 from functools import cached_property
+import warnings
 
 from scipy.stats._distn_infrastructure import rv_frozen
 from scipy.stats._multivariate import multi_rv_frozen
@@ -42,11 +43,13 @@ class DomainSpace:
         self.constraint = constraint
         self.constraint_max_tries = constraint_max_retries
         self.scale_params = scale_params
-
-        self.domain_size = self.calc_domain_size(self.dist)
-        self.categorical_params, self.integer_params, self.multivariate_params = (
-            self.classify_parameters(self.dist)
-        )
+        (
+            self.categorical_params,
+            self.integer_params,
+            self.multivariate_params,
+            self.univariate_params,
+        ) = self.classify_parameters(self.dist)
+        self.domain_size = self.calc_domain_size()
 
     @cached_property
     def categorical_index_lookup(self):
@@ -186,7 +189,7 @@ class DomainSpace:
 
                 elif par in mv_params:
                     dim = self.multivariate_param_dimensions[par]
-                    curr_x_ps[par] = curr_x_gp[index : index + dim]
+                    curr_x_ps[par] = curr_x_gp[index : index + dim].tolist()
                     index += dim
 
                 # this is a float value
@@ -197,8 +200,7 @@ class DomainSpace:
             X_ps.append(curr_x_ps)
         return X_ps
 
-    @staticmethod
-    def calc_domain_size(param_dict: dict) -> int:
+    def calc_domain_size(self) -> int:
         """
         Return an estimate of number of points in the search space.
         """
@@ -208,10 +210,9 @@ class DomainSpace:
 
         ans = 1
 
-        for par in param_dict:
-            if isinstance(param_dict[par], rv_frozen):
-                distrib = param_dict[par]
-                loc, scale = distrib.args
+        for par, dist in self.dist.items():
+            if par in self.univariate_params:
+                loc, scale = dist.args
                 min_scale = 1
                 scale = int(scale)
                 if scale < min_scale:
@@ -219,11 +220,15 @@ class DomainSpace:
 
                 ans = ans * scale * 50
 
-            elif isinstance(param_dict[par], range):
-                ans = ans * len(param_dict[par])
+            elif par in self.multivariate_params:
+                # FIXME:  assuming scale 10 for multivariate as don't see a way to get it from the dist
+                ans = ans * 10
 
-            elif isinstance(param_dict[par], list):
-                ans = ans * len(param_dict[par])
+            elif par in self.integer_params:
+                ans = ans * len(dist)
+
+            elif par in self.categorical_params:
+                ans = ans * len(dist)
 
         if ans < domain_min:
             ans = domain_min
@@ -234,26 +239,28 @@ class DomainSpace:
         return ans
 
     @staticmethod
-    def classify_parameters(param_dict: dict) -> (list, list):
+    def classify_parameters(param_dict: dict) -> (set, set, set, set):
         """
         Identify parameters that are categorical or integer types.
         Categorical values/discrete values are considered from the list of each value being str
         Integer values are considered from list of each value as int or from a range
         Multivariate values are random variables defined using scipy stats multivariate distribution
+        Univariate values are random variable defined using scipy stats distribution
 
         :param param_dict: dictionary of parameter distributions
-        :return: a tuple of three sets where first element is the set of parameter that are categorical,
-        second element is the set of parameters that are integer, and third element is the set of params that are
-        multivariate
+        :return: a tuple of four sets where first element is the set of parameter that are categorical,
+        second element is the set of parameters that are integer, third element is the set of params that are
+        multivariate, and fourth element is the set of params that are univariate
         """
         categorical_params = set()
         int_params = set()
         multivariate_params = set()
+        univariate_params = set()
 
         for par in param_dict:
             if isinstance(param_dict[par], rv_frozen):
                 # FIXME: what if the distribution generators ints , GP would convert it to float
-                pass  # we are not doing anything at present, and will directly use its value for GP.
+                univariate_params.add(par)
             elif isinstance(param_dict[par], multi_rv_frozen):
                 multivariate_params.add(par)
 
@@ -275,5 +282,7 @@ class DomainSpace:
                 # For lists with mixed type, floats or strings we consider them categorical or discrete
                 else:
                     categorical_params.add(par)
+            else:
+                warnings.warn(f"Parameter {par} could not be classified")
 
-        return (categorical_params, int_params, multivariate_params)
+        return (categorical_params, int_params, multivariate_params, univariate_params)
