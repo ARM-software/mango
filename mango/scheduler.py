@@ -35,7 +35,6 @@ def parallel(n_jobs):
 
 
 def celery(n_jobs, timeout=None):
-    import celery
     from celery import exceptions
 
     def decorator(func):

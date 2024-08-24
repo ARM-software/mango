@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "arm-mango"
-version = "1.5.0"
+version = "1.5.1"
 description = "parallel bayesian optimization over complex search spaces"
 authors = ["Sandeep Singh Sandha <sandha.iitr@gmail.com>", "Mohit Aggarwal <mohitagg@gmail.com>"]
 license = "Apache-2.0"
@@ -20,7 +20,6 @@ numpy = ">=1.17.0"
 scipy = ">=1.4.1"
 scikit_learn = ">=0.21.3"
 tqdm = ">=4.36.1"
-attrdict = ">=2.0.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.2.0"

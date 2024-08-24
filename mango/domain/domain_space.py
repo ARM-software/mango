@@ -2,7 +2,6 @@ from collections.abc import Mapping, Iterable
 import math
 import numpy as np
 from collections.abc import Callable
-import warnings
 from itertools import compress
 from functools import cached_property
 import warnings
@@ -272,7 +271,7 @@ class DomainSpace:
                 try:
                     # this check takes care of numpy ints as well
                     all_int = all(
-                        x == int(x) and type(x) != bool for x in param_dict[par]
+                        x == int(x) and not isinstance(x, bool) for x in param_dict[par]
                     )
                 except (ValueError, TypeError):
                     all_int = False
