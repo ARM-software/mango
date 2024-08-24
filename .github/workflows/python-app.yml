@@ -27,13 +27,17 @@ jobs:
       uses: snok/install-poetry@v1
     - name: Install dependencies
       run: |
-        poetry install --with dev
+        python3.11 -m venv venv
+        source venv/bin/activate
+        poetry install
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
+        source venv/bin/activate
         flake8 mango --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 mango --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
+        source venv/bin/activate
         pytest tests/
