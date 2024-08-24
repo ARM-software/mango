@@ -1,4 +1,5 @@
 import pytest
+import random
 
 from mango import Tuner
 
@@ -40,3 +41,31 @@ def test_initial_custom():
         config = {"initial_custom": xy_init}
         tuner = Tuner(param_space, objfun, conf_dict=config)
         tuner.run()
+
+
+def test_custom_sampler():
+
+    def objfun(params):
+        return [param["a"] + param["b"] for param in params]
+
+    param_space = {
+        "a": range(1, 100),
+        "b": range(1, 100),
+    }
+
+    def custom_sampler(param_dist: dict, size: int):
+        # Always sort the keys of a dictionary, for reproducibility
+        items = sorted(param_dist.items())
+        samples = []
+        keys = []
+        for key, value in items:
+            keys.append(key)
+            samples.append(random.choices(value, k=size))
+        return [dict(zip(keys, sample)) for sample in zip(*samples)]
+
+    config = {"param_sampler": custom_sampler}
+    tuner = Tuner(param_space, objfun, conf_dict=config)
+    results = tuner.run()
+
+    assert results["best_params"]["a"] == pytest.approx(100, abs=2)
+    assert results["best_params"]["b"] == pytest.approx(100, abs=2)

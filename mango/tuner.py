@@ -1,146 +1,113 @@
 """
 Main Tuner Class which uses other abstractions.
-General usage is to find the optimal hyper-parameters of the classifier
+General usage is to find the optimal hyperparameters of the classifier
 """
 
 import copy
-from collections.abc import Mapping, Iterable
+from collections.abc import Mapping
 from dataclasses import dataclass
 import logging
 import random
 from typing import Callable
-
-from mango.domain.domain_space import domain_space
-from mango.optimizer.bayesian_learning import BayesianLearning
-from scipy.stats._distn_infrastructure import rv_frozen
+import warnings
 
 from tqdm.auto import tqdm
 import numpy as np
 
-# setting warnings to ignore for now
-import warnings
+from mango.domain.domain_space import DomainSpace
+from mango.optimizer.bayesian_learning import BayesianLearning
+from mango.domain.parameter_sampler import parameter_sampler
 
+# setting warnings to ignore for now
 warnings.filterwarnings("ignore")
 
 _logger = logging.getLogger(__name__)
 
 
+@dataclass
+class TunerConfig:
+    domain_size: int = None
+    initial_random: int = 2
+    initial_custom: list = None
+    num_iteration: int = 20
+    batch_size: int = 1
+    optimizer: str = "Bayesian"
+    parallel_strategy: str = "clustering"
+    surrogate: object = None  # used to test different kernel functions
+    valid_optimizers = ["Bayesian", "Random"]
+    valid_parallel_strategies = ["penalty", "clustering"]
+    alpha: float = 2.0
+    exploration: float = 1.0
+    exploration_decay: float = 0.9
+    exploration_min: float = 0.1
+    fixed_domain: bool = False
+    early_stopping: Callable = None
+    constraint: Callable = None
+    param_sampler: Callable = parameter_sampler
+    scale_params: bool = False
+
+    def __post_init__(self):
+        if self.optimizer not in self.valid_optimizers:
+            raise ValueError(
+                f"optimizer: {self.optimizer} is not valid, should be one of {self.valid_optimizers}"
+            )
+        if self.parallel_strategy not in self.valid_parallel_strategies:
+            raise ValueError(
+                f"parallel strategy: {self.parallel_strategy} is not valid,"
+                f" should be one of {self.valid_parallel_strategies}"
+            )
+
+    @property
+    def is_bayesian(self):
+        return self.optimizer == "Bayesian"
+
+    @property
+    def is_random(self):
+        return self.optimizer == "Random"
+
+    @property
+    def strategy_is_penalty(self):
+        return self.parallel_strategy == "penalty"
+
+    @property
+    def strategy_is_clustering(self):
+        return self.parallel_strategy == "clustering"
+
+    def early_stop(self, results):
+        if self.early_stopping is None:
+            return False
+
+        results = copy.deepcopy(results)
+        return self.early_stopping(results)
+
+
 class Tuner:
-    @dataclass
-    class Config:
-        domain_size: int = None
-        initial_random: int = 2
-        initial_custom: list = None
-        num_iteration: int = 20
-        batch_size: int = 1
-        optimizer: str = "Bayesian"
-        parallel_strategy: str = "clustering"
-        surrogate: object = None  # used to test different kernel functions
-        valid_optimizers = ["Bayesian", "Random"]
-        valid_parallel_strategies = ["penalty", "clustering"]
-        alpha: float = 2.0
-        exploration: float = 1.0
-        exploration_decay: float = 0.9
-        exploration_min: float = 0.1
-        fixed_domain: bool = False
-        early_stopping: Callable = None
-        constraint: Callable = None
-
-        def __post_init__(self):
-            if self.optimizer not in self.valid_optimizers:
-                raise ValueError(
-                    f"optimizer: {self.optimizer} is not valid, should be one of {self.valid_optimizers}"
-                )
-            if self.parallel_strategy not in self.valid_parallel_strategies:
-                raise ValueError(
-                    f"parallel strategy: {self.parallel_strategy} is not valid, should be one of {self.valid_parallel_strategies}"
-                )
-
-        @property
-        def is_bayesian(self):
-            return self.optimizer == "Bayesian"
-
-        @property
-        def is_random(self):
-            return self.optimizer == "Random"
-
-        @property
-        def strategy_is_penalty(self):
-            return self.parallel_strategy == "penalty"
-
-        @property
-        def strategy_is_clustering(self):
-            return self.parallel_strategy == "clustering"
-
-        def early_stop(self, results):
-            if self.early_stopping is None:
-                return False
-
-            results = copy.deepcopy(results)
-            return self.early_stopping(results)
 
     def __init__(self, param_dict, objective, conf_dict=None):
 
-        self.param_dict = param_dict
         self.objective_function = objective
         self.maximize_objective = True
 
         if conf_dict is None:
             conf_dict = {}
 
-        self.config = Tuner.Config(**conf_dict)
+        self.config = TunerConfig(**conf_dict)
+        self.ds = DomainSpace(
+            param_dict,
+            param_sampler=self.config.param_sampler,
+            constraint=self.config.constraint,
+            scale_params=self.config.scale_params,
+        )
 
-        if self.config.domain_size is None:
-            self.config.domain_size = self.calculateDomainSize(self.param_dict)
+        if self.config.domain_size is not None:
+            self.ds.domain_size = self.config.domain_size
 
         # overwrite batch size if given as a property of objective function
         if hasattr(objective, "batch_size"):
             self.config.batch_size = objective.batch_size
 
-        # save domain size
-        self.ds = domain_space(
-            self.param_dict, self.config.domain_size, constraint=self.config.constraint
-        )
-
         # stores the results of using the tuner
         self.results = dict()
-
-    @staticmethod
-    def calculateDomainSize(param_dict):
-        """
-        Calculating the domain size to be explored for finding
-        optimum of bayesian optimizer
-        """
-        # Minimum and maximum domain size
-        domain_min = 50000
-        domain_max = 500000
-
-        domain_size = 1
-
-        for par in param_dict:
-            if isinstance(param_dict[par], rv_frozen):
-                distrib = param_dict[par]
-                loc, scale = distrib.args
-                min_scale = 1
-                scale = int(scale)
-                if scale < min_scale:
-                    scale = min_scale
-
-                domain_size = domain_size * scale * 50
-
-            elif isinstance(param_dict[par], range):
-                domain_size = domain_size * len(param_dict[par])
-
-            elif isinstance(param_dict[par], list):
-                domain_size = domain_size * len(param_dict[par])
-
-        if domain_size < domain_min:
-            domain_size = domain_min
-
-        if domain_size > domain_max:
-            domain_size = domain_max
-
-        return domain_size
 
     def run(self):
         if self.config.is_bayesian:
@@ -163,15 +130,15 @@ class Tuner:
         init_values = self.config.initial_custom
 
         if all(isinstance(v, Mapping) for v in init_values):
-            X_tried = copy.deepcopy(init_values)
-            X_list, Y_list = self.runUserObjective(X_tried)
-            return X_list, Y_list, X_tried
+            X_init = copy.deepcopy(init_values)
+            X_list, Y_list = self.runUserObjective(X_init)
+            return X_list, Y_list
         elif all(isinstance(v, tuple) and len(v) == 2 for v in init_values):
             X_list = copy.deepcopy([v[0] for v in init_values])
             Y_list = np.array([v[1] for v in init_values])
             if self.maximize_objective is False:
                 Y_list = -1 * Y_list
-            return X_list, Y_list, X_list
+            return X_list, Y_list
         else:
             raise TypeError(
                 f"Elements of initial_custom param should be either a dict of params or tuple (params, y),"
@@ -183,17 +150,16 @@ class Tuner:
             return self.process_initial_custom()
         else:
             # getting first few random values
-            X_tried = self.ds.get_random_sample(self.config.initial_random)
-            X_list, Y_list = self.runUserObjective(X_tried)
+            X_init = self.ds.get_random_sample(self.config.initial_random)
+            X_list, Y_list = self.runUserObjective(X_init)
 
             # in case initial random results are invalid try different samples
             n_tries = 1
             while len(Y_list) < self.config.initial_random and n_tries < 3:
-                X_tried2 = self.ds.get_random_sample(
+                X_init = self.ds.get_random_sample(
                     self.config.initial_random - len(Y_list)
                 )
-                X_list2, Y_list2 = self.runUserObjective(X_tried2)
-                X_tried2.extend(X_tried2)
+                X_list2, Y_list2 = self.runUserObjective(X_init)
                 X_list = np.append(X_list, X_list2)
                 Y_list = np.append(Y_list, Y_list2)
                 n_tries += 1
@@ -202,18 +168,18 @@ class Tuner:
                 raise ValueError(
                     "No valid configuration found to initiate the Bayesian Optimizer"
                 )
-        return X_list, Y_list, X_tried
+        return X_list, Y_list
 
     def runBayesianOptimizer(self):
         results = dict()
 
-        X_list, Y_list, X_tried = self.run_initial()
+        X_list, Y_list = self.run_initial()
 
-        # evaluated hyper parameters are used
+        # evaluated hyperparameters are used
         X_init = self.ds.convert_GP_space(X_list)
         Y_init = Y_list.reshape(len(Y_list), 1)
 
-        # setting the initial random hyper parameters tried
+        # setting the initial random hyperparameters tried
         results["random_params"] = X_list
         results["random_params_objective"] = Y_list
 
@@ -226,7 +192,7 @@ class Tuner:
         X_sample = X_init
         Y_sample = Y_init
 
-        hyper_parameters_tried = X_tried
+        hyper_parameters_tried = X_list
         objective_function_values = Y_list
         surrogate_values = Y_list
 
@@ -234,11 +200,10 @@ class Tuner:
 
         domain_list = self.ds.get_domain()
         X_domain_np = self.ds.convert_GP_space(domain_list)
-        context = None
 
         # running the iterations
         pbar = tqdm(range(self.config.num_iteration))
-        for i in pbar:
+        for _ in pbar:
 
             # adding a Minimum exploration to explore independent of UCB
             if random.random() < self.config.exploration:
@@ -301,7 +266,7 @@ class Tuner:
             X_sample = np.vstack((X_sample, X_next_batch))
             Y_sample = np.vstack((Y_sample, Y_next_batch))
 
-            # referesh domain if not fixed
+            # refresh domain if not fixed
             if not self.config.fixed_domain:
                 domain_list = self.ds.get_domain()
                 X_domain_np = self.ds.convert_GP_space(domain_list)

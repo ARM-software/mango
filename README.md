@@ -127,7 +127,12 @@ Mango search space is compatible with scikit-learn's parameter space definitions
 [RandomizedSearchCV](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.RandomizedSearchCV.html)
  or [GridSearchCV](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html).
 The search space is defined as a dictionary with keys being the parameter names (string) and values being
-list of discreet choices, range of integers or the distributions. Example of some common search spaces are:
+list of discreet choices, range of integers or the distributions. 
+
+> [!NOTE]  
+> Mango does not scale or normalize the search space parameters by default. Users should use their judgement on whether input space needs to be normalized.
+
+Example of some common search spaces are:
 
 ### Integer
 Following space defines `x` as an integer parameters with values in `range(-10, 11)` (11 is not included):
@@ -151,7 +156,7 @@ param_space = dict(max_features=['auto', 0.2, 0.3])
 Lists are uniformly sampled and are assumed to be unordered. They are one-hot encoded internally.
 
 ### Distributions
-All the distributions supported by [`scipy.stats`](https://docs.scipy.org/doc/scipy/reference/stats.html) are supported.
+All the distributions, including multivariate, supported by [`scipy.stats`](https://docs.scipy.org/doc/scipy/reference/stats.html) are supported.
 In general, distributions must provide a `rvs` method for sampling.
 
 #### Uniform distribution
@@ -383,10 +388,18 @@ It can be either:
   This allows the user to customize the initial evaluation points and therefore guide the optimization process.
 It also enables starting the optimizer from the results of a previous tuner run (see [this](<examples/warmup.ipynb>) notebook for a working example).
 Note that if `initial_custom` option is given then `initial_random` is ignored.  
+- *scale_params*: `True` or `False` (default: `False`). Scales the search space parameter space using `MinMaxScaler`. Can be useful when the range of parameters is not comparable like below:
+```python
+{
+    'x': uniform(-1, 2), # -1 to 1
+    'y': uniform(-1000, 2000) # -1000 to 1000
+}
+```
+However, use this option with caution as it could have unintended consequences. 
 
 
-The default configuration parameters can be modified, as shown below. Only the parameters whose values need to adjusted can be passed as the dictionary.
 
+The configuration options can be modified, as shown below:
 ```python
 conf_dict = dict(num_iteration=40, domain_size=10000, initial_random=3)
 
