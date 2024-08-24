@@ -111,7 +111,8 @@ class BayesianLearning(BasePredictor):
         return Value
 
     """
-    Returns the most optmal x along with mean value from the domain of x and making sure it is not a Duplicate (depending on closeness)
+    Returns the most optmal x along with mean value from the domain of x and 
+    making sure it is not a Duplicate (depending on closeness)
     used in batch setting: As mean is also returned
     """
 
@@ -128,7 +129,7 @@ class BayesianLearning(BasePredictor):
             # check if x_optimal is in X_Sample
             check_closeness = self.closeness(x_optimal, X_Sample)
 
-            if check_closeness == False:  # No close element to x_optimal in X_Sample
+            if check_closeness is False:  # No close element to x_optimal in X_Sample
                 break
 
                 # we will look for next optimal value to try
@@ -159,7 +160,7 @@ class BayesianLearning(BasePredictor):
             # check if x_optimal is in X_Sample
             check_closeness = self.closeness(x_optimal, X_Sample)
 
-            if check_closeness == False:  # No close element to x_optimal in X_Sample
+            if check_closeness is False:  # No close element to x_optimal in X_Sample
                 break
 
                 # we will look for next optimal value to try
@@ -287,7 +288,7 @@ class BayesianLearning(BasePredictor):
             # check if x_optimal is in X_Sample
             check_closeness = self.closeness(x_optimal, X_Sample)
 
-            if check_closeness == False:  # No close element to x_optimal in X_Sample
+            if check_closeness is False:  # No close element to x_optimal in X_Sample
                 break
 
                 # we will look for next optimal value to try
@@ -386,7 +387,6 @@ class BayesianLearning(BasePredictor):
 
             try:
                 self.surrogate.fit(X_temp, Y_temp)
-
             except:
                 print("*" * 100)
                 print(X_temp)

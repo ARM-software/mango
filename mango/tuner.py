@@ -246,7 +246,8 @@ class Tuner:
 
             if len(Y_next_list) == 0:
                 # no values returned
-                # this is problematic if domain is small and same value is tried again in the next iteration as the optimizer would be stuck
+                # this is problematic if domain is small and same value is tried again
+                # in the next iteration as the optimizer would be stuck
                 continue
 
             Y_next_batch = Y_next_list.reshape(len(Y_next_list), 1)

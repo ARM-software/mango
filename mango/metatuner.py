@@ -12,8 +12,6 @@ import numpy as np
 from tqdm.auto import tqdm
 import random
 
-
-## setting warnings to ignore for now
 import warnings
 
 warnings.filterwarnings("ignore")
