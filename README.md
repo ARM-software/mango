@@ -80,7 +80,7 @@ def objective(x):
 tuner = Tuner(param_space, objective)
 results = tuner.minimize()
 
-print(f'Optimal value of parameters: {results["best_params"]} and objective: {results["best_objective"]}')```
+print(f'Optimal value of parameters: {results["best_params"]} and objective: {results["best_objective"]}')
 # => Optimal value of parameters: {'x': 0}  and objective: 0
 ```
 
