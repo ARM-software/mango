@@ -302,6 +302,10 @@ def test_local_scheduler():
 )
 def test_six_hump(y_scale, scale_params):
 
+    # Fix randomness for reproducible optimizer behaviour in this test
+    random.seed(0)
+    np.random.seed(0)
+
     def camel(x, y):
         y = y / y_scale
         x2 = math.pow(x, 2)
