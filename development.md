@@ -7,7 +7,20 @@ poetry config pypi-token.pypi <api_token>
 > poetry version [major, minor, patch]
 > poetry build
 > poetry publish
+> git commit -am "chore(release): vx.y.z"
+> git tag -a vx.y.z -m "Release vx.y.z"
+> git push origin main --tags
 ```
+
+## Release v1.4.3
+
+### Changes
+- Fix progress bar optional behavior
+- Close #123
+
+### Git Commands Used
+```bash
+
 
 ### Local development: virtualenv and tests
 
