@@ -396,6 +396,7 @@ Note that if `initial_custom` option is given then `initial_random` is ignored.
 }
 ```
 However, use this option with caution as it could have unintended consequences. 
+- *log_progress*: `True` or `False` (default: `True`). When `True`, Mango logs optimization progress with a tqdm-based progress bar and per-iteration best scores. Set this to `False` to suppress progress logging, which is useful in CI environments or when you want cleaner logs.
 
 
 

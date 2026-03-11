@@ -6,6 +6,7 @@ import random
 
 from mango.domain.domain_space import DomainSpace
 from mango import Tuner, scheduler
+import mango.tuner as tuner_mod
 from scipy.stats import uniform, dirichlet
 
 # Simple param_dict
@@ -154,6 +155,55 @@ def test_config():
     tuner = Tuner(param_dict, objfunc, conf_dict=dict(optimizer="Random"))
     results = tuner.minimize()
     check(results, "error while minimizing random")
+
+
+def test_log_progress_flag(monkeypatch):
+    """log_progress controls use of tqdm in the optimizer."""
+
+    class DummyTqdm:
+        def __init__(self):
+            self.iter_calls = 0
+            self.write_calls = 0
+
+        def __call__(self, iterable, *args, **kwargs):
+            # mimic tqdm(iterable) by returning the iterable unchanged
+            self.iter_calls += 1
+            return iterable
+
+        def write(self, *args, **kwargs):
+            self.write_calls += 1
+
+    dummy_tqdm = DummyTqdm()
+    monkeypatch.setattr(tuner_mod, "tqdm", dummy_tqdm)
+
+    param_dict = dict(x=range(-2, 3))
+
+    def objfunc(p_list):
+        # trivial, fast objective
+        return [0.0 for _ in p_list]
+
+    # When log_progress is False, tqdm should not be used
+    tuner = Tuner(
+        param_dict,
+        objfunc,
+        conf_dict=dict(num_iteration=3, initial_random=1, log_progress=False),
+    )
+    tuner.run()
+    assert dummy_tqdm.iter_calls == 0
+    assert dummy_tqdm.write_calls == 0
+
+    # When log_progress is True, tqdm should be used
+    dummy_tqdm.iter_calls = 0
+    dummy_tqdm.write_calls = 0
+
+    tuner = Tuner(
+        param_dict,
+        objfunc,
+        conf_dict=dict(num_iteration=3, initial_random=1, log_progress=True),
+    )
+    tuner.run()
+    assert dummy_tqdm.iter_calls > 0
+    assert dummy_tqdm.write_calls > 0
 
 
 def test_convex():

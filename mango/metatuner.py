@@ -22,6 +22,7 @@ class MetaTuner:
     class Config:
         n_iter: int = 20
         n_init: int = 2
+        log_progress: bool = True
 
     def __init__(self, param_dict_list, objective_list, **kwargs):
         self.param_dict_list = param_dict_list
@@ -30,6 +31,7 @@ class MetaTuner:
         # adjustable parameters
         self.num_of_iterations = self.config.n_iter
         self.initial_random = self.config.n_init
+        self.log_progress = self.config.log_progress
 
         # list of GPR for each objective
         self.gpr_list = []
@@ -222,9 +224,13 @@ class MetaTuner:
         # print(Optimizer_exploration)
 
         # Now run the optimization iterations
-        pbar = tqdm(range(self.num_of_iterations))
+        iterator = (
+            tqdm(range(self.num_of_iterations))
+            if self.log_progress
+            else range(self.num_of_iterations)
+        )
 
-        for itr in pbar:
+        for itr in iterator:
             # next values of x returned from individual function
             # Values in x are dependent on types of param dict, so using a list
             x_values_list = []
@@ -375,7 +381,8 @@ class MetaTuner:
                         Optimizer_exploration[i] + 1.1 * self.exploration_rate
                     )
 
-            pbar.set_description(": Best score: %s" % max_val_y)
+            if self.log_progress:
+                tqdm.write(": Best score: %s" % max_val_y)
 
             # print(itr, s_values_list, Optimizer_iteration, Optimizer_exploration, max_val_y)#, Y_dict_array[selected_obj])
 
