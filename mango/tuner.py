@@ -45,6 +45,7 @@ class TunerConfig:
     constraint: Callable = None
     param_sampler: Callable = parameter_sampler
     scale_params: bool = False
+    log_progress: bool = True
 
     def __post_init__(self):
         if self.optimizer not in self.valid_optimizers:
@@ -202,8 +203,12 @@ class Tuner:
         X_domain_np = self.ds.convert_GP_space(domain_list)
 
         # running the iterations
-        pbar = tqdm(range(self.config.num_iteration))
-        for _ in pbar:
+        iterator = (
+            tqdm(range(self.config.num_iteration))
+            if self.config.log_progress
+            else range(self.config.num_iteration)
+        )
+        for _ in iterator:
 
             # adding a Minimum exploration to explore independent of UCB
             if random.random() < self.config.exploration:
@@ -284,7 +289,8 @@ class Tuner:
                 results["objective_values"] = -1 * results["objective_values"]
                 results["best_objective"] = -1 * results["best_objective"]
 
-            pbar.set_description("Best score: %s" % results["best_objective"])
+            if self.config.log_progress:
+                tqdm.write("Best score: %s" % results["best_objective"])
 
             # check if early stop criteria has been met
             if self.config.early_stop(results):
@@ -307,8 +313,12 @@ class Tuner:
         random_hyper_parameters = self.ds.get_random_sample(n_iterations * batch_size)
 
         # running the iterations
-        pbar = tqdm(range(0, len(random_hyper_parameters), batch_size))
-        for idx in pbar:
+        iterator = (
+            tqdm(range(0, len(random_hyper_parameters), batch_size))
+            if self.config.log_progress
+            else range(0, len(random_hyper_parameters), batch_size)
+        )
+        for idx in iterator:
             # getting batch by batch random values to try
             batch_hyper_parameters = random_hyper_parameters[idx : idx + batch_size]
             X_list, Y_list = self.runUserObjective(batch_hyper_parameters)
@@ -327,7 +337,8 @@ class Tuner:
                 results["objective_values"] = -1 * results["objective_values"]
                 results["best_objective"] = -1 * results["best_objective"]
 
-            pbar.set_description("Best score: %s" % results["best_objective"])
+            if self.config.log_progress:
+                tqdm.write("Best score: %s" % results["best_objective"])
 
             # check if early stop criteria has been met
             if self.config.early_stop(results):
