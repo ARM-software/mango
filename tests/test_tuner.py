@@ -157,6 +157,35 @@ def test_config():
     check(results, "error while minimizing random")
 
 
+@pytest.mark.parametrize(
+    "domain_size, batch_size", [(3, 2), (8, 3), (3, 5)]
+)
+def test_clustering_with_small_finite_domain(domain_size, batch_size):
+    """Clustering must handle fewer candidate points than its top-quartile target."""
+    param_dict = {"x": range(domain_size)}
+
+    def objfunc(params):
+        # Small self-authored toy objective; no model or dataset.
+        return [float(item["x"] ** 2) for item in params]
+
+    tuner = Tuner(
+        param_dict,
+        objfunc,
+        conf_dict=dict(
+            domain_size=domain_size,
+            initial_random=1,
+            num_iteration=1,
+            batch_size=batch_size,
+            exploration=0.0,
+            log_progress=False,
+        ),
+    )
+    results = tuner.minimize()
+
+    assert len(results["params_tried"]) == 1 + min(batch_size, domain_size)
+    assert all(item["x"] in param_dict["x"] for item in results["params_tried"])
+
+
 def test_log_progress_flag(monkeypatch):
     """log_progress controls use of tqdm in the optimizer."""
 

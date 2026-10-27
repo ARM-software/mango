@@ -232,12 +232,15 @@ class BayesianLearning(BasePredictor):
 
         if batch_size > 1:
             gen = sorted(zip(Acquition, X_tries), key=lambda x: -x[0])
+            candidate_count = len(gen)
+            top_count = min(candidate_count, max(batch_size, candidate_count // 4))
             x_best_acq_value, x_best_acq_domain = (
-                np.array(t)[: len(Acquition) // 4] for t in zip(*gen)
+                np.array(t)[:top_count] for t in zip(*gen)
             )
+            cluster_count = min(batch_size, len(x_best_acq_domain))
 
             # Do the domain space based clustering on the best points
-            kmeans = KMeans(n_clusters=batch_size, random_state=0).fit(
+            kmeans = KMeans(n_clusters=cluster_count, random_state=0).fit(
                 x_best_acq_domain
             )
             cluster_pred_domain = kmeans.labels_.reshape(kmeans.labels_.shape[0])
@@ -245,7 +248,7 @@ class BayesianLearning(BasePredictor):
             # partition the space into the cluster in X and select the best X from each space
             partitioned_space = dict()
             partitioned_acq = dict()
-            for i in range(batch_size):
+            for i in range(cluster_count):
                 partitioned_space[i] = []
                 partitioned_acq[i] = []
 
