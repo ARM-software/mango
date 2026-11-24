@@ -25,20 +25,20 @@ Mango has the following salient features:
 7. [Additional features](#AdditionalFeatures)
 8. [CASH feature](#CASHFeature)
 9. [Platform-aware neural architecture search](https://github.com/ARM-software/mango/tree/master/examples/THIN-Bayes)
-10. [Mango introduction slides](https://github.com/ARM-software/mango/blob/master/documents/Mango_github_slides.pdf) & [Mango production usage slides](https://github.com/ARM-software/mango/blob/master/documents/Mango_cogml_slides.pdf).
+10. [Mango introduction slides](https://github.com/ARM-software/mango/blob/main/documents/Mango_github_slides.pdf) & [Mango production usage slides](https://github.com/ARM-software/mango/blob/main/documents/Mango_cogml_slides.pdf).
 11. [Core Mango research papers to cite](#CorePapers) and [novel applications built over Mango](#ApplicationPapers)
 
 <!--
-11. [Mango paper (ICASSP 2020)](https://arxiv.org/pdf/2005.11394.pdf) & [Mango paper (CogMI 2021)](https://github.com/ARM-software/mango/blob/master/documents/Mango_CogMI_paper.pdf).
+11. [Mango paper (ICASSP 2020)](https://arxiv.org/pdf/2005.11394.pdf) & [Mango paper (CogMI 2021)](https://github.com/ARM-software/mango/blob/main/documents/Mango_CogMI_paper.pdf).
 -->
 
 <!--
 7. [Schedule Objective Function on Celery](#Celery)
 8. [Algorithms](#mangoAlgorithms)
-9. [ Tune Hyperparameters of Facebook Prophet ](https://github.com/ARM-software/mango/blob/master/examples/Prophet_Classifier.ipynb)
-10. [ Tune Hyperparameters of xgboost XGBRegressor ](https://github.com/ARM-software/mango/blob/master/examples/Xgboost_Example.ipynb)
-11. [ Tune Hyperparameters of xgboost XGBClassifier ](https://github.com/ARM-software/mango/blob/master/examples/Xgboost_XGBClassifier.ipynb)
-12. [Tune Hyperparameters of SVM](https://github.com/ARM-software/mango/blob/master/examples/SVM_Example.ipynb)
+9. [ Tune Hyperparameters of Facebook Prophet ](https://github.com/ARM-software/mango/blob/main/examples/Prophet_Classifier.ipynb)
+10. [ Tune Hyperparameters of xgboost XGBRegressor ](https://github.com/ARM-software/mango/blob/main/examples/Xgboost_Example.ipynb)
+11. [ Tune Hyperparameters of xgboost XGBClassifier ](https://github.com/ARM-software/mango/blob/main/examples/Xgboost_XGBClassifier.ipynb)
+12. [Tune Hyperparameters of SVM](https://github.com/ARM-software/mango/blob/main/examples/SVM_Example.ipynb)
 13. [ More Examples](https://github.com/ARM-software/mango/tree/master/examples)
 14. [ Contact & Questions ](#contactDetails)
 -->
@@ -116,8 +116,8 @@ print('best accuracy:', results['best_objective'])
 # => best accuracy: 0.9332401800962584
 ```
 Note that best parameters may be different but accuracy should be ~ 0.93. More examples are available
-in the `examples` directory ([Facebook's Prophet](https://github.com/ARM-software/mango/blob/master/examples/Prophet_Classifier.ipynb),
-[XGBoost](https://github.com/ARM-software/mango/blob/master/examples/Xgboost_XGBClassifier.ipynb), [SVM](https://github.com/ARM-software/mango/blob/master/examples/SVM_Example.ipynb)).
+in the `examples` directory ([Facebook's Prophet](https://github.com/ARM-software/mango/blob/main/examples/Prophet_Classifier.ipynb),
+[XGBoost](https://github.com/ARM-software/mango/blob/main/examples/Xgboost_XGBClassifier.ipynb), [SVM](https://github.com/ARM-software/mango/blob/main/examples/SVM_Example.ipynb)).
 
 
 <a name="DomainSpace"></a>
@@ -169,7 +169,7 @@ param_space = dict(a=uniform(-1, 2))
 ```
 
 #### Log uniform distribution
-We have added [loguniform](https://github.com/ARM-software/mango/blob/master/mango/domain/distribution.py) distribution by extending the `scipy.stats.distributions` constructs.
+We have added [loguniform](https://github.com/ARM-software/mango/blob/main/mango/domain/distribution.py) distribution by extending the `scipy.stats.distributions` constructs.
 Using `loguniform(loc, scale)` one obtains the loguniform distribution on <code>[10<sup>loc</sup>, 10<sup>loc + scale</sup>]</code>.
 ```python
 from mango.domain.distribution import loguniform
@@ -365,7 +365,7 @@ The configuration parameters are:
   ```
     Early stopping is one of Mango's important features that allow to early terminate the current parallel search
     based on the custom user-designed criteria, such as the total optimization time spent, current validation accuracy
-    achieved, or improvements in the past few iterations. For usage see early stopping examples [notebook](https://github.com/ARM-software/mango/blob/master/examples/EarlyStopping.ipynb).
+    achieved, or improvements in the past few iterations. For usage see early stopping examples [notebook](https://github.com/ARM-software/mango/blob/main/examples/EarlyStopping.ipynb).
 - *constraint*: A callable to specify constraints on parameter space. It has the following
   signature:
   ```python
@@ -410,10 +410,10 @@ tuner = Tuner(param_dict, objective, conf_dict)
 <a name="AdditionalFeatures"></a>
 ## 7. Additional Features
 ### Handling runtime failed evaluation
-At runtime, failed evaluations are widespread in production deployments. Mango abstractions enable users to make progress even in the presence of failures by only using the correct evaluations. The syntax can return the successful evaluation, and the user can flexibly keep track of failures, for example, using timeouts. Examples showing the usage of Mango in the presence of failures: [serial execution](https://github.com/ARM-software/mango/blob/master/examples/Failure_Handling.ipynb) and [parallel execution](https://github.com/ARM-software/mango/blob/master/examples/Failure_Handling_Parallel.ipynb)
+At runtime, failed evaluations are widespread in production deployments. Mango abstractions enable users to make progress even in the presence of failures by only using the correct evaluations. The syntax can return the successful evaluation, and the user can flexibly keep track of failures, for example, using timeouts. Examples showing the usage of Mango in the presence of failures: [serial execution](https://github.com/ARM-software/mango/blob/main/examples/Failure_Handling.ipynb) and [parallel execution](https://github.com/ARM-software/mango/blob/main/examples/Failure_Handling_Parallel.ipynb)
 
 ### Neural Architecture Search
-Mango can also do an efficient neural architecture search. An example on the MNIST dataset to search for optimal filter sizes, the number of filters, etc., is [available](https://github.com/ARM-software/mango/blob/master/examples/NAS_Mnist.ipynb).
+Mango can also do an efficient neural architecture search. An example on the MNIST dataset to search for optimal filter sizes, the number of filters, etc., is [available](https://github.com/ARM-software/mango/blob/main/examples/NAS_Mnist.ipynb).
 
 More extensive examples are available in the [THIN-Bayes](https://github.com/ARM-software/mango/tree/master/examples/THIN-Bayes) folder doing *Neural Architecture Search* for a class of neural networks and classical models for different regression and classification tasks. 
 
@@ -423,10 +423,10 @@ More extensive examples are available in the [THIN-Bayes](https://github.com/ARM
 User-defined objective function can be scheduled on local, cluster or cloud infrastructure. The objective function scheduler
 is entirely independent of the Mango. This design was chosen to enable the scheduling of varied resource objective function according to developer needs. We have included examples using [Celery](http://www.celeryproject.org/). In the sample
 examples, celery workers are used to evaluate the objective function in parallel. These examples assume celery is installed, and workers
-are running. Default celery configurations can be modified in the [file](https://github.com/ARM-software/mango/blob/master/examples/classifiers/celery.py).
+are running. Default celery configurations can be modified in the [file](https://github.com/ARM-software/mango/blob/main/examples/classifiers/celery.py).
 
-- [KNN example using celery workers](https://github.com/ARM-software/mango/blob/master/examples/KNN_Celery.ipynb)
-- [Prophet example using celery workers](https://github.com/ARM-software/mango/blob/master/examples/Prophet_Celery.ipynb)
+- [KNN example using celery workers](https://github.com/ARM-software/mango/blob/main/examples/KNN_Celery.ipynb)
+- [Prophet example using celery workers](https://github.com/ARM-software/mango/blob/main/examples/Prophet_Celery.ipynb)
 
 More examples will be included to show the scheduling of objective function using local threads/processes. By default examples schedule
 the objective function on the local machine itself.
@@ -529,7 +529,7 @@ Please cite them as:
 
 ### Slides
 
-Slides explaining Mango abstractions and design choices are available. [Mango Slides-1](https://github.com/ARM-software/mango/blob/master/documents/Mango_github_slides.pdf), [Mango Slides-2](https://drive.google.com/file/d/1_sUOnbW-LkHMMcjq_WgzabN7IQ-wBRgn/view).
+Slides explaining Mango abstractions and design choices are available. [Mango Slides-1](https://github.com/ARM-software/mango/blob/main/documents/Mango_github_slides.pdf), [Mango Slides-2](https://drive.google.com/file/d/1_sUOnbW-LkHMMcjq_WgzabN7IQ-wBRgn/view).
 
 ### Contribute
 

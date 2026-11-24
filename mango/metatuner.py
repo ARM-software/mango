@@ -314,8 +314,6 @@ class MetaTuner:
 
             prob_selection = random.random()
 
-            random_selected = False
-
             # do the random evaluation of the functions
             if prob_selection < self.exploration_rate:
                 selected_obj = random.randint(
@@ -327,8 +325,6 @@ class MetaTuner:
 
                 else:
                     self.exploration_rate = self.exploration_rate_min
-
-                random_selected = True
 
             else:
                 selected_obj = v_sorting_index[0]
