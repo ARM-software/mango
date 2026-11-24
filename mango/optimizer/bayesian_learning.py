@@ -3,8 +3,9 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import Matern
 import math
 from sklearn.cluster import KMeans
+import logging
 
-from .base_predictor import BasePredictor
+_logger = logging.getLogger(__name__)
 
 """
 Bayesian Learning optimizer
@@ -12,7 +13,7 @@ Bayesian Learning optimizer
 """
 
 
-class BayesianLearning(BasePredictor):
+class BayesianLearning:
 
     def __init__(self, surrogate=None, alpha=None, domain_size=1000):
         # initialzing some of the default values
@@ -387,11 +388,8 @@ class BayesianLearning(BasePredictor):
 
             try:
                 self.surrogate.fit(X_temp, Y_temp)
-            except:
-                print("*" * 100)
-                print(X_temp)
-                print("*" * 10)
-                print(Y_temp)
+            except Exception:
+                _logger.warning("Surrogate fit failed", exc_info=True)
             # print('Doing fit of surrogate:',classifier_index)
 
             X_next, s_value, s_value_ext, u_value = (
